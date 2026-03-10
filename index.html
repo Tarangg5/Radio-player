@@ -6,41 +6,48 @@
   <title>Radio Player By Sonu</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background-color: #0f0f12; color: white; display: flex; justify-content: center; }
-    .player-container { width: 100%; max-width: 500px; background: #181920; padding: 20px; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-    h1 { margin-top: 0; font-size: 24px; text-align: center; }
-    audio { width: 100%; margin: 20px 0; filter: invert(100%); }
+    body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; background-color: #0f0f12; color: white; display: flex; justify-content: center; }
+    .player-container { width: 100%; max-width: 500px; background: #181920; padding: 20px; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #222; }
     
-    /* Search Bar Styling */
-    #searchBar {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 15px;
-      border-radius: 8px;
-      border: none;
-      background: #2c2e3a;
-      color: white;
-      box-sizing: border-box;
-      font-size: 16px;
-    }
-    #searchBar:focus { outline: 2px solid #24a4f9; }
+    .header { text-align: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
+    .header h1 { margin: 0; color: #4caf50; font-size: 22px; text-transform: uppercase; letter-spacing: 1px; }
+    
+    /* Now Playing Section */
+    .now-playing-box { margin-top: 10px; background: #21222b; padding: 10px; border-radius: 8px; border-left: 4px solid #24a4f9; }
+    #status-label { font-size: 10px; color: #888; text-transform: uppercase; display: block; }
+    #nowPlaying { color: #fff; font-weight: bold; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    .playlist { list-style: none; padding: 0; max-height: 400px; overflow-y: auto; }
-    .playlist li { background: #21222b; color: #ccc; margin-bottom: 8px; border-radius: 6px; padding: 12px; cursor: pointer; transition: 0.2s; }
-    .playlist li.active { background: #24a4f9; color: #fff; font-weight: bold; }
+    audio { width: 100%; margin: 15px 0; height: 45px; filter: invert(100%) hue-rotate(180deg) brightness(1.5); }
+    
+    #searchBar {
+      width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #333;
+      background: #2c2e3a; color: white; box-sizing: border-box; font-size: 16px; transition: 0.3s;
+    }
+    #searchBar:focus { border-color: #24a4f9; outline: none; background: #323544; }
+
+    .playlist { list-style: none; padding: 0; max-height: 400px; overflow-y: auto; border-radius: 8px; background: #111; }
+    .playlist li { background: #181920; color: #aaa; margin-bottom: 1px; padding: 12px 15px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; }
+    .playlist li::before { content: "▶"; margin-right: 10px; font-size: 12px; color: #444; }
+    .playlist li.active { background: #24a4f915; color: #24a4f9; font-weight: bold; border-left: 3px solid #24a4f9; }
+    .playlist li.active::before { color: #24a4f9; }
     .playlist li:hover { background: #2d303d; color: #fff; }
     
-    /* Custom Scrollbar */
-    .playlist::-webkit-scrollbar { width: 6px; }
-    .playlist::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+    .playlist::-webkit-scrollbar { width: 5px; }
+    .playlist::-webkit-scrollbar-thumb { background: #444; border-radius: 10px; }
   </style>
 </head>
 <body>
 
   <div class="player-container">
-    <h1><span style="color: #4caf50;">Radio</span> Player</h1>
+    <div class="header">
+        <h1>Radio Player By Sonu</h1>
+        <div class="now-playing-box">
+            <span id="status-label">Now Playing</span>
+            <div id="nowPlaying">Please select a station...</div>
+        </div>
+    </div>
     
-    <input type="text" id="searchBar" placeholder="Search stations..." onkeyup="filterStations()">
+    <input type="text" id="searchBar" placeholder="Search station or city..." onkeyup="filterStations()">
     
     <audio id="audioPlayer" controls></audio>
     <ul class="playlist" id="playlist"></ul>
@@ -50,28 +57,25 @@
     const audioPlayer = document.getElementById('audioPlayer');
     const playlist = document.getElementById('playlist');
     const searchBar = document.getElementById('searchBar');
+    const nowPlayingText = document.getElementById('nowPlaying');
     
     const audioFiles = [
-      { name: 'VIVID BHARATI', src: 'https://air.pc.cdn.bitgravity.com/air/live/pbaudio001/chunklist.m3u8' },
-      { name: 'FM GOLD', src: 'https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio005/hlspbaudio00564kbps.m3u8' },
-      { name: 'FM RAINBOW', src: 'https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio004/hlspbaudio00464kbps.m3u8' },
-      { name: 'AIR RADIO NEWS', src: 'https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio002/hlspbaudio00264kbps.m3u8' },  
-      { name: 'Akashwani PATNA', src: 'https://air.pc.cdn.bitgravity.com/air/live/pbaudio087/chunklist.m3u8' },
+      { name: 'Vivid Bharati (AIR)', src: 'https://air.pc.cdn.bitgravity.com/air/live/pbaudio001/chunklist.m3u8' },
+      { name: 'FM Gold (Delhi)', src: 'https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio005/hlspbaudio00564kbps.m3u8' },
+      { name: 'FM Rainbow', src: 'https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio004/hlspbaudio00464kbps.m3u8' },
+      { name: 'AIR News 24x7', src: 'https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio002/hlspbaudio00264kbps.m3u8' },  
+      { name: 'Akashwani Patna', src: 'https://air.pc.cdn.bitgravity.com/air/live/pbaudio087/chunklist.m3u8' },
       { name: 'Akashwani Sasaram', src: 'https://air.pc.cdn.bitgravity.com/air/live/pbaudio075/chunklist.m3u8' },
-      { name: 'VBS DELHI', src: 'https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio238/hlspbaudio23864kbps.m3u8' },
-      { name: 'INDRAPRASTH', src: 'https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio006/hlspbaudio00664kbps.m3u8' },
-      { name: 'Akashwani chattisgarh', src: 'https://air.pc.cdn.bitgravity.com/air/live/pbaudio118/chunklist.m3u8' }, 
-      { name: 'Akashwani Saraipali', src: 'https://air.pc.cdn.bitgravity.com/air/live/pbaudio254/chunklist.m3u8' },
-      { name: 'Md Rafi', src: 'https://stream.zeno.fm/2xx62x8ztm0uv' },
-      { name: 'BOLLYWOOD 90', src: 'https://stream.zeno.fm/143d7gty24zuv' },
-      { name: 'KISHOR KR', src: 'https://server.mixify.in:8010/radio.mp3' },
-      { name: 'BIG FM 92.7', src: 'https://stream.zeno.fm/dbstwo3dvhhtv' },
-      { name: 'RED FM 93.5', src: 'https://stream.zeno.fm/9phrkb1e3v8uv' },
-      { name: 'ISHQ FM', src: 'https://drive.uber.radio/uber/bollywoodlove/icecast.audio' },
-      { name: 'HITS OF BOLLYWOOD', src: 'https://stream.zeno.fm/a2gyqzwpwfeuv' },
-      { name: 'Radio Retro Bollywood', src: 'https://stream.zeno.fm/g372rxef798uv' },
-      { name: 'Bollywood Radio and Beyond', src: 'https://s6.yesstreaming.net/proxy/john1237?mp=/live' },
-      { name: 'Radio Baingan online', src: 'https://stream.zeno.fm/eyxg23ky4x8uv' }
+      { name: 'Radio Mirchi Hindi', src: 'https://shoutcast.radiomirchi.com/mirchi_hindi_hits_high' },
+      { name: 'Radio City Hindi', src: 'https://prclive4.listenon.in/Hindi' },
+      { name: 'Big FM 92.7', src: 'https://stream.zeno.fm/dbstwo3dvhhtv' },
+      { name: 'Red FM 93.5', src: 'https://stream.zeno.fm/9phrkb1e3v8uv' },
+      { name: 'Md Rafi Radio', src: 'https://stream.zeno.fm/2xx62x8ztm0uv' },
+      { name: 'Kishore Kumar Hits', src: 'https://server.mixify.in:8010/radio.mp3' },
+      { name: 'Bollywood 90s Classics', src: 'https://stream.zeno.fm/143d7gty24zuv' },
+      { name: 'Bhakti Sagar', src: 'https://stream.zeno.fm/67vun8t99p8uv' },
+      { name: 'Ishq FM Love Songs', src: 'https://drive.uber.radio/uber/bollywoodlove/icecast.audio' },
+      { name: 'Radio Retro', src: 'https://stream.zeno.fm/g372rxef798uv' }
     ];
 
     let hls;
@@ -83,28 +87,38 @@
       }
     }
 
-    function loadAudio(audioSrc, listItem) {
+    function loadAudio(audioSrc, listItem, stationName) {
       detachHLS();
+      
+      // Update UI
+      nowPlayingText.textContent = stationName;
+      document.title = "▶ Playing: " + stationName;
+      
       if (audioSrc.endsWith('.m3u8') && window.Hls && Hls.isSupported()) {
         hls = new Hls();
         hls.loadSource(audioSrc);
         hls.attachMedia(audioPlayer);
-        audioPlayer.oncanplay = () => audioPlayer.play();
+        hls.on(Hls.Events.MANIFEST_PARSED, () => audioPlayer.play());
       } else {
         audioPlayer.src = audioSrc;
         audioPlayer.load();
-        audioPlayer.play();
+        audioPlayer.play().catch(e => {
+            nowPlayingText.textContent = "Error: Link is Offline";
+            console.log("Playback error:", e);
+        });
       }
+
+      // Active class handling
       document.querySelectorAll('.playlist li').forEach(item => item.classList.remove('active'));
       listItem.classList.add('active');
     }
 
     function renderPlaylist(list) {
       playlist.innerHTML = '';
-      list.forEach((audio, idx) => {
+      list.forEach((audio) => {
         const li = document.createElement('li');
         li.textContent = audio.name;
-        li.onclick = () => loadAudio(audio.src, li);
+        li.onclick = () => loadAudio(audio.src, li, audio.name);
         playlist.appendChild(li);
       });
     }
@@ -117,7 +131,7 @@
       renderPlaylist(filtered);
     }
 
-    // Initial render
+    // Load initial list
     renderPlaylist(audioFiles);
   </script>
 </body>
