@@ -11,39 +11,19 @@
       --accent: #bc13fe;
       --bg: #050505; 
       --card: #111111; 
-      --railway-gold: #ffd700;
     }
     
-    body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; background-color: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
+    body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; background-color: var(--bg); color: white; display: flex; justify-content: center; min-height: 100vh; align-items: center; }
     
-    /* Moving Train Animation */
-    .train-track {
-      position: fixed;
-      bottom: 80px;
-      width: 100%;
-      height: 20px;
-      z-index: 0;
-      opacity: 0.3;
-      pointer-events: none;
-    }
-    .train {
-      position: absolute;
-      font-size: 30px;
-      white-space: nowrap;
-      animation: trainMove 20s linear infinite;
-    }
-    @keyframes trainMove {
-      from { left: -200px; }
-      to { left: 100%; }
-    }
-
     .player-container { 
       width: 100%; max-width: 420px; background: var(--card); padding: 25px; border-radius: 24px; position: relative;
       border: 1px solid rgba(255, 255, 255, 0.1);
       box-shadow: 0 0 20px rgba(0, 242, 255, 0.1), 0 0 40px rgba(188, 19, 254, 0.1);
-      z-index: 1;
+      transition: box-shadow 0.5s ease;
     }
 
+    .player-container.playing { box-shadow: 0 0 30px rgba(0, 242, 255, 0.2), 0 0 60px rgba(188, 19, 254, 0.2); }
+    
     .header h1 { 
       margin: 0; font-size: 20px; text-align: center;
       background: linear-gradient(to right, var(--primary), var(--accent));
@@ -56,9 +36,16 @@
       display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(255,255,255,0.05);
     }
 
+    #status-label { font-size: 10px; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
+    #nowPlaying { font-weight: bold; font-size: 16px; margin-top: 4px; color: #fff; text-shadow: 0 0 10px rgba(0,242,255,0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
     .visualizer { display: flex; align-items: flex-end; height: 35px; gap: 4px; }
-    .bar { width: 5px; background: var(--primary); border-radius: 10px; height: 4px; transition: 0.2s; }
+    .bar { width: 5px; background: var(--primary); border-radius: 10px; height: 4px; transition: 0.2s; box-shadow: 0 0 10px var(--primary); }
     .playing .bar { animation: neonBounce 0.6s infinite alternate; }
+    .bar:nth-child(2) { background: #45e3ff; animation-delay: 0.1s; }
+    .bar:nth-child(3) { background: #8a7cff; animation-delay: 0.2s; }
+    .bar:nth-child(4) { background: var(--accent); animation-delay: 0.3s; box-shadow: 0 0 10px var(--accent); }
+
     @keyframes neonBounce { 0% { height: 4px; } 100% { height: 30px; } }
 
     audio { width: 100%; margin-bottom: 20px; filter: invert(1) hue-rotate(180deg) contrast(1.5); }
@@ -67,38 +54,32 @@
       width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 12px;
       background: #1a1a1a; color: white; border: 1px solid #333; outline: none; box-sizing: border-box;
     }
+    #searchBar:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(0,242,255,0.3); }
 
     .playlist { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; }
     .playlist li { 
       background: rgba(255,255,255,0.02); margin-bottom: 5px; padding: 12px 15px; cursor: pointer; 
-      border-radius: 10px; font-size: 14px; color: #aaa; transition: 0.3s;
+      border-radius: 10px; transition: 0.3s; font-size: 14px; color: #aaa; border: 1px solid transparent;
     }
-    .playlist li.active { background: rgba(0, 242, 255, 0.1); color: var(--primary); border: 1px solid rgba(0, 242, 255, 0.3); }
+    .playlist li.active { 
+      background: rgba(0, 242, 255, 0.1); color: var(--primary); border: 1px solid rgba(0, 242, 255, 0.3);
+      text-shadow: 0 0 8px rgba(0, 242, 255, 0.4);
+    }
+    .playlist li:hover { background: rgba(255,255,255,0.08); color: #fff; }
     
-    .railway-footer {
-      margin-top: 25px; padding: 15px; text-align: center; width: 100%; max-width: 420px; z-index: 1;
-    }
-    .badge {
-      display: inline-block; padding: 5px 15px; border-radius: 20px;
-      background: rgba(255, 215, 0, 0.1); border: 1px solid var(--railway-gold);
-      color: var(--railway-gold); font-size: 12px; font-weight: bold;
-    }
-    .employee-info { font-size: 13px; margin-top: 8px; color: #888; }
+    .playlist::-webkit-scrollbar { width: 4px; }
+    .playlist::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
   </style>
 </head>
 <body>
-
-  <div class="train-track">
-    <div class="train">🚂🚃🚃🚃🚃🚃🚃</div>
-  </div>
 
   <div class="player-container" id="mainContainer">
     <div class="header">
         <h1>SONU LIVE RADIO</h1>
         <div class="now-playing-box">
             <div class="info">
-                <span id="status-label" style="font-size:10px; color:var(--primary)">Now On Air</span>
-                <div id="nowPlaying" style="font-weight:bold; font-size:16px;">Select Station</div>
+                <span id="status-label">Now On Air</span>
+                <div id="nowPlaying">Select Station</div>
             </div>
             <div class="visualizer" id="visualizer">
                 <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
@@ -106,15 +87,10 @@
         </div>
     </div>
     
-    <input type="text" id="searchBar" placeholder="Find your station..." onkeyup="filterStations()">
+    <input type="text" id="searchBar" placeholder="Search (Patna, News, 90s...)" onkeyup="filterStations()">
     
     <audio id="audioPlayer" controls></audio>
     <ul class="playlist" id="playlist"></ul>
-  </div>
-
-  <div class="railway-footer">
-    <div class="badge">Chief Commercial-cum-Ticket Clerk</div>
-    <div class="employee-info">Proudly Serving at MOG Station, Indian Railways</div>
   </div>
 
   <script>
@@ -125,6 +101,7 @@
     const mainContainer = document.getElementById('mainContainer');
     const visualizer = document.getElementById('visualizer');
     
+    // FULL COMBINED LIST (All old + new stations)
     const audioFiles = [
       { name: 'Vivid Bharati (AIR)', src: 'https://air.pc.cdn.bitgravity.com/air/live/pbaudio001/chunklist.m3u8' },
       { name: 'FM Gold Delhi', src: 'https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio005/hlspbaudio00564kbps.m3u8' },
@@ -150,6 +127,7 @@
     ];
 
     let hls;
+
     function detachHLS() { if (hls) { hls.destroy(); hls = null; } }
 
     audioPlayer.onplay = () => { mainContainer.classList.add('playing'); visualizer.classList.add('playing'); };
@@ -159,6 +137,7 @@
       detachHLS();
       nowPlayingText.textContent = stationName;
       document.title = "🎶 " + stationName;
+      
       if (audioSrc.endsWith('.m3u8') && window.Hls && Hls.isSupported()) {
         hls = new Hls();
         hls.loadSource(audioSrc);
@@ -167,8 +146,9 @@
       } else {
         audioPlayer.src = audioSrc;
         audioPlayer.load();
-        audioPlayer.play().catch(() => { nowPlayingText.textContent = "Offline"; });
+        audioPlayer.play().catch(() => { nowPlayingText.textContent = "Offline/Error"; });
       }
+
       document.querySelectorAll('.playlist li').forEach(item => item.classList.remove('active'));
       listItem.classList.add('active');
     }
@@ -188,6 +168,7 @@
       const filtered = audioFiles.filter(s => s.name.toLowerCase().includes(term));
       renderPlaylist(filtered);
     }
+
     renderPlaylist(audioFiles);
   </script>
 </body>
