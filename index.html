@@ -3,70 +3,94 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sonu Neon Radio Pro</title>
+  <title>Radio Player By Sonu</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
-    :root { --primary: #00f2ff; --accent: #bc13fe; --bg: #050505; --card: #111111; --railway: #ffd700; }
-    body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; background: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-x: hidden; }
+    :root { 
+      --primary: #00f2ff; 
+      --accent: #bc13fe;
+      --bg: #050505; 
+      --card: #111111; 
+    }
     
-    .player-container { width: 100%; max-width: 420px; background: var(--card); padding: 25px; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 0 30px rgba(0, 242, 255, 0.15); z-index: 1; }
+    body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; background-color: var(--bg); color: white; display: flex; justify-content: center; min-height: 100vh; align-items: center; }
     
-    .header h1 { margin: 0; font-size: 20px; text-align: center; background: linear-gradient(to right, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; letter-spacing: 2px; }
-    
-    .timer-section { margin: 15px 0; display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(255,255,255,0.03); padding: 8px; border-radius: 12px; font-size: 12px; border: 1px solid rgba(0,242,255,0.1); }
-    select { background: #222; color: var(--primary); border: 1px solid var(--primary); border-radius: 4px; padding: 2px 5px; outline: none; }
+    .player-container { 
+      width: 100%; max-width: 420px; background: var(--card); padding: 25px; border-radius: 24px; position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 0 20px rgba(0, 242, 255, 0.1), 0 0 40px rgba(188, 19, 254, 0.1);
+      transition: box-shadow 0.5s ease;
+    }
 
-    .now-playing-box { margin: 15px 0; background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 15px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(255,255,255,0.05); }
-    .visualizer { display: flex; align-items: flex-end; height: 30px; gap: 3px; }
-    .bar { width: 4px; background: var(--primary); border-radius: 10px; height: 4px; }
+    .player-container.playing { box-shadow: 0 0 30px rgba(0, 242, 255, 0.2), 0 0 60px rgba(188, 19, 254, 0.2); }
+    
+    .header h1 { 
+      margin: 0; font-size: 20px; text-align: center;
+      background: linear-gradient(to right, var(--primary), var(--accent));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      letter-spacing: 2px; text-transform: uppercase;
+    }
+    
+    .now-playing-box { 
+      margin: 20px 0; background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 15px; 
+      display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    #status-label { font-size: 10px; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
+    #nowPlaying { font-weight: bold; font-size: 16px; margin-top: 4px; color: #fff; text-shadow: 0 0 10px rgba(0,242,255,0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    .visualizer { display: flex; align-items: flex-end; height: 35px; gap: 4px; }
+    .bar { width: 5px; background: var(--primary); border-radius: 10px; height: 4px; transition: 0.2s; box-shadow: 0 0 10px var(--primary); }
     .playing .bar { animation: neonBounce 0.6s infinite alternate; }
-    @keyframes neonBounce { 0% { height: 4px; } 100% { height: 25px; } }
+    .bar:nth-child(2) { background: #45e3ff; animation-delay: 0.1s; }
+    .bar:nth-child(3) { background: #8a7cff; animation-delay: 0.2s; }
+    .bar:nth-child(4) { background: var(--accent); animation-delay: 0.3s; box-shadow: 0 0 10px var(--accent); }
 
-    audio { width: 100%; margin-bottom: 15px; filter: invert(1) hue-rotate(180deg); }
-    input#searchBar { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 12px; background: #1a1a1a; color: white; border: 1px solid #333; box-sizing: border-box; outline: none; }
-    input#searchBar:focus { border-color: var(--primary); }
+    @keyframes neonBounce { 0% { height: 4px; } 100% { height: 30px; } }
 
-    .playlist { list-style: none; padding: 0; max-height: 250px; overflow-y: auto; }
-    .playlist li { background: rgba(255,255,255,0.02); margin-bottom: 6px; padding: 12px; cursor: pointer; border-radius: 10px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; color: #bbb; }
-    .playlist li.active { background: rgba(0, 242, 255, 0.1); color: var(--primary); border: 1px solid rgba(0, 242, 255, 0.2); }
-    .fav-btn { cursor: pointer; font-size: 18px; color: #444; transition: 0.2s; }
-    .fav-btn.active { color: var(--railway); text-shadow: 0 0 10px var(--railway); }
+    audio { width: 100%; margin-bottom: 20px; filter: invert(1) hue-rotate(180deg) contrast(1.5); }
+    
+    #searchBar {
+      width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 12px;
+      background: #1a1a1a; color: white; border: 1px solid #333; outline: none; box-sizing: border-box;
+    }
+    #searchBar:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(0,242,255,0.3); }
 
-    .railway-footer { margin-top: 20px; text-align: center; opacity: 0.8; }
-    .badge { display: inline-block; padding: 4px 12px; border-radius: 15px; border: 1px solid var(--railway); color: var(--railway); font-size: 11px; font-weight: bold; text-transform: uppercase; }
+    .playlist { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; }
+    .playlist li { 
+      background: rgba(255,255,255,0.02); margin-bottom: 5px; padding: 12px 15px; cursor: pointer; 
+      border-radius: 10px; transition: 0.3s; font-size: 14px; color: #aaa; border: 1px solid transparent;
+    }
+    .playlist li.active { 
+      background: rgba(0, 242, 255, 0.1); color: var(--primary); border: 1px solid rgba(0, 242, 255, 0.3);
+      text-shadow: 0 0 8px rgba(0, 242, 255, 0.4);
+    }
+    .playlist li:hover { background: rgba(255,255,255,0.08); color: #fff; }
+    
+    .playlist::-webkit-scrollbar { width: 4px; }
+    .playlist::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
   </style>
 </head>
 <body>
 
   <div class="player-container" id="mainContainer">
-    <div class="header"><h1>SONU NEON RADIO PRO</h1></div>
-
-    <div class="timer-section">
-      <span>⏳ Sleep:</span>
-      <select id="sleepDuration" onchange="setSleepTimer()">
-        <option value="0">Off</option><option value="15">15m</option><option value="30">30m</option><option value="60">60m</option>
-      </select>
-      <span id="timerDisplay" style="color: var(--accent);"></span>
-    </div>
-
-    <div class="now-playing-box">
-        <div class="info">
-            <span id="status-label" style="font-size:9px; color:var(--primary); letter-spacing: 1px;">LIVE STREAMING</span>
-            <div id="nowPlaying" style="font-weight:bold; font-size:15px; margin-top:3px;">Select a Station</div>
-        </div>
-        <div class="visualizer" id="visualizer">
-            <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    <div class="header">
+        <h1>SONU LIVE RADIO</h1>
+        <div class="now-playing-box">
+            <div class="info">
+                <span id="status-label">Now On Air</span>
+                <div id="nowPlaying">Select Station</div>
+            </div>
+            <div class="visualizer" id="visualizer">
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+            </div>
         </div>
     </div>
     
     <input type="text" id="searchBar" placeholder="Search (Patna, News, 90s...)" onkeyup="filterStations()">
+    
     <audio id="audioPlayer" controls></audio>
     <ul class="playlist" id="playlist"></ul>
-  </div>
-
-  <div class="railway-footer">
-    <div class="badge">Chief Commercial-cum-Ticket Clerk</div>
-    <p style="font-size: 11px; color: #666; margin-top: 5px;">MOG Station | Indian Railways</p>
   </div>
 
   <script>
@@ -76,101 +100,76 @@
     const nowPlayingText = document.getElementById('nowPlaying');
     const mainContainer = document.getElementById('mainContainer');
     const visualizer = document.getElementById('visualizer');
-    const timerDisplay = document.getElementById('timerDisplay');
     
-    let hls;
-    let sleepTimeout, countdownInterval;
-    let favorites = JSON.parse(localStorage.getItem('sonuRadioFavs')) || [];
-
-    const stations = [
+    // FULL COMBINED LIST (All old + new stations)
+    const audioFiles = [
       { name: 'Vivid Bharati (AIR)', src: 'https://air.pc.cdn.bitgravity.com/air/live/pbaudio001/chunklist.m3u8' },
       { name: 'FM Gold Delhi', src: 'https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio005/hlspbaudio00564kbps.m3u8' },
-      { name: 'AIR News 24x7', src: 'https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio002/hlspbaudio00264kbps.m3u8' },
+      { name: 'FM Rainbow', src: 'https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio004/hlspbaudio00464kbps.m3u8' },
+      { name: 'AIR News 24x7', src: 'https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio002/hlspbaudio00264kbps.m3u8' },  
       { name: 'Akashwani Patna', src: 'https://air.pc.cdn.bitgravity.com/air/live/pbaudio087/chunklist.m3u8' },
       { name: 'Akashwani Sasaram', src: 'https://air.pc.cdn.bitgravity.com/air/live/pbaudio075/chunklist.m3u8' },
+      { name: 'VBS Delhi', src: 'https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio238/hlspbaudio23864kbps.m3u8' },
+      { name: 'Indraprasth', src: 'https://airhlspush.pc.cdn.bitgravity.com/httppush/hlspbaudio006/hlspbaudio00664kbps.m3u8' },
+      { name: 'Akashwani Chhattisgarh', src: 'https://air.pc.cdn.bitgravity.com/air/live/pbaudio118/chunklist.m3u8' }, 
       { name: 'Radio Mirchi 98.3', src: 'https://shoutcast.radiomirchi.com/mirchi_hindi_hits_high' },
+      { name: 'Radio City Hindi', src: 'https://prclive4.listenon.in/Hindi' },
       { name: 'Big FM 92.7', src: 'https://stream.zeno.fm/dbstwo3dvhhtv' },
+      { name: 'Red FM 93.5', src: 'https://stream.zeno.fm/9phrkb1e3v8uv' },
       { name: 'Md Rafi Hits', src: 'https://stream.zeno.fm/2xx62x8ztm0uv' },
       { name: 'Kishore Kumar Radio', src: 'https://server.mixify.in:8010/radio.mp3' },
       { name: 'Bollywood 90s Hits', src: 'https://stream.zeno.fm/143d7gty24zuv' },
-      { name: 'Bhakti Sagar', src: 'https://stream.zeno.fm/67vun8t99p8uv' }
+      { name: 'Bhakti Sagar', src: 'https://stream.zeno.fm/67vun8t99p8uv' },
+      { name: 'Lata Mangeshkar Hits', src: 'https://stream.zeno.fm/cg37e2m0yv8uv' },
+      { name: 'Ishq FM Love Songs', src: 'https://drive.uber.radio/uber/bollywoodlove/icecast.audio' },
+      { name: 'Radio Retro Bollywood', src: 'https://stream.zeno.fm/g372rxef798uv' },
+      { name: 'Radio Baingan', src: 'https://stream.zeno.fm/eyxg23ky4x8uv' }
     ];
 
-    function toggleFav(name, event) {
-      event.stopPropagation();
-      if (favorites.includes(name)) {
-        favorites = favorites.filter(f => f !== name);
-      } else {
-        favorites.push(name);
-      }
-      localStorage.setItem('sonuRadioFavs', JSON.stringify(favorites));
-      renderPlaylist(stations);
-    }
+    let hls;
 
-    function updateMediaSession(name) {
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-          title: name,
-          artist: 'Sonu Neon Radio',
-          album: 'Indian Railways - MOG',
-          artwork: [{ src: 'https://via.placeholder.com/512/00f2ff/000000?text=RADIO', sizes: '512x512', type: 'image/png' }]
-        });
-      }
-    }
+    function detachHLS() { if (hls) { hls.destroy(); hls = null; } }
 
-    function setSleepTimer() {
-      const minutes = parseInt(document.getElementById('sleepDuration').value);
-      clearTimeout(sleepTimeout); clearInterval(countdownInterval);
-      timerDisplay.textContent = "";
-      if (minutes > 0) {
-        let seconds = minutes * 60;
-        countdownInterval = setInterval(() => {
-          seconds--;
-          timerDisplay.textContent = `(${Math.floor(seconds/60)}m ${seconds%60}s)`;
-          if (seconds <= 0) clearInterval(countdownInterval);
-        }, 1000);
-        sleepTimeout = setTimeout(() => { audioPlayer.pause(); document.getElementById('sleepDuration').value="0"; timerDisplay.textContent=""; }, minutes * 60000);
-      }
-    }
+    audioPlayer.onplay = () => { mainContainer.classList.add('playing'); visualizer.classList.add('playing'); };
+    audioPlayer.onpause = () => { mainContainer.classList.remove('playing'); visualizer.classList.remove('playing'); };
 
-    function loadAudio(audioSrc, stationName) {
-      if (hls) hls.destroy();
+    function loadAudio(audioSrc, listItem, stationName) {
+      detachHLS();
       nowPlayingText.textContent = stationName;
-      updateMediaSession(stationName);
+      document.title = "🎶 " + stationName;
       
-      if (audioSrc.endsWith('.m3u8') && Hls.isSupported()) {
-        hls = new Hls(); hls.loadSource(audioSrc); hls.attachMedia(audioPlayer);
+      if (audioSrc.endsWith('.m3u8') && window.Hls && Hls.isSupported()) {
+        hls = new Hls();
+        hls.loadSource(audioSrc);
+        hls.attachMedia(audioPlayer);
         hls.on(Hls.Events.MANIFEST_PARSED, () => audioPlayer.play());
       } else {
-        audioPlayer.src = audioSrc; audioPlayer.load(); audioPlayer.play();
+        audioPlayer.src = audioSrc;
+        audioPlayer.load();
+        audioPlayer.play().catch(() => { nowPlayingText.textContent = "Offline/Error"; });
       }
-      renderPlaylist(stations);
+
+      document.querySelectorAll('.playlist li').forEach(item => item.classList.remove('active'));
+      listItem.classList.add('active');
     }
 
     function renderPlaylist(list) {
-      const term = searchBar.value.toLowerCase();
       playlist.innerHTML = '';
-      
-      // Sort: Favorites first, then filtered
-      const sorted = [...list].sort((a, b) => favorites.includes(b.name) - favorites.includes(a.name));
-      
-      sorted.forEach((audio) => {
-        if (!audio.name.toLowerCase().includes(term)) return;
+      list.forEach((audio) => {
         const li = document.createElement('li');
-        if (nowPlayingText.textContent === audio.name) li.className = 'active';
-        
-        const isFav = favorites.includes(audio.name);
-        li.innerHTML = `<span>${audio.name}</span> <span class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFav('${audio.name}', event)">${isFav ? '★' : '☆'}</span>`;
-        li.onclick = () => loadAudio(audio.src, audio.name);
+        li.textContent = audio.name;
+        li.onclick = () => loadAudio(audio.src, li, audio.name);
         playlist.appendChild(li);
       });
     }
 
-    audioPlayer.onplay = () => { mainContainer.classList.add('playing'); visualizer.classList.add('playing'); };
-    audioPlayer.onpause = () => { mainContainer.classList.remove('playing'); visualizer.classList.remove('playing'); };
-    
-    function filterStations() { renderPlaylist(stations); }
-    renderPlaylist(stations);
+    function filterStations() {
+      const term = searchBar.value.toLowerCase();
+      const filtered = audioFiles.filter(s => s.name.toLowerCase().includes(term));
+      renderPlaylist(filtered);
+    }
+
+    renderPlaylist(audioFiles);
   </script>
 </body>
 </html>
