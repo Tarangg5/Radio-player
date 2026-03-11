@@ -4,34 +4,29 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sonu Live TV - Railway Special</title>
-  
-  <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
-  <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-quality-levels@latest/dist/videojs-contrib-quality-levels.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/videojs-http-source-selector@latest/dist/videojs-http-source-selector.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dash-shaka-playback@latest/dist/dash-shaka-playback.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/clappr-level-selector-plugin@latest/dist/level-selector.min.js"></script>
 
   <style>
-    :root { --primary: #00f2ff; --accent: #bc13fe; --bg: #050505; --railway: #ffd700; }
+    :root { --primary: #00f2ff; --accent: #bc13fe; --bg: #050505; --card: #111111; --railway: #ffd700; }
     body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; background: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
     
     .logo-container { width: 60px; height: 60px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; border: 2px solid var(--railway); box-shadow: 0 0 10px var(--railway); overflow: hidden; }
     .railway-logo { width: 85%; height: 85%; object-fit: contain; }
 
     .player-section { width: 100%; max-width: 850px; background: #000; border-radius: 15px; overflow: hidden; border: 1px solid rgba(0,242,255,0.3); box-shadow: 0 0 25px rgba(0,242,255,0.2); position: sticky; top: 0; z-index: 100; }
-    
-    /* Video.js Custom Look */
-    .video-js { width: 100%; aspect-ratio: 16/9; }
-    .vjs-theme-city .vjs-big-play-button { border: none; background-color: var(--primary); }
+    #video-player { width: 100%; aspect-ratio: 16/9; }
 
     .channel-box { width: 100%; max-width: 850px; margin-top: 15px; }
     input#searchBar { width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 12px; background: #1a1a1a; color: white; border: 1px solid #333; box-sizing: border-box; outline: none; font-size: 16px; width: 100%; }
 
     .channel-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; padding: 5px; }
     .channel-item { background: #151515; padding: 12px 5px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.3s; border: 1px solid #222; }
-    .channel-item:hover { transform: translateY(-5px); border-color: var(--primary); }
-    .channel-item.active { border-color: var(--accent); background: rgba(188, 19, 254, 0.15); }
+    .channel-item:hover { transform: translateY(-5px); border-color: var(--primary); background: #1a1a1a; }
+    .channel-item.active { border-color: var(--accent); background: rgba(188, 19, 254, 0.15); box-shadow: 0 0 15px rgba(188, 19, 254, 0.2); }
     .channel-item img { width: 45px; height: 45px; object-fit: contain; margin-bottom: 8px; border-radius: 5px; }
-    .channel-item span { display: block; font-size: 10px; font-weight: bold; color: #eee; }
+    .channel-item span { display: block; font-size: 10px; font-weight: bold; color: #eee; overflow: hidden; text-overflow: ellipsis; }
 
     .footer-badge { margin: 30px 0; text-align: center; }
     .badge { padding: 6px 18px; border-radius: 25px; border: 1px solid var(--railway); color: var(--railway); font-size: 12px; font-weight: bold; text-transform: uppercase; }
@@ -43,11 +38,7 @@
     <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSHbTtG3wGQFbFUaChzCmNG2v5bAsK8ESlbw&s" alt="IR Logo" class="railway-logo">
   </div>
 
-  <div class="player-section">
-    <video id="my-video" class="video-js vjs-big-play-centered" controls preload="auto" data-setup='{}'>
-      <p class="vjs-no-js">To view this video please enable JavaScript</p>
-    </video>
-  </div>
+  <div class="player-section"><div id="video-player"></div></div>
 
   <div class="channel-box">
     <input type="text" id="searchBar" placeholder="Search Channels..." onkeyup="filterChannels()">
@@ -62,31 +53,33 @@
     const channels = [
       { name: 'WORLD CUP HINDI', src: 'https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/nn1qrdjaha/out/v1/bc4fa7d9cebf47858bebf14ad589025e/cenc.mpd', key: '9909e33838e1152cc512c4636f513f8f:02f67060c94bcc3307280f505ad508ab', logo: 'https://iili.io/1Nz0AP.png' },
       { name: 'WORLD CUP ENG', src: 'https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/lz7yhtgbjb/out/v1/bedaa948e7a24dc0b5fd5d7b38534d8c/cenc.mpd', key: '470a5bda0ae8965c3ab4004c302bc1c8:b04888df6ed570c9435b97471504bd9b', logo: 'https://iili.io/1Nz0AP.png' },
-      { name: 'NEWS18 INDIA', src: 'https://nw18live.cdn.jio.com/bpk-tv/News18_India_NW18_MOB/output01/News18_India_NW18_MOB-audio_98835_eng=98800-video=3724000.m3u8', logo: 'https://i.postimg.cc/hvvtSwCV/Astro-Cricket.png' },
-      { name: 'AAJ TAK HD', src: 'https://aajtakhdlive-amd.akamaized.net/hls/live/2014415/aajtakhd/aajtakhdlive/live_1080p/chunks.m3u8', logo: 'https://i.postimg.cc/hvvtSwCV/Astro-Cricket.png' },
+      { name: 'TNT SPORTS 4', src: 'https://ta.bia-cf.live.pv-cdn.net/bom-nitro/live/clients/dash/enc/ecp6xidc5d/out/v1/b8a94677c56e4411aef7ecc2431cec0a/cenc.mpd', key: '192b1115da041585c77200128549efa1:634e10efe4abbb14be400a3ccbac0258', logo: 'https://iili.io/1Nz0AP.png' },
+      { name: 'NEWS18 INDIA', src: 'https://nw18live.cdn.jio.com/bpk-tv/News18_India_NW18_MOB/output01/News18_India_NW18_MOB-audio_98835_eng=98800-video=3724000.m3u8', key: '6da8c268d58a0fe4ff75d297359a8ad7:eb0ae4c2c24a52070154499bb09a36cb', logo: 'https://i.postimg.cc/hvvtSwCV/Astro-Cricket.png' },
+      { name: 'AAJ TAK HD', src: 'https://aajtakhdlive-amd.akamaized.net/hls/live/2014415/aajtakhd/aajtakhdlive/live_1080p/chunks.m3u8', key: '', logo: 'https://i.postimg.cc/hvvtSwCV/Astro-Cricket.png' },
+      { name: 'ABP NEWS', src: 'https://d2l4ar6y3mrs4k.cloudfront.net/live-streaming/abpnews-livetv/master.m3u8', key: '', logo: 'https://i.postimg.cc/hvvtSwCV/Astro-Cricket.png' },
+      { name: 'ZEE NEWS', src: 'https://dknttpxmr0dwf.cloudfront.net/index_57.m3u8', key: '', logo: 'https://i.postimg.cc/hvvtSwCV/Astro-Cricket.png' },
       { name: 'ZEE CINEMA', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Zeecinema/default/manifest.mpd', key: '43513b13f4b542e39c9265921dfc1726:b0b2678bcd274c37b888a6c987d502ed', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/qss9gFuH.png' }
-      // ... baki channels bhi isi format me add kar sakte hain
     ];
 
-    let player = videojs('my-video');
-    player.httpSourceSelector(); // Quality selector enable karne ke liye
+    let player;
 
     function playChannel(src, key, name) {
-      let type = src.includes('.mpd') ? 'application/dash+xml' : 'application/x-mpegURL';
+      if (player) player.destroy();
       
-      player.src({
-        src: src,
-        type: type,
-        keySystems: key ? {
-          'org.w3.clearkey': {
-            'clearkeys': {
-              [key.split(':')[0]]: key.split(':')[1]
-            }
-          }
-        } : {}
+      player = new Clappr.Player({
+        source: src,
+        parentId: "#video-player",
+        plugins: [DashShakaPlayback, LevelSelector],
+        shakaConfiguration: {
+          drm: { clearKeys: key ? { [key.split(':')[0]]: key.split(':')[1] } : {} }
+        },
+        levelSelectorConfig: {
+          title: 'Quality',
+          labels: { 2: '720p', 1: '480p', 0: '360p' }
+        },
+        width: '100%', height: '100%', autoPlay: true,
+        mimeType: src.endsWith('.mpd') ? 'application/dash+xml' : 'application/x-mpegURL'
       });
-      
-      player.play();
       document.title = "Sonu TV: " + name;
     }
 
@@ -112,7 +105,7 @@
     }
 
     renderChannels(channels);
-    // Pehla channel click par hi chalega browser policy ki wajah se
+    // Browser restriction ke liye first click zaroori hai
   </script>
 </body>
 </html>
