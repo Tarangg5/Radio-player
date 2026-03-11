@@ -4,10 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sonu Live TV - Railway Special</title>
-  <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dash-shaka-playback@latest/dist/dash-shaka-playback.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/clappr-level-selector-plugin@latest/dist/level-selector.min.js"></script>
   
+  <script src="https://cdn.jsdelivr.net/npm/clappr@0.3.13/dist/clappr.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dash-shaka-playback@0.3.0/dist/dash-shaka-playback.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/clappr-level-selector-plugin@0.3.0/dist/level-selector.min.js"></script>
+
   <style>
     :root { --primary: #00f2ff; --accent: #bc13fe; --bg: #050505; --card: #111111; --railway: #ffd700; }
     body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; background: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -15,28 +16,21 @@
     .logo-container { width: 60px; height: 60px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; border: 2px solid var(--railway); box-shadow: 0 0 10px var(--railway); overflow: hidden; }
     .railway-logo { width: 85%; height: 85%; object-fit: contain; }
 
-    .player-section { width: 100%; max-width: 850px; background: #000; border-radius: 15px; overflow: hidden; border: 1px solid rgba(0,242,255,0.3); box-shadow: 0 0 25px rgba(0,242,255,0.2); position: sticky; top: 0; z-index: 100; }
+    .player-section { width: 100%; max-width: 850px; background: #000; border-radius: 15px; overflow: hidden; border: 1px solid rgba(0,242,255,0.3); box-shadow: 0 0 25px rgba(0,242,255,0.2); position: sticky; top: 0; z-index: 100; min-height: 200px; }
     #video-player { width: 100%; aspect-ratio: 16/9; }
-
-    /* Full Screen Fix for Mobile */
-    #video-player video { object-fit: contain; }
 
     .channel-box { width: 100%; max-width: 850px; margin-top: 15px; }
     input#searchBar { width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 12px; background: #1a1a1a; color: white; border: 1px solid #333; box-sizing: border-box; outline: none; font-size: 16px; }
-    input#searchBar:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(0,242,255,0.2); }
 
     .channel-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; padding: 5px; }
     .channel-item { background: #151515; padding: 12px 5px; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.3s; border: 1px solid #222; }
-    .channel-item:hover { transform: translateY(-5px); border-color: var(--primary); background: #1a1a1a; }
-    .channel-item.active { border-color: var(--accent); background: rgba(188, 19, 254, 0.15); box-shadow: 0 0 15px rgba(188, 19, 254, 0.2); }
-    .channel-item img { width: 45px; height: 45px; object-fit: contain; margin-bottom: 8px; border-radius: 5px; background: transparent; }
+    .channel-item:hover { transform: translateY(-5px); border-color: var(--primary); }
+    .channel-item.active { border-color: var(--accent); background: rgba(188, 19, 254, 0.15); }
+    .channel-item img { width: 45px; height: 45px; object-fit: contain; margin-bottom: 8px; border-radius: 5px; }
     .channel-item span { display: block; font-size: 10px; font-weight: bold; color: #eee; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     .footer-badge { margin: 30px 0; text-align: center; }
-    .badge { padding: 6px 18px; border-radius: 25px; border: 1px solid var(--railway); color: var(--railway); font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
-    
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+    .badge { padding: 6px 18px; border-radius: 25px; border: 1px solid var(--railway); color: var(--railway); font-size: 12px; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -45,7 +39,9 @@
     <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSHbTtG3wGQFbFUaChzCmNG2v5bAsK8ESlbw&s" alt="IR Logo" class="railway-logo">
   </div>
 
-  <div class="player-section"><div id="video-player"></div></div>
+  <div class="player-section">
+    <div id="video-player"></div>
+  </div>
 
   <div class="channel-box">
     <input type="text" id="searchBar" placeholder="Search Channels..." onkeyup="filterChannels()">
@@ -79,21 +75,35 @@
     let player;
 
     function playChannel(src, key, name) {
-      if (player) player.destroy();
+      if (player) {
+        player.destroy();
+      }
       
-      player = new Clappr.Player({
+      const config = {
         source: src,
         parentId: "#video-player",
-        plugins: [DashShakaPlayback, LevelSelector], // LevelSelector added back
+        plugins: [DashShakaPlayback, LevelSelector],
         shakaConfiguration: {
           drm: { clearKeys: key ? { [key.split(':')[0]]: key.split(':')[1] } : {} }
         },
-        width: '100%', 
-        height: '100%', 
+        levelSelectorConfig: {
+          title: 'Quality',
+          labels: {
+            2: '720p', 1: '480p', 0: '360p',
+          }
+        },
+        width: '100%',
+        height: '100%',
         autoPlay: true,
-        preload: 'auto',
-        mimeType: src.endsWith('.mpd') ? 'application/dash+xml' : 'application/x-mpegURL'
-      });
+        mute: false // Browser restriction ke liye false rakha hai
+      };
+
+      // Handle HLS vs DASH
+      if (!src.endsWith('.mpd')) {
+         config.mimeType = 'application/x-mpegURL';
+      }
+
+      player = new Clappr.Player(config);
       document.title = "Sonu TV: " + name;
     }
 
@@ -118,9 +128,12 @@
       renderChannels(channels.filter(c => c.name.toLowerCase().includes(term)));
     }
 
-    renderChannels(channels);
-    // Initial Play
-    if(channels.length > 0) playChannel(channels[0].src, channels[0].key, channels[0].name);
+    // Initialize
+    window.onload = () => {
+        renderChannels(channels);
+        // Pehla channel auto-load nahi karte kyunki browser block kar deta hai.
+        // Seedha koi channel click kijiye ya pehla load karna hai toh mute:true karna padega.
+    };
   </script>
 </body>
 </html>
