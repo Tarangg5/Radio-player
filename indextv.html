@@ -10,35 +10,26 @@
   <script src="https://cdn.jsdelivr.net/npm/clappr-level-selector@latest/dist/level-selector.min.js"></script>
 
   <style>
-    :root { --primary: #00f2ff; --accent: #bc13fe; --bg: #050505; --card: #111111; }
-    body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+    :root { --primary: #00f2ff; --bg: #050505; --card: #111111; }
+    body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; background: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; }
     
-    /* Header Section */
-    .header { padding: 15px; text-align: center; width: 100%; background: #000; border-bottom: 1px solid #222; }
-    .header h1 { margin: 0; font-size: 20px; color: var(--primary); letter-spacing: 2px; text-transform: uppercase; }
+    .header { padding: 10px; width: 100%; text-align: center; background: #000; border-bottom: 1px solid #222; }
+    .header h1 { margin: 0; font-size: 18px; color: var(--primary); text-transform: uppercase; }
 
-    /* Player Box */
-    .player-section { width: 100%; max-width: 900px; background: #000; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+    .player-section { width: 100%; max-width: 900px; background: #000; position: sticky; top: 0; z-index: 100; border-bottom: 2px solid var(--primary); }
     #video-player { width: 100%; aspect-ratio: 16/9; }
 
-    /* Search & Filters */
     .controls { width: 100%; max-width: 850px; padding: 15px; box-sizing: border-box; }
-    input#searchBar { width: 100%; padding: 14px; border-radius: 12px; background: var(--card); color: white; border: 1px solid #333; outline: none; font-size: 16px; transition: 0.3s; }
-    input#searchBar:focus { border-color: var(--primary); }
+    input#searchBar { width: 100%; padding: 12px; border-radius: 10px; background: var(--card); color: white; border: 1px solid #333; outline: none; margin-bottom: 15px; }
 
-    /* Channel Grid */
-    .channel-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)); gap: 12px; padding-bottom: 30px; }
-    .channel-item { background: var(--card); padding: 12px 5px; border-radius: 12px; text-align: center; cursor: pointer; border: 1px solid #222; transition: 0.3s; }
-    .channel-item:hover { transform: translateY(-3px); border-color: var(--primary); }
-    .channel-item.active { border-color: var(--accent); background: rgba(188, 19, 254, 0.1); }
-    .channel-item img { width: 45px; height: 45px; object-fit: contain; margin-bottom: 8px; border-radius: 5px; background: transparent; }
-    .channel-item span { display: block; font-size: 10px; font-weight: bold; color: #ccc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .channel-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; padding-bottom: 30px; }
+    .channel-item { background: var(--card); padding: 10px; border-radius: 10px; text-align: center; cursor: pointer; border: 1px solid #222; }
+    .channel-item.active { border-color: #bc13fe; background: rgba(188, 19, 254, 0.1); }
+    .channel-item img { width: 40px; height: 40px; object-fit: contain; margin-bottom: 5px; }
+    .channel-item span { display: block; font-size: 10px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    /* Level Selector (Quality) UI Fix */
-    .level_selector button { background: transparent; color: white; border: none; cursor: pointer; font-size: 14px; }
-    
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+    /* Quality Menu Color Fix */
+    .clappr-style .level_selector ul li a { color: #fff !important; }
   </style>
 </head>
 <body>
@@ -54,54 +45,40 @@
 
   <script>
     const channels = [
-      // Sports
+      [span_2](start_span)// Sports & World Cup[span_2](end_span)
       { name: 'WORLD CUP HINDI', src: 'https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/nn1qrdjaha/out/v1/bc4fa7d9cebf47858bebf14ad589025e/cenc.mpd', key: '9909e33838e1152cc512c4636f513f8f:02f67060c94bcc3307280f505ad508ab', logo: 'https://iili.io/1Nz0AP.png' },
       { name: 'WORLD CUP ENG', src: 'https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/lz7yhtgbjb/out/v1/bedaa948e7a24dc0b5fd5d7b38534d8c/cenc.mpd', key: '470a5bda0ae8965c3ab4004c302bc1c8:b04888df6ed570c9435b97471504bd9b', logo: 'https://iili.io/1Nz0AP.png' },
       { name: 'TNT SPORTS 4', src: 'https://ta.bia-cf.live.pv-cdn.net/bom-nitro/live/clients/dash/enc/ecp6xidc5d/out/v1/b8a94677c56e4411aef7ecc2431cec0a/cenc.mpd', key: '192b1115da041585c77200128549efa1:634e10efe4abbb14be400a3ccbac0258', logo: 'https://iili.io/1Nz0AP.png' },
       { name: 'TNT SPORTS 1', src: 'https://ottb.live.cf.ww.aiv-cdn.net/lhr-nitro/live/dash/enc/wf8usag51e/out/v1/bd3b0c314fff4bb1ab4693358f3cd2d3/cenc.mpd', key: 'd0f2e5c39e70c18f29bf77768a1ad89a:d6853c51fcf37a18905f0609972395d7', logo: 'https://iili.io/1Nz0AP.png' },
       
-      // News
+      [span_3](start_span)// News[span_3](end_span)
       { name: 'ABP NEWS', src: 'https://d2l4ar6y3mrs4k.cloudfront.net/live-streaming/abpnews-livetv/master.m3u8', key: '6da8c268d58a0fe4ff75d297359a8ad7:eb0ae4c2c24a52070154499bb09a36cb', logo: 'https://i.postimg.cc/hvvtSwCV/Astro-Cricket.png' },
-      { name: 'AAJ TAK HD', src: 'https://aajtakhdlive-amd.akamaized.net/hls/live/2014415/aajtakhd/aajtakhdlive/live_1080p/chunks.m3u8', key: '', logo: 'https://yt3.googleusercontent.com/MqNixkUgqY_rJiz34wzNf4yhWdrQWQ-F2pu9tJ7TXsSRjseqbUVASuAhuIN-L74cm6lZljkssA=s900-c-k-c0x00ffffff-no-rj' },
       { name: 'NEWS18 HINDI', src: 'https://nw18live.cdn.jio.com/bpk-tv/News18_India_NW18_MOB/output01/News18_India_NW18_MOB-audio_98835_eng=98800-video=3724000.m3u8', key: '6da8c268d58a0fe4ff75d297359a8ad7:eb0ae4c2c24a52070154499bb09a36cb', logo: 'https://i.postimg.cc/hvvtSwCV/Astro-Cricket.png' },
-      { name: 'NDTV INDIA', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Ndtvindia2/default/manifest.mpd', key: 'd78c01625c3f4ed98912609799298544:b91bb882f9624872ada6125006fe5c73', logo: 'https://d388d59m61mm0v.cloudfront.net/optimized/content/common/logos/channel/logos/iqfloc.png' },
+      { name: 'AAJ TAK HD', src: 'https://aajtakhdlive-amd.akamaized.net/hls/live/2014415/aajtakhd/aajtakhdlive/live_1080p/chunks.m3u8', key: '', logo: 'https://yt3.googleusercontent.com/MqNixkUgqY_rJiz34wzNf4yhWdrQWQ-F2pu9tJ7TXsSRjseqbUVASuAhuIN-L74cm6lZljkssA=s900-c-k-c0x00ffffff-no-rj' },
       
-      // Travel & Discovery
-      { name: 'TRAVELXP 4K', src: 'https://deltatesttatasky.akamaized.net/out/i/968284.m3u8', key: '6da8c268d58a0fe4ff75d297359a8ad7:eb0ae4c2c24a52070154499bb09a36cb', logo: 'https://i.postimg.cc/hvvtSwCV/Astro-Cricket.png' },
-      { name: 'DISCOVERY SCIENCE', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Discoveryscience2/default/manifest.mpd', key: '5458f45efedb4d6f8aa6ac76c85b621b:dbf8a0a306a64525ba3012fd225370c0', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/vIA7TExn.png' },
+      [span_4](start_span)// Travel & Discovery[span_4](end_span)
+      { name: 'TRAVELXP 4K HDR', src: 'https://deltatesttatasky.akamaized.net/out/i/968284.m3u8', key: '6da8c268d58a0fe4ff75d297359a8ad7:eb0ae4c2c24a52070154499bb09a36cb', logo: 'https://i.postimg.cc/hvvtSwCV/Astro-Cricket.png' },
       { name: 'DISCOVERY TURBO', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Discoveryturbo2/default/manifest.mpd', key: 'c011525969e44b99a86059dbb3cdf4e8:6700a5d93203417b8585f7de7dd1a09b', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/6eCv1iuk.png' },
       
-      // Zee Network
+      [span_5](start_span)// Zee Network[span_5](end_span)
       { name: 'ZEE TV SD', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Zeetv/default/manifest.mpd', key: 'ed068cf84f0640ccbc7c0e395c0a272e:bb722190f2bb446391020411a7d0828b', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/yHNSuG1V.png' },
       { name: 'ZEE CINEMA SD', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Zeecinema/default/manifest.mpd', key: '43513b13f4b542e39c9265921dfc1726:b0b2678bcd274c37b888a6c987d502ed', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/qss9gFuH.png' },
-      { name: 'ZEE BIHAR JHK', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Zeebiharjharkhand/default/manifest.mpd', key: 'e1ec6098b5014ac7aae0b37f72d5e85e:c04950f25d8e4107a96e828e7911e53b', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/5zkMvEbF.png' },
-      { name: 'ZEE BOLLYWOOD', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Zeebollywood/default/manifest.mpd', key: 'e61523260c614746b25b9a5523fe9a39:72ddbf37f76f49acbb8e140e7279e7a1', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/EqDlflgi.png' },
-      { name: 'AND TV SD', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Andtv/default/manifest.mpd', key: '26df86eeebb04d7fbc45c948f76e81fd:5f3a23f1a73c4c96ababce5fffe7b06b', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/T1CCvaAQ.png' },
-      { name: 'KOREAN DRAMA', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Koreandramas2/default/manifest.mpd', key: 'ed197e7253c04946903f03bad9afac91:99ebb8683ea74b70a9fda1cbdc2cc1b4', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/BNu8WvFw.png' },
-      { name: 'ZING', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Zing/default/manifest.mpd', key: 'f0fb14eebe474a6ab74c8301d55a7224:f9f8b2e30704458b8db844a285ce32be', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/Nyi83z1G.png' }
+      { name: 'ZEE BOLLYWOOD', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Zeebollywood/default/manifest.mpd', key: 'e61523260c614746b25b9a5523fe9a39:72ddbf37f76f49acbb8e140e7279e7a1', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/EqDlflgi.png' }
     ];
 
     let player;
 
     function playChannel(src, key, name) {
       if (player) player.destroy();
-      
       const drmConfig = key ? { [key.split(':')[0]]: key.split(':')[1] } : {};
       
       player = new Clappr.Player({
         source: src,
         parentId: "#video-player",
-        plugins: [DashShakaPlayback, LevelSelector], // Both plugins integrated
-        shakaConfiguration: {
-          drm: { clearKeys: drmConfig }
-        },
-        levelSelectorConfig: {
-          title: 'Quality',
-          labels: { 3: '1080p', 2: '720p', 1: '480p', 0: 'Auto' }
-        },
-        width: '100%',
-        height: '100%',
-        autoPlay: true,
+        plugins: [DashShakaPlayback, LevelSelector],
+        shakaConfiguration: { drm: { clearKeys: drmConfig } },
+        levelSelectorConfig: { title: 'Quality', labels: { 3: '1080p', 2: '720p', 1: '480p', 0: 'Auto' } },
+        width: '100%', height: '100%', autoPlay: true,
         mimeType: src.endsWith('.mpd') ? 'application/dash+xml' : 'application/x-mpegURL'
       });
     }
@@ -112,7 +89,7 @@
       list.forEach(ch => {
         const div = document.createElement('div');
         div.className = 'channel-item';
-        div.innerHTML = `<img src="${ch.logo}" onerror="this.src='https://via.placeholder.com/45/222/fff?text=TV'"><span>${ch.name}</span>`;
+        div.innerHTML = `<img src="${ch.logo}" onerror="this.src='https://via.placeholder.com/40/222/fff?text=TV'"><span>${ch.name}</span>`;
         div.onclick = () => {
           playChannel(ch.src, ch.key, ch.name);
           document.querySelectorAll('.channel-item').forEach(i => i.classList.remove('active'));
@@ -128,8 +105,10 @@
       renderChannels(channels.filter(c => c.name.toLowerCase().includes(term)));
     }
 
-    renderChannels(channels);
-    if(channels.length > 0) playChannel(channels[0].src, channels[0].key, channels[0].name);
+    window.onload = () => {
+      renderChannels(channels);
+      if(channels.length > 0) playChannel(channels[0].src, channels[0].key, channels[0].name);
+    };
   </script>
 </body>
 </html>
