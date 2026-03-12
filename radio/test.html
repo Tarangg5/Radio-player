@@ -3,96 +3,111 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sonu Radio - Official Metadata</title>
+  <title>Sonu Radio - Live Metadata</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
-    :root { --primary: #00f2ff; --bg: #050505; --card: #111111; }
-    body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-    .player-container { width: 100%; max-width: 400px; background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid #333; text-align: center; }
+    :root { --primary: #00f2ff; --accent: #bc13fe; --bg: #050505; --card: #111111; }
+    body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; background-color: var(--bg); color: white; display: flex; justify-content: center; min-height: 100vh; align-items: center; }
     
-    /* Official Zeno Style Metadata Box */
-    .zeno-meta { margin: 20px 0; background: #000; padding: 15px; border-radius: 12px; border: 1px solid #222; min-height: 80px; }
-    #track-title { font-weight: bold; font-size: 18px; color: var(--primary); display: block; }
-    #artist-name { font-size: 14px; color: #888; display: block; margin-top: 5px; }
+    .player-container { width: 100%; max-width: 420px; background: var(--card); padding: 25px; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 0 20px rgba(0, 242, 255, 0.1); text-align: center; }
     
-    audio { width: 100%; margin: 15px 0; filter: invert(1); }
-    .playlist { list-style: none; padding: 0; text-align: left; max-height: 200px; overflow-y: auto; }
-    .playlist li { padding: 12px; margin-bottom: 8px; background: #1a1a1a; cursor: pointer; border-radius: 10px; font-size: 14px; border: 1px solid transparent; }
-    .playlist li.active { border-color: var(--primary); color: var(--primary); }
+    .header h1 { margin: 0; font-size: 20px; background: linear-gradient(to right, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 2px; text-transform: uppercase; }
+    
+    .now-playing-box { margin: 20px 0; background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); min-height: 100px; display: flex; flex-direction: column; justify-content: center; }
+    #songTitle { font-weight: bold; font-size: 18px; color: var(--primary); margin-bottom: 5px; }
+    #singerTitle { font-size: 14px; color: #888; font-style: italic; }
+    
+    audio { width: 100%; margin-bottom: 20px; filter: invert(1); }
+    
+    .playlist { list-style: none; padding: 0; max-height: 250px; overflow-y: auto; text-align: left; }
+    .playlist li { background: rgba(255,255,255,0.02); margin-bottom: 8px; padding: 12px; cursor: pointer; border-radius: 10px; font-size: 14px; color: #aaa; transition: 0.3s; border: 1px solid transparent; }
+    .playlist li.active { background: rgba(0, 242, 255, 0.1); color: var(--primary); border-color: var(--primary); }
+    .playlist li:hover { background: rgba(255,255,255,0.05); }
   </style>
 </head>
 <body>
 
   <div class="player-container">
-    <h2 style="font-size: 12px; color: #555; letter-spacing: 2px;">SONU RADIO OFFICIAL</h2>
-    
-    <div class="zeno-meta">
-      <span id="track-title">Select Station</span>
-      <span id="artist-name">Artist Info</span>
+    <div class="header">
+        <h1>SONU RADIO</h1>
+        <div class="now-playing-box">
+            <div style="font-size: 10px; color: #555; margin-bottom: 8px; letter-spacing: 1px;">NOW STREAMING</div>
+            <div id="songTitle">Select a Station</div>
+            <div id="singerTitle">Artist Info</div>
+        </div>
     </div>
-
+    
     <audio id="audioPlayer" controls autoplay></audio>
     <ul class="playlist" id="playlist"></ul>
   </div>
 
-  <script src="https://zeno.fm/static/js/widget.js"></script>
-
   <script>
     const audioPlayer = document.getElementById('audioPlayer');
-    const songText = document.getElementById('track-title');
-    const artistText = document.getElementById('artist-name');
+    const songText = document.getElementById('songTitle');
+    const singerText = document.getElementById('singerTitle');
     const playlist = document.getElementById('playlist');
 
-    const stations = [
-      { name: 'Hindi Melody', id: 'f25zvfe37p8uv', src: 'https://stream.zeno.fm/f25zvfe37p8uv' },
-      { name: 'Arijit Singh Hits', id: 'wn6muavgfr2tv', src: 'https://stream.zeno.fm/wn6muavgfr2tv' },
-      { name: 'Md Rafi Hits', id: '2xx62x8ztm0uv', src: 'https://stream.zeno.fm/2xx62x8ztm0uv' }
+    const audioFiles = [
+      { name: 'Hindi Melody', src: 'https://stream.zeno.fm/f25zvfe37p8uv', id: 'f25zvfe37p8uv' },
+      { name: 'Arijit Singh Hits', src: 'https://stream.zeno.fm/wn6muavgfr2tv', id: 'wn6muavgfr2tv' },
+      { name: 'Big FM 92.7', src: 'https://stream.zeno.fm/dbstwo3dvhhtv', id: 'dbstwo3dvhhtv' },
+      { name: 'Md Rafi Hits', src: 'https://stream.zeno.fm/2xx62x8ztm0uv', id: '2xx62x8ztm0uv' }
     ];
 
-    // Function to fetch metadata using Zeno's official widget endpoint
-    function updateOfficialMeta(stationId) {
-        // Zeno uses a public JSONP-like endpoint for their widgets
-        fetch(`https://api.zeno.fm/mounts/metadata/subscribe/${stationId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.streamTitle) {
-                    const title = data.streamTitle;
-                    if (title.includes(" - ")) {
-                        const parts = title.split(" - ");
-                        artistText.textContent = parts[0].trim();
-                        songText.textContent = parts[1].trim();
-                    } else {
-                        songText.textContent = title;
-                        artistText.textContent = "Live Radio";
-                    }
-                }
-            })
-            .catch(() => {
-                // If it fails, we keep the station name
-                console.log("Widget API fell back.");
-            });
+    let hls;
+    let metaInterval;
+
+    async function updateMetadata(station) {
+      if (!station.id) return;
+
+      try {
+        // Vercel friendly proxy
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent('https://api.zeno.fm/mounts/metadata/subscribe/' + station.id)}`;
+        
+        const response = await fetch(proxyUrl);
+        const data = await response.json();
+        
+        if (data.streamTitle) {
+          const fullTitle = data.streamTitle;
+          if (fullTitle.includes(" - ")) {
+            const parts = fullTitle.split(" - ");
+            singerText.textContent = parts[0].trim();
+            songText.textContent = parts[1].trim();
+          } else {
+            songText.textContent = fullTitle;
+            singerText.textContent = station.name;
+          }
+        }
+      } catch (e) {
+        console.log("Metadata Fetch Failed");
+        // Don't change text to error, keep it clean
+      }
     }
 
-    stations.forEach(st => {
+    function loadStation(ch, li) {
+      if (hls) { hls.destroy(); hls = null; }
+      clearInterval(metaInterval);
+      
+      audioPlayer.src = ch.src;
+      audioPlayer.play();
+      
+      songText.textContent = "Loading Info...";
+      singerText.textContent = ch.name;
+
+      // Initial Fetch
+      updateMetadata(ch);
+      
+      // Refresh every 15 seconds
+      metaInterval = setInterval(() => updateMetadata(ch), 15000);
+
+      document.querySelectorAll('.playlist li').forEach(item => item.classList.remove('active'));
+      li.classList.add('active');
+    }
+
+    audioFiles.forEach(ch => {
       const li = document.createElement('li');
-      li.textContent = st.name;
-      li.onclick = () => {
-        audioPlayer.src = st.src;
-        audioPlayer.play();
-        
-        // Show station name immediately
-        songText.textContent = st.name;
-        artistText.textContent = "Loading Info...";
-
-        // Initial fetch
-        updateOfficialMeta(st.id);
-        
-        // Auto-refresh using setInterval
-        if(window.metaInterval) clearInterval(window.metaInterval);
-        window.metaInterval = setInterval(() => updateOfficialMeta(st.id), 20000);
-
-        document.querySelectorAll('li').forEach(l => l.classList.remove('active'));
-        li.classList.add('active');
-      };
+      li.textContent = ch.name;
+      li.onclick = () => loadStation(ch, li);
       playlist.appendChild(li);
     });
   </script>
