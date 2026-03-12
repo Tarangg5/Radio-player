@@ -3,27 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sonu Radio Pro | Vercel Edition</title>
+  <title>Sonu Radio - Ultimate Metadata Fix</title>
   <style>
     :root { --primary: #00f2ff; --bg: #050505; --card: #111111; }
     body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--bg); color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
     .player-container { width: 100%; max-width: 400px; background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid #333; text-align: center; }
-    .meta-box { margin: 20px 0; background: #000; padding: 15px; border-radius: 12px; border: 1px solid #222; min-height: 85px; }
+    .meta-box { margin: 20px 0; background: #000; padding: 15px; border-radius: 12px; border: 1px solid #222; min-height: 80px; }
     #songTitle { font-weight: bold; font-size: 18px; color: var(--primary); display: block; }
     #artistName { font-size: 14px; color: #888; display: block; margin-top: 5px; }
     audio { width: 100%; margin: 15px 0; filter: invert(1); }
     .playlist { list-style: none; padding: 0; text-align: left; max-height: 200px; overflow-y: auto; }
     .playlist li { padding: 12px; margin-bottom: 8px; background: #1a1a1a; cursor: pointer; border-radius: 10px; font-size: 14px; border: 1px solid transparent; }
     .playlist li.active { border-color: var(--primary); color: var(--primary); }
+    .refresh-btn { font-size: 10px; color: var(--primary); cursor: pointer; text-decoration: underline; margin-top: 5px; display: inline-block; }
   </style>
 </head>
 <body>
 
   <div class="player-container">
-    <h2 style="font-size: 14px; color: #555; letter-spacing: 2px;">SONU RADIO LIVE</h2>
+    <h2 style="font-size: 16px; letter-spacing: 2px; color: #555;">SONU LIVE RADIO</h2>
     <div class="meta-box">
       <span id="songTitle">Select Station</span>
       <span id="artistName">Artist Info</span>
+      <span class="refresh-btn" id="manualRefresh">Force Refresh Name</span>
     </div>
     <audio id="audioPlayer" controls autoplay></audio>
     <ul class="playlist" id="playlist"></ul>
@@ -34,6 +36,7 @@
     const songText = document.getElementById('songTitle');
     const artistText = document.getElementById('artistName');
     const playlist = document.getElementById('playlist');
+    const refreshBtn = document.getElementById('manualRefresh');
 
     const stations = [
       { name: 'Hindi Melody', id: 'f25zvfe37p8uv', src: 'https://stream.zeno.fm/f25zvfe37p8uv' },
@@ -42,63 +45,59 @@
     ];
 
     let currentStation = null;
-    let metaInterval;
+    let metaTimer;
 
-    // Use a different proxy specifically for Vercel/Cloudflare
-    async function updateMetadata(station) {
-      if (!station) return;
-      
-      // Try fetching via a more reliable proxy for Zeno
-      const url = `https://api.allorigins.win/get?url=${encodeURIComponent('https://api.zeno.fm/mounts/metadata/subscribe/' + station.id)}`;
-      
-      try {
-        const response = await fetch(url);
-        const data = await response.json();
-        const raw = data.contents;
-
-        // Custom Regex to find title in Zeno JSON string
-        const match = raw.match(/"streamTitle":"(.*?)"/);
+    function getMetadata(station) {
+        if (!station) return;
+        const url = `https://api.allorigins.win/get?url=${encodeURIComponent('https://api.zeno.fm/mounts/metadata/subscribe/' + station.id)}`;
         
-        if (match && match[1]) {
-          const title = match[1];
-          if (title.includes(" - ")) {
-            const [singer, song] = title.split(" - ");
-            artistText.textContent = singer.trim();
-            songText.textContent = song.trim();
-          } else {
-            songText.textContent = title;
-            artistText.textContent = station.name;
-          }
-        }
-      } catch (err) {
-        // Fallback: If metadata fails, show station name instead of "Connecting"
-        console.log("Meta failed, using fallback.");
-        songText.textContent = station.name;
-        artistText.textContent = "Live Radio";
-      }
+        // XMLHttpRequest is more stable for proxies
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", url, true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                const response = JSON.parse(xhr.responseText);
+                const contents = response.contents;
+                const match = contents.match(/"streamTitle":"(.*?)"/);
+                
+                if (match && match[1]) {
+                    const title = match[1];
+                    if (title.includes(" - ")) {
+                        const parts = title.split(" - ");
+                        artistText.textContent = parts[0].trim();
+                        songText.textContent = parts[1].trim();
+                    } else {
+                        songText.textContent = title;
+                        artistText.textContent = station.name;
+                    }
+                }
+            }
+        };
+        xhr.send();
     }
 
     stations.forEach(st => {
       const li = document.createElement('li');
       li.textContent = st.name;
       li.onclick = () => {
-        clearInterval(metaInterval);
+        clearInterval(metaTimer);
         currentStation = st;
         audioPlayer.src = st.src;
         audioPlayer.play();
         
-        // Instant Feedback
-        songText.textContent = "Loading Info...";
-        artistText.textContent = st.name;
-
-        updateMetadata(st);
-        metaInterval = setInterval(() => updateMetadata(st), 15000);
-
+        songText.textContent = "Fetching...";
+        artistText.textContent = "...";
+        
+        getMetadata(st);
+        metaTimer = setInterval(() => getMetadata(st), 20000);
+        
         document.querySelectorAll('li').forEach(l => l.classList.remove('active'));
         li.classList.add('active');
       };
       playlist.appendChild(li);
     });
+
+    refreshBtn.onclick = () => getMetadata(currentStation);
   </script>
 </body>
 </html>
