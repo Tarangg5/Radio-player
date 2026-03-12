@@ -1,106 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Radio Player By Sonu</title>
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-  <style>
-    :root { --primary: #00f2ff; --accent: #bc13fe; --bg: #050505; --card: #111111; }
-    body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; background-color: var(--bg); color: white; display: flex; justify-content: center; min-height: 100vh; align-items: center; }
-    .player-container { width: 100%; max-width: 420px; background: var(--card); padding: 25px; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 0 20px rgba(0, 242, 255, 0.1); transition: 0.5s; }
-    .player-container.playing { box-shadow: 0 0 30px rgba(0, 242, 255, 0.2), 0 0 60px rgba(188, 19, 254, 0.2); }
-    .header h1 { margin: 0; font-size: 20px; text-align: center; background: linear-gradient(to right, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 2px; text-transform: uppercase; }
-    .now-playing-box { margin: 20px 0; background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 15px; display: flex; align-items: center; justify-content: space-between; border: 1px solid rgba(255,255,255,0.05); }
-    #status-label { font-size: 10px; color: var(--primary); text-transform: uppercase; }
-    #nowPlaying { font-weight: bold; font-size: 16px; margin-top: 4px; color: #fff; text-shadow: 0 0 10px rgba(0,242,255,0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .visualizer { display: flex; align-items: flex-end; height: 35px; gap: 4px; }
-    .bar { width: 5px; background: var(--primary); border-radius: 10px; height: 4px; }
-    .playing .bar { animation: neonBounce 0.6s infinite alternate; }
-    @keyframes neonBounce { 0% { height: 4px; } 100% { height: 30px; } }
-    audio { width: 100%; margin-bottom: 20px; filter: invert(1) hue-rotate(180deg); }
-    #searchBar { width: 100%; padding: 14px; margin-bottom: 15px; border-radius: 12px; background: #1a1a1a; color: white; border: 1px solid #333; outline: none; }
-    .playlist { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; }
-    .playlist li { background: rgba(255,255,255,0.02); margin-bottom: 5px; padding: 12px 15px; cursor: pointer; border-radius: 10px; font-size: 14px; color: #aaa; }
-    .playlist li.active { background: rgba(0, 242, 255, 0.1); color: var(--primary); border: 1px solid rgba(0, 242, 255, 0.3); }
-  </style>
-</head>
+  </head>
 <body>
-
-  <div class="player-container" id="mainContainer">
-    <div class="header">
-        <h1>SONU LIVE RADIO</h1>
-        <div class="now-playing-box">
-            <div class="info">
-                <span id="status-label">Now On Air</span>
-                <div id="nowPlaying">Select Station</div>
-            </div>
-            <div class="visualizer" id="visualizer">
-                <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
-            </div>
-        </div>
-    </div>
-    <input type="text" id="searchBar" placeholder="Search Station..." onkeyup="filterStations()">
-    <audio id="audioPlayer" controls></audio>
-    <ul class="playlist" id="playlist"></ul>
-  </div>
-
   <script>
     const audioPlayer = document.getElementById('audioPlayer');
     const nowPlayingText = document.getElementById('nowPlaying');
     const playlist = document.getElementById('playlist');
-    const mainContainer = document.getElementById('mainContainer');
-    const visualizer = document.getElementById('visualizer');
 
+    // --- Yahan aapko manually details bharni hain ---
     const audioFiles = [
-      { name: 'Hindi Song', src: 'https://stream.zeno.fm/0h3xz4xskchvv' },
-      { name: 'Big FM 92.7', src: 'https://stream.zeno.fm/dbstwo3dvhhtv' },
-      { name: 'Arijit Singh Hits', src: 'https://stream.zeno.fm/wn6muavgfr2tv' },
-      { name: 'Md Rafi Hits', src: 'https://stream.zeno.fm/2xx62x8ztm0uv' },
-      { name: 'Vivid Bharati (AIR)', src: 'https://air.pc.cdn.bitgravity.com/air/live/pbaudio001/chunklist.m3u8' }
+      { 
+        name: 'Arijit Singh Hits', 
+        src: 'https://stream.zeno.fm/wn6muavgfr2tv',
+        // Is station ke liye metadata nikalne ki direct link yahan dalein
+        metadataUrl: 'https://api.zeno.fm/mounts/metadata/subscribe/wn6muavgfr2tv' 
+      },
+      { 
+        name: 'Big FM 92.7', 
+        src: 'https://stream.zeno.fm/dbstwo3dvhhtv',
+        metadataUrl: 'https://api.zeno.fm/mounts/metadata/subscribe/dbstwo3dvhhtv'
+      },
+      { 
+        name: 'Vivid Bharati', 
+        src: 'https://air.pc.cdn.bitgravity.com/air/live/pbaudio001/chunklist.m3u8',
+        metadataUrl: '' // Agar metadata nahi hai toh khali chhodein
+      }
     ];
 
-    let hls;
     let metadataInterval;
 
-    // Zeno Metadata Fetcher
-    async function fetchMetadata(audioSrc, stationName) {
+    // Manual Fetching Function
+    async function updateManualMetadata(url, defaultName) {
+      if (!url) {
+        nowPlayingText.textContent = defaultName;
+        return;
+      }
+
       try {
-        if (audioSrc.includes("zeno.fm")) {
-          const streamId = audioSrc.split('/').pop();
-          // Zeno API for live song title
-          const res = await fetch(`https://api.zeno.fm/mounts/metadata/subscribe/${streamId}`);
-          const reader = res.body.getReader();
-          const { value } = await reader.read();
-          const text = new TextDecoder().decode(value);
-          const data = JSON.parse(text.split('data:')[1]);
-          if (data.streamTitle) nowPlayingText.textContent = data.streamTitle;
+        const response = await fetch(url);
+        const text = await response.text();
+        
+        // Zeno format parse karne ke liye simple logic
+        if (text.includes('streamTitle')) {
+            const match = text.match(/"streamTitle":"(.*?)"/);
+            if (match && match[1]) {
+                nowPlayingText.textContent = match[1];
+            }
         } else {
-          nowPlayingText.textContent = stationName;
+            nowPlayingText.textContent = defaultName;
         }
       } catch (e) {
-        nowPlayingText.textContent = stationName;
+        nowPlayingText.textContent = defaultName;
       }
     }
 
-    function loadAudio(audioSrc, listItem, stationName) {
-      if (hls) { hls.destroy(); hls = null; }
+    function loadAudio(ch, listItem) {
       clearInterval(metadataInterval);
-      
-      nowPlayingText.textContent = "Connecting...";
-      
-      if (audioSrc.endsWith('.m3u8') && Hls.isSupported()) {
-        hls = new Hls();
-        hls.loadSource(audioSrc);
-        hls.attachMedia(audioPlayer);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => audioPlayer.play());
-      } else {
-        audioPlayer.src = audioSrc;
-        audioPlayer.play().then(() => {
-          fetchMetadata(audioSrc, stationName);
-          metadataInterval = setInterval(() => fetchMetadata(audioSrc, stationName), 15000);
-        });
-      }
+      audioPlayer.src = ch.src;
+      audioPlayer.play();
+
+      // Pehli baar aur fir har 15 second mein manually update
+      updateManualMetadata(ch.metadataUrl, ch.name);
+      metadataInterval = setInterval(() => {
+        updateManualMetadata(ch.metadataUrl, ch.name);
+      }, 15000);
 
       document.querySelectorAll('.playlist li').forEach(item => item.classList.remove('active'));
       listItem.classList.add('active');
@@ -108,21 +72,13 @@
 
     function renderPlaylist(list) {
       playlist.innerHTML = '';
-      list.forEach(audio => {
+      list.forEach(ch => {
         const li = document.createElement('li');
-        li.textContent = audio.name;
-        li.onclick = () => loadAudio(audio.src, li, audio.name);
+        li.textContent = ch.name;
+        li.onclick = () => loadAudio(ch, li);
         playlist.appendChild(li);
       });
     }
-
-    function filterStations() {
-      const term = document.getElementById('searchBar').value.toLowerCase();
-      renderPlaylist(audioFiles.filter(s => s.name.toLowerCase().includes(term)));
-    }
-
-    audioPlayer.onplay = () => { mainContainer.classList.add('playing'); visualizer.classList.add('playing'); };
-    audioPlayer.onpause = () => { mainContainer.classList.remove('playing'); visualizer.classList.remove('playing'); };
 
     renderPlaylist(audioFiles);
   </script>
