@@ -57,17 +57,15 @@
     let hls;
     let metaInterval;
 
-    async function updateMetadata(station) {
+        async function updateMetadata(station) {
       if (!station.id) return;
 
       try {
-        // Vercel friendly proxy
-        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent('https://api.zeno.fm/mounts/metadata/subscribe/' + station.id)}`;
-        
-        const response = await fetch(proxyUrl);
+        // Ab hum kisi teesre ki proxy nahi, apni khud ki API call kar rahe hain
+        const response = await fetch(`/api/meta?id=${station.id}`);
         const data = await response.json();
         
-        if (data.streamTitle) {
+        if (data && data.streamTitle) {
           const fullTitle = data.streamTitle;
           if (fullTitle.includes(" - ")) {
             const parts = fullTitle.split(" - ");
@@ -79,10 +77,12 @@
           }
         }
       } catch (e) {
-        console.log("Metadata Fetch Failed");
-        // Don't change text to error, keep it clean
+        console.log("Metadata Error");
+        songText.textContent = station.name;
+        singerText.textContent = "Live Radio";
       }
     }
+
 
     function loadStation(ch, li) {
       if (hls) { hls.destroy(); hls = null; }
