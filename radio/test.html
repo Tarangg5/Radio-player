@@ -3,36 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sonu Radio - Metadata Fixed</title>
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <title>Sonu Radio - Final Fix</title>
   <style>
-    :root { --primary: #00f2ff; --accent: #bc13fe; --bg: #050505; --card: #111111; }
-    body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; background-color: var(--bg); color: white; display: flex; justify-content: center; min-height: 100vh; align-items: center; }
-    .player-container { width: 100%; max-width: 420px; background: var(--card); padding: 25px; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 0 20px rgba(0, 242, 255, 0.1); text-align: center; }
-    .header h1 { margin: 0; font-size: 20px; background: linear-gradient(to right, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 2px; text-transform: uppercase; }
-    
-    .now-playing-box { margin: 20px 0; background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); min-height: 100px; display: flex; flex-direction: column; justify-content: center; }
-    #songTitle { font-weight: bold; font-size: 18px; color: var(--primary); margin-bottom: 5px; text-shadow: 0 0 10px rgba(0,242,255,0.2); }
-    #singerTitle { font-size: 14px; color: #888; font-style: italic; }
-    
-    audio { width: 100%; margin-bottom: 20px; filter: invert(1); }
-    .playlist { list-style: none; padding: 0; max-height: 250px; overflow-y: auto; text-align: left; }
-    .playlist li { background: rgba(255,255,255,0.02); margin-bottom: 5px; padding: 12px; cursor: pointer; border-radius: 10px; font-size: 14px; color: #aaa; }
-    .playlist li.active { background: rgba(0, 242, 255, 0.1); color: var(--primary); border: 1px solid var(--primary); }
+    :root { --primary: #00f2ff; --bg: #050505; --card: #111111; }
+    body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; background-color: var(--bg); color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .player-container { width: 100%; max-width: 400px; background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid #333; text-align: center; }
+    .now-playing-box { margin: 20px 0; background: #000; padding: 15px; border-radius: 12px; border: 1px solid #222; min-height: 80px; }
+    #songTitle { font-weight: bold; font-size: 18px; color: var(--primary); display: block; }
+    #singerTitle { font-size: 14px; color: #888; display: block; margin-top: 5px; }
+    audio { width: 100%; margin: 15px 0; filter: invert(1); }
+    .playlist { list-style: none; padding: 0; text-align: left; max-height: 200px; overflow-y: auto; }
+    .playlist li { padding: 10px; margin-bottom: 5px; background: #1a1a1a; cursor: pointer; border-radius: 8px; font-size: 14px; }
+    .playlist li.active { border: 1px solid var(--primary); color: var(--primary); }
   </style>
 </head>
 <body>
 
   <div class="player-container">
-    <div class="header">
-        <h1>SONU RADIO</h1>
-        <div class="now-playing-box">
-            <div style="font-size: 10px; color: #555; margin-bottom: 10px;">LIVE METADATA</div>
-            <div id="songTitle">Select a Station</div>
-            <div id="singerTitle">Artist Info</div>
-        </div>
+    <h2 style="font-size: 16px; letter-spacing: 2px;">SONU RADIO</h2>
+    <div class="now-playing-box">
+      <span id="songTitle">Select Station</span>
+      <span id="singerTitle">Artist Info</span>
     </div>
-    <audio id="audioPlayer" controls></audio>
+    <audio id="audioPlayer" controls autoplay></audio>
     <ul class="playlist" id="playlist"></ul>
   </div>
 
@@ -42,68 +35,60 @@
     const singerText = document.getElementById('singerTitle');
     const playlist = document.getElementById('playlist');
 
-    const audioFiles = [
-      { name: 'Arijit Singh Hits', src: 'https://stream.zeno.fm/wn6muavgfr2tv', meta: 'https://api.zeno.fm/mounts/metadata/subscribe/wn6muavgfr2tv' },
-      { name: 'Big FM 92.7', src: 'https://stream.zeno.fm/dbstwo3dvhhtv', meta: 'https://api.zeno.fm/mounts/metadata/subscribe/dbstwo3dvhhtv' },
-      { name: 'Md Rafi Hits', src: 'https://stream.zeno.fm/2xx62x8ztm0uv', meta: 'https://api.zeno.fm/mounts/metadata/subscribe/2xx62x8ztm0uv' }
+    const stations = [
+      { name: 'Arijit Singh Hits', src: 'https://stream.zeno.fm/wn6muavgfr2tv', id: 'wn6muavgfr2tv' },
+      { name: 'Big FM 92.7', src: 'https://stream.zeno.fm/dbstwo3dvhhtv', id: 'dbstwo3dvhhtv' },
+      { name: 'Md Rafi Hits', src: 'https://stream.zeno.fm/2xx62x8ztm0uv', id: '2xx62x8ztm0uv' }
     ];
 
-    let metadataInterval;
+    let metaInterval;
 
-    async function getLiveMeta(url, station) {
-        if (!url) {
-            songText.textContent = station;
-            singerText.textContent = "Live Stream";
-            return;
-        }
-
+    async function fetchMeta(station) {
+        // Zeno direct metadata link
+        const url = `https://api.zeno.fm/mounts/metadata/subscribe/${station.id}`;
+        
         try {
-            // CORS Bypass Proxy
-            const proxy = "https://api.allorigins.win/get?url=";
-            const res = await fetch(proxy + encodeURIComponent(url));
+            // Using a more reliable open proxy
+            const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
             const data = await res.json();
-            const rawText = data.contents;
-
-            // Manual String Extract logic for Zeno
-            const match = rawText.match(/"streamTitle":"(.*?)"/);
-            if (match && match[1]) {
-                const fullText = match[1];
-                if (fullText.includes(" - ")) {
-                    const parts = fullText.split(" - ");
-                    singerText.textContent = parts[0].trim(); // Artist Name
-                    songText.textContent = parts[1].trim();   // Song Name
+            const raw = data.contents;
+            
+            // Look for song title in the raw text
+            const parts = raw.split('"streamTitle":"');
+            if (parts.length > 1) {
+                const title = parts[1].split('"')[0];
+                if (title.includes(" - ")) {
+                    const [singer, song] = title.split(" - ");
+                    singerText.textContent = singer.trim();
+                    songText.textContent = song.trim();
                 } else {
-                    songText.textContent = fullText;
-                    singerText.textContent = station;
+                    songText.textContent = title;
+                    singerText.textContent = station.name;
                 }
             }
         } catch (e) {
-            songText.textContent = station;
-            singerText.textContent = "Radio Live";
+            songText.textContent = station.name;
+            singerText.textContent = "Live Stream";
         }
     }
 
-    function loadStation(ch, li) {
-        clearInterval(metadataInterval);
-        audioPlayer.src = ch.src;
+    stations.forEach(st => {
+      const li = document.createElement('li');
+      li.textContent = st.name;
+      li.onclick = () => {
+        clearInterval(metaInterval);
+        audioPlayer.src = st.src;
         audioPlayer.play();
-
-        songText.textContent = "Connecting...";
-        singerText.textContent = "...";
-
-        // Start Metadata Updates
-        getLiveMeta(ch.meta, ch.name);
-        metadataInterval = setInterval(() => getLiveMeta(ch.meta, ch.name), 15000);
-
-        document.querySelectorAll('.playlist li').forEach(item => item.classList.remove('active'));
+        
+        // Initial fetch
+        fetchMeta(st);
+        // Refresh every 20 seconds
+        metaInterval = setInterval(() => fetchMeta(st), 20000);
+        
+        document.querySelectorAll('li').forEach(l => l.classList.remove('active'));
         li.classList.add('active');
-    }
-
-    audioFiles.forEach(ch => {
-        const li = document.createElement('li');
-        li.textContent = ch.name;
-        li.onclick = () => loadStation(ch, li);
-        playlist.appendChild(li);
+      };
+      playlist.appendChild(li);
     });
   </script>
 </body>
