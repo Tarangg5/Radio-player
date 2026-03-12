@@ -3,122 +3,118 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sonu Ragdio - Admin Edition</title>
+  <title>Sonu Radio - Live Metadata</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
     :root { --primary: #00f2ff; --accent: #bc13fe; --bg: #050505; --card: #111111; }
-    body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px; background-color: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+    body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; background-color: var(--bg); color: white; display: flex; justify-content: center; min-height: 100vh; align-items: center; }
+    .player-container { width: 100%; max-width: 420px; background: var(--card); padding: 25px; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 0 20px rgba(0, 242, 255, 0.1); text-align: center; }
+    .header h1 { margin: 0; font-size: 20px; background: linear-gradient(to right, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 2px; text-transform: uppercase; }
     
-    .player-container { width: 100%; max-width: 400px; background: var(--card); padding: 20px; border-radius: 24px; border: 1px solid #222; position: relative; }
-    .header h1 { margin: 0; font-size: 18px; text-align: center; color: var(--primary); letter-spacing: 2px; }
+    .now-playing-box { margin: 20px 0; background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); min-height: 80px; display: flex; flex-direction: column; justify-content: center; }
+    #songName { font-weight: bold; font-size: 18px; color: var(--primary); text-shadow: 0 0 10px rgba(0,242,255,0.3); margin-bottom: 5px; }
+    #singerName { font-size: 13px; color: #888; font-style: italic; }
     
-    .now-playing-box { margin: 15px 0; background: #000; padding: 15px; border-radius: 15px; border: 1px solid #333; min-height: 50px; }
-    #nowPlaying { font-weight: bold; font-size: 15px; color: var(--primary); }
-
-    audio { width: 100%; margin-bottom: 15px; filter: invert(1); }
-    
-    .playlist { list-style: none; padding: 0; max-height: 200px; overflow-y: auto; text-align: left; }
-    .playlist li { background: #1a1a1a; margin-bottom: 5px; padding: 10px; cursor: pointer; border-radius: 8px; font-size: 13px; color: #aaa; }
-    .playlist li.active { border: 1px solid var(--primary); color: var(--primary); }
-
-    /* Admin Panel Styling */
-    .admin-panel { display: none; margin-top: 20px; width: 100%; max-width: 400px; background: #151515; padding: 15px; border-radius: 15px; border: 1px solid #444; }
-    .admin-input { width: 100%; padding: 10px; margin-bottom: 10px; background: #000; border: 1px solid #333; color: white; border-radius: 5px; box-sizing: border-box; }
-    .admin-btn { width: 100%; padding: 10px; background: var(--primary); border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
-    .toggle-admin { margin-top: 15px; font-size: 12px; color: #555; cursor: pointer; text-decoration: underline; }
+    audio { width: 100%; margin-bottom: 20px; filter: invert(1); }
+    .playlist { list-style: none; padding: 0; max-height: 250px; overflow-y: auto; text-align: left; }
+    .playlist li { background: rgba(255,255,255,0.02); margin-bottom: 5px; padding: 12px; cursor: pointer; border-radius: 10px; font-size: 14px; color: #aaa; border: 1px solid transparent; }
+    .playlist li.active { background: rgba(0, 242, 255, 0.1); color: var(--primary); border-color: var(--primary); }
   </style>
 </head>
 <body>
 
   <div class="player-container">
     <div class="header">
-        <h1>SONU RADIhO PRO</h1>
+        <h1>SONU RADIO</h1>
         <div class="now-playing-box">
-            <div id="nowPlaying">Select a Station</div>
+            <div style="font-size: 10px; color: #555; margin-bottom: 8px; letter-spacing: 1px;">LIVE STREAMING</div>
+            <div id="songName">Select Station</div>
+            <div id="singerName">Artist Info</div>
         </div>
     </div>
+    
     <audio id="audioPlayer" controls></audio>
     <ul class="playlist" id="playlist"></ul>
-    <div class="toggle-admin" onclick="toggleAdmin()">Admin Settings</div>
-  </div>
-
-  <div class="admin-panel" id="adminPanel">
-    <h3 style="font-size: 14px; margin-bottom: 10px;">Add New Station</h3>
-    <input type="text" id="newLabel" class="admin-input" placeholder="Station Name">
-    <input type="text" id="newSrc" class="admin-input" placeholder="Stream URL (.mp3 or .m3u8)">
-    <input type="text" id="newMeta" class="admin-input" placeholder="Metadata URL (Optional)">
-    <button class="admin-btn" onclick="addNewStation()">Add to Playlist</button>
   </div>
 
   <script>
     const audioPlayer = document.getElementById('audioPlayer');
-    const nowPlayingText = document.getElementById('nowPlaying');
+    const songNameText = document.getElementById('songName');
+    const singerNameText = document.getElementById('singerName');
     const playlist = document.getElementById('playlist');
-    
-    // Browser storage se data uthana
-    let audioFiles = JSON.parse(localStorage.getItem('sonuRadio')) || [
-      { name: 'Vivid Bharati', src: 'https://air.pc.cdn.bitgravity.com/air/live/pbaudio001/chunklist.m3u8', metadataUrl: '' }
+
+    const audioFiles = [
+      { name: 'Arijit Singh Hits', src: 'https://stream.zeno.fm/wn6muavgfr2tv', metadataUrl: 'https://api.zeno.fm/mounts/metadata/subscribe/wn6muavgfr2tv' },
+      { name: 'Big FM 92.7', src: 'https://stream.zeno.fm/dbstwo3dvhhtv', metadataUrl: 'https://api.zeno.fm/mounts/metadata/subscribe/dbstwo3dvhhtv' },
+      { name: 'Md Rafi Hits', src: 'https://stream.zeno.fm/2xx62x8ztm0uv', metadataUrl: 'https://api.zeno.fm/mounts/metadata/subscribe/2xx62x8ztm0uv' }
     ];
 
     let hls;
     let metadataInterval;
 
     async function updateMetadata(url, defaultName) {
-      if (!url) { nowPlayingText.textContent = defaultName; return; }
+      if (!url) {
+        songNameText.textContent = defaultName;
+        singerNameText.textContent = "Live Radio";
+        return;
+      }
       try {
         const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
         const json = await response.json();
-        const match = json.contents.match(/"streamTitle":"(.*?)"/);
-        nowPlayingText.textContent = match ? match[1] : defaultName;
-      } catch (e) { nowPlayingText.textContent = defaultName; }
+        const raw = json.contents;
+        const match = raw.match(/"streamTitle":"(.*?)"/);
+        
+        if (match && match[1]) {
+          const fullTitle = match[1];
+          // Check if title has a separator like "-" or "by"
+          if (fullTitle.includes(" - ")) {
+            const parts = fullTitle.split(" - ");
+            singerNameText.textContent = parts[0].trim(); // Artist
+            songNameText.textContent = parts[1].trim();   // Song Title
+          } else {
+            songNameText.textContent = fullTitle;
+            singerNameText.textContent = "Unknown Artist";
+          }
+        } else {
+          songNameText.textContent = defaultName;
+          singerNameText.textContent = "Station Live";
+        }
+      } catch (e) {
+        songNameText.textContent = defaultName;
+      }
     }
 
     function loadAudio(ch, li) {
       if (hls) { hls.destroy(); hls = null; }
       clearInterval(metadataInterval);
-      nowPlayingText.textContent = "Connecting...";
+      
+      songNameText.textContent = "Connecting...";
+      singerNameText.textContent = "...";
       
       if (ch.src.endsWith('.m3u8') && Hls.isSupported()) {
-        hls = new Hls(); hls.loadSource(ch.src); hls.attachMedia(audioPlayer);
+        hls = new Hls();
+        hls.loadSource(ch.src);
+        hls.attachMedia(audioPlayer);
         hls.on(Hls.Events.MANIFEST_PARSED, () => audioPlayer.play());
       } else {
-        audioPlayer.src = ch.src; audioPlayer.play();
+        audioPlayer.src = ch.src;
+        audioPlayer.play();
       }
 
       updateMetadata(ch.metadataUrl, ch.name);
       metadataInterval = setInterval(() => updateMetadata(ch.metadataUrl, ch.name), 20000);
+
       document.querySelectorAll('.playlist li').forEach(item => item.classList.remove('active'));
       li.classList.add('active');
     }
 
     function renderPlaylist() {
-      playlist.innerHTML = '';
       audioFiles.forEach(ch => {
         const li = document.createElement('li');
         li.textContent = ch.name;
         li.onclick = () => loadAudio(ch, li);
         playlist.appendChild(li);
       });
-    }
-
-    // Admin Functions
-    function toggleAdmin() {
-      const panel = document.getElementById('adminPanel');
-      panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-    }
-
-    function addNewStation() {
-      const name = document.getElementById('newLabel').value;
-      const src = document.getElementById('newSrc').value;
-      const meta = document.getElementById('newMeta').value;
-      
-      if(name && src) {
-        audioFiles.push({ name, src, metadataUrl: meta });
-        localStorage.setItem('sonuRadio', JSON.stringify(audioFiles)); // Save to browser
-        renderPlaylist();
-        toggleAdmin();
-        alert("Station Added!");
-      }
     }
 
     renderPlaylist();
