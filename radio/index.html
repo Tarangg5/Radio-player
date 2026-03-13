@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Sports Player v2</title>
+    <title>Sports Player Pro - Quality Control</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
@@ -11,18 +11,20 @@
         .container { max-width: 850px; margin: auto; background: #161616; padding: 25px; border-radius: 15px; box-shadow: 0 0 30px rgba(0,0,0,0.8); }
         video { width: 100%; border-radius: 10px; background: black; margin-top: 15px; border: 1px solid #333; }
         .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-        input { padding: 12px; border-radius: 6px; border: 1px solid #444; background: #222; color: white; }
+        input, select { padding: 12px; border-radius: 6px; border: 1px solid #444; background: #222; color: white; }
         .drm-inputs { display: flex; gap: 10px; }
         .drm-inputs input { flex: 1; }
-        button { padding: 12px; border-radius: 6px; border: none; background: #ff1744; color: white; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .btn-group { display: flex; gap: 10px; }
+        button { flex: 1; padding: 12px; border-radius: 6px; border: none; background: #ff1744; color: white; font-weight: bold; cursor: pointer; }
         button:hover { background: #d50000; }
+        .quality-picker { margin-top: 10px; text-align: left; }
         .status { margin-top: 10px; font-size: 0.85em; color: #00e676; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Master Sports Player (HLS/DASH)</h2>
+    <h2>Master Player with Quality Control</h2>
     
     <div class="controls">
         <input type="text" id="urlInput" placeholder="Paste .m3u8 or .mpd link here...">
@@ -30,7 +32,17 @@
             <input type="text" id="keyId" placeholder="Key ID (Only for MPD)">
             <input type="text" id="key" placeholder="Key (Only for MPD)">
         </div>
-        <button onclick="startPlayer()">Play Stream</button>
+        
+        <div class="quality-picker">
+            <label>Select Quality: </label>
+            <select id="qualitySelect" onchange="changeQuality()">
+                <option value="auto">Auto Quality</option>
+            </select>
+        </div>
+
+        <div class="btn-group">
+            <button onclick="startPlayer()">Play Stream</button>
+        </div>
     </div>
 
     <video id="video" controls autoplay></video>
@@ -39,58 +51,72 @@
 
 <script>
     let currentShakaPlayer = null;
+    let currentHls = null;
+    const video = document.getElementById('video');
+    const qualitySelect = document.getElementById('qualitySelect');
 
     async function startPlayer() {
         const url = document.getElementById('urlInput').value.trim();
         const keyId = document.getElementById('keyId').value.trim();
         const key = document.getElementById('key').value.trim();
-        const video = document.getElementById('video');
-        const status = document.getElementById('status');
+        
+        // Reset Everything
+        if (currentShakaPlayer) { await currentShakaPlayer.destroy(); currentShakaPlayer = null; }
+        if (currentHls) { currentHls.destroy(); currentHls = null; }
+        qualitySelect.innerHTML = '<option value="auto">Auto Quality</option>';
 
-        if (!url) return alert("Link toh dalo bhai!");
-
-        // Purana Shaka player instance clear karo agar hai toh
-        if (currentShakaPlayer) {
-            await currentShakaPlayer.destroy();
-            currentShakaPlayer = null;
-        }
-
-        // --- CASE 1: M3U8 (HLS) ---
         if (url.includes('.m3u8')) {
-            status.innerText = "Loading HLS (.m3u8)...";
             if (Hls.isSupported()) {
-                const hls = new Hls();
-                hls.loadSource(url);
-                hls.attachMedia(video);
-                hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = url;
+                currentHls = new Hls();
+                currentHls.loadSource(url);
+                currentHls.attachMedia(video);
+                currentHls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    // Fill HLS Quality Levels
+                    currentHls.levels.forEach((level, index) => {
+                        const opt = document.createElement('option');
+                        opt.value = index;
+                        opt.text = level.height + 'p';
+                        qualitySelect.appendChild(opt);
+                    });
+                    video.play();
+                });
             }
         } 
-        
-        // --- CASE 2: MPD (DASH) ---
         else if (url.includes('.mpd')) {
-            status.innerText = "Loading DASH (.mpd) with Shaka...";
             shaka.polyfill.installAll();
-            const player = new shaka.Player(video);
-            currentShakaPlayer = player;
-
-            // DRM Config
+            currentShakaPlayer = new shaka.Player(video);
             if (keyId && key) {
-                player.configure({
-                    drm: { clearKeys: { [keyId]: key } }
-                });
+                currentShakaPlayer.configure({ drm: { clearKeys: { [keyId]: key } } });
             }
 
             try {
-                await player.load(url);
+                await currentShakaPlayer.load(url);
+                // Fill DASH Quality Levels
+                const tracks = currentShakaPlayer.getVariantTracks();
+                tracks.forEach((track) => {
+                    const opt = document.createElement('option');
+                    opt.value = track.id;
+                    opt.text = track.height + 'p';
+                    qualitySelect.appendChild(opt);
+                });
                 video.play();
-            } catch (e) {
-                console.error("DASH Error", e);
-                status.innerText = "DASH Error: " + e.code;
+            } catch (e) { alert("DASH Error: " + e.code); }
+        }
+    }
+
+    function changeQuality() {
+        const val = qualitySelect.value;
+        if (currentHls) {
+            currentHls.currentLevel = (val === "auto") ? -1 : parseInt(val);
+        } else if (currentShakaPlayer) {
+            if (val === "auto") {
+                currentShakaPlayer.configure({ abr: { enabled: true } });
+            } else {
+                currentShakaPlayer.configure({ abr: { enabled: false } });
+                const tracks = currentShakaPlayer.getVariantTracks();
+                const selectedTrack = tracks.find(t => t.id == val);
+                currentShakaPlayer.selectVariantTrack(selectedTrack, true);
             }
-        } else {
-            alert("Invalid Format! .m3u8 ya .mpd link use karein.");
         }
     }
 </script>
