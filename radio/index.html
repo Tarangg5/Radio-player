@@ -7,29 +7,27 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        /* --- Neon Cyberpunk Theme --- */
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
+
         body { 
-            font-family: 'Orbitron', 'Segoe UI', sans-serif; /* Futuristic Font */
-            background: #050505; /* Pitch Black */
+            font-family: 'Orbitron', sans-serif; 
+            background: #050505; 
             color: #fff; 
             padding: 20px; 
             text-align: center;
-            overflow-x: hidden;
         }
 
-        /* Container with Neon Glow */
         .container { 
             max-width: 900px; 
             margin: auto; 
-            background: rgba(20, 20, 20, 0.8); 
+            background: rgba(20, 20, 20, 0.9); 
             padding: 30px; 
             border-radius: 20px; 
-            border: 2px solid #ff0055; /* Neon Pink Border */
-            box-shadow: 0 0 20px #ff0055, inset 0 0 10px #ff0055; /* Outer & Inner Glow */
-            position: relative; /* For Logo Positioning */
+            border: 2px solid #ff0055; 
+            box-shadow: 0 0 20px #ff0055;
+            position: relative;
         }
 
-        /* --- Your "IR" Logo --- */
         .logo-container {
             position: absolute;
             top: 20px;
@@ -37,131 +35,69 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            border: 2px solid #00f2fe; /* Neon Blue Border for Logo */
+            border: 2px solid #00f2fe;
             box-shadow: 0 0 15px #00f2fe;
             overflow: hidden;
             background: #000;
         }
-        .logo-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* Logo fits perfectly */
-        }
+        .logo-container img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* Main Heading */
         h2 {
-            font-size: 2.5em;
-            margin-top: 0;
+            font-size: 2.2em;
             margin-bottom: 20px;
-            color: #fff;
-            text-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055, 0 0 30px #ff0055; /* Triple Neon Glow */
+            text-shadow: 0 0 15px #ff0055;
         }
 
-        /* Video with Neon Border */
         video { 
             width: 100%; 
             border-radius: 12px; 
-            background: #000; 
             margin-top: 20px; 
-            border: 3px solid #00f2fe; /* Neon Blue Video Border */
+            border: 3px solid #00f2fe; 
             box-shadow: 0 0 25px #00f2fe; 
         }
 
-        /* Controls Section */
         .controls { 
             display: flex; 
             flex-direction: column; 
             gap: 15px; 
-            margin-bottom: 25px; 
-            margin-top: 70px; /* Space for Logo */
+            margin-top: 60px; 
         }
 
-        /* Neon Inputs & Selects */
         input, select { 
-            padding: 15px; 
+            padding: 14px; 
             border-radius: 8px; 
             border: 2px solid #ff0055; 
             background: #111; 
             color: #fff; 
-            font-size: 16px;
             transition: 0.3s;
         }
-        input:focus, select:focus {
-            outline: none;
-            border-color: #00f2fe;
-            box-shadow: 0 0 15px #00f2fe;
-        }
+        input:focus { border-color: #00f2fe; box-shadow: 0 0 10px #00f2fe; outline: none; }
 
-        /* DRM Key Row */
-        .drm-row {
-            display: flex;
-            gap: 10px;
-        }
-        .drm-row input {
-            flex: 1;
-        }
+        .selector-group { display: flex; gap: 10px; }
+        .selector-item { flex: 1; text-align: left; }
+        label { font-size: 0.8em; color: #00f2fe; margin-bottom: 5px; display: block; }
 
-        /* Selector Group for Quality/Audio */
-        .selector-group { 
-            display: flex; 
-            gap: 15px; 
-            flex-wrap: wrap; 
-            justify-content: center; 
-        }
-        .selector-item { 
-            display: flex; 
-            flex-direction: column; 
-            text-align: left; 
-            flex: 1; 
-            min-width: 200px; 
-        }
-        label { 
-            font-size: 0.9em; 
-            margin-bottom: 8px; 
-            color: #00f2fe; /* Neon Blue Labels */
-            text-shadow: 0 0 5px #00f2fe;
-        }
-
-        /* --- Neon Play Button --- */
         button { 
             padding: 18px; 
             border-radius: 10px; 
-            border: none; 
             background: transparent;
             color: #ff0055; 
             font-weight: bold; 
-            font-size: 18px; 
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            cursor: pointer; 
             border: 2px solid #ff0055;
-            box-shadow: 0 0 15px #ff0055;
+            box-shadow: 0 0 10px #ff0055;
+            cursor: pointer;
             transition: 0.4s;
         }
-        button:hover { 
-            background: #ff0055;
-            color: #fff;
-            box-shadow: 0 0 30px #ff0055, 0 0 50px #ff0055;
-        }
+        button:hover { background: #ff0055; color: #fff; box-shadow: 0 0 30px #ff0055; }
 
-        /* Status Text */
-        .status { 
-            margin-top: 15px; 
-            font-size: 0.9em; 
-            color: #00e676; /* Neon Green Status */
-            text-shadow: 0 0 10px #00e676;
-        }
-
-        /* Futuristic Font Load */
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
-
+        .status { margin-top: 15px; color: #00e676; text-shadow: 0 0 5px #00e676; font-size: 0.9em; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="logo-container">
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSHbTtG3wGQFbFUaChzCmNG2v5bAsK8ESlbw&s" alt="IR Logo">
+        <img src="logo.png" alt="IR">
     </div>
 
     <h2>IR NEON PLAYER</h2>
@@ -169,31 +105,28 @@
     <div class="controls">
         <input type="text" id="urlInput" placeholder="Paste .m3u8 or .mpd link here...">
         
-        <div class="drm-row">
-            <input type="text" id="keyId" placeholder="DRM Key ID">
-            <input type="text" id="key" placeholder="DRM Key">
-        </div>
+        <input type="text" id="drmKeyInput" placeholder="Paste DRM Key (KID:KEY)">
 
         <div class="selector-group">
             <div class="selector-item">
-                <label>VIDEO QUALITY</label>
+                <label>QUALITY</label>
                 <select id="qualitySelect" onchange="changeQuality()">
-                    <option value="auto">AUTO (4K READY)</option>
+                    <option value="auto">AUTO</option>
                 </select>
             </div>
             <div class="selector-item">
-                <label>AUDIO LANGUAGE</label>
+                <label>AUDIO</label>
                 <select id="audioSelect" onchange="changeAudio()">
-                    <option value="default">DEFAULT AUDIO</option>
+                    <option value="default">DEFAULT</option>
                 </select>
             </div>
         </div>
 
-        <button onclick="startPlayer()">LIVESTREAM START</button>
+        <button onclick="startPlayer()">LAUNCH STREAM</button>
     </div>
 
     <video id="video" controls autoplay playsinline></video>
-    <div id="status" class="status">SYSTEM READY... AWAITING LINK</div>
+    <div id="status" class="status">SYSTEM READY...</div>
 </div>
 
 <script>
@@ -206,100 +139,37 @@
 
     async function startPlayer() {
         const url = document.getElementById('urlInput').value.trim();
-        const kId = document.getElementById('keyId').value.trim();
-        const k = document.getElementById('key').value.trim();
+        const drmInput = document.getElementById('drmKeyInput').value.trim();
         
         if (shakaPlayer) { await shakaPlayer.destroy(); shakaPlayer = null; }
         if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
-        qSelect.innerHTML = '<option value="auto">AUTO (4K READY)</option>';
-        aSelect.innerHTML = '<option value="default">DEFAULT AUDIO</option>';
+        qSelect.innerHTML = '<option value="auto">AUTO</option>';
+        aSelect.innerHTML = '<option value="default">DEFAULT</option>';
 
-        if (!url) { status.innerText = "ERROR: NO LINK PROVIDED"; return; }
+        if (!url) { status.innerText = "ERROR: NO LINK"; return; }
 
         if (url.includes('.m3u8')) {
-            status.innerText = "INITIALIZING HLS CORE...";
             if (Hls.isSupported()) {
                 hlsInstance = new Hls({ enableWorker: true, capLevelToPlayerSize: false });
                 hlsInstance.loadSource(url);
                 hlsInstance.attachMedia(video);
-                
                 hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-                    status.innerText = "HLS STREAM ACTIVE";
                     hlsInstance.levels.forEach((l, i) => {
                         let opt = document.createElement('option');
                         opt.value = i; opt.text = l.height + 'p';
                         qSelect.appendChild(opt);
                     });
                     video.play();
+                    status.innerText = "HLS ACTIVE";
                 });
-
-                hlsInstance.on(Hls.Events.AUDIO_TRACKS_UPDATED, (event, data) => {
-                    aSelect.innerHTML = '<option value="default">DEFAULT AUDIO</option>';
-                    data.audioTracks.forEach((track, i) => {
+                hlsInstance.on(Hls.Events.AUDIO_TRACKS_UPDATED, (e, data) => {
+                    aSelect.innerHTML = '<option value="default">DEFAULT</option>';
+                    data.audioTracks.forEach((t, i) => {
                         let opt = document.createElement('option');
-                        opt.value = i; opt.text = track.name || track.lang || `Track ${i+1}`;
+                        opt.value = i; opt.text = t.name || t.lang;
                         aSelect.appendChild(opt);
                     });
                 });
             }
         } 
-        else if (url.includes('.mpd')) {
-            status.innerText = "INITIALIZING DASH CORE...";
-            shaka.polyfill.installAll();
-            shakaPlayer = new shaka.Player(video);
-            shakaPlayer.configure({ restrictions: { maxHeight: 4320 } });
-
-            if (kId && k) {
-                status.innerText = "DRM KEYS DETECTED. DECRYPTING...";
-                shakaPlayer.configure({ drm: { clearKeys: { [kId]: k } } });
-            }
-
-            try {
-                await shakaPlayer.load(url);
-                status.innerText = "DASH STREAM ACTIVE";
-                shakaPlayer.getVariantTracks().forEach(t => {
-                    let opt = document.createElement('option');
-                    opt.value = t.id; opt.text = t.height + 'p';
-                    qSelect.appendChild(opt);
-                });
-
-                const languages = shakaPlayer.getAudioLanguages();
-                if (languages.length > 0) {
-                    aSelect.innerHTML = ''; 
-                    languages.forEach(lang => {
-                        let opt = document.createElement('option');
-                        opt.value = lang;
-                        let name = lang.toUpperCase();
-                        if(name === 'HI') name = 'HINDI';
-                        if(name === 'EN') name = 'ENGLISH';
-                        opt.text = name;
-                        aSelect.appendChild(opt);
-                    });
-                }
-                video.play();
-            } catch (e) { status.innerText = "DASH ERROR: " + e.code; }
-        } else { status.innerText = "ERROR: INVALID FORMAT (.M3U8/.MPD ONLY)"; }
-    }
-
-    function changeQuality() {
-        let val = qSelect.value;
-        if (hlsInstance) hlsInstance.currentLevel = (val === "auto") ? -1 : parseInt(val);
-        else if (shakaPlayer) {
-            if (val === "auto") shakaPlayer.configure({ abr: { enabled: true } });
-            else {
-                shakaPlayer.configure({ abr: { enabled: false } });
-                let t = shakaPlayer.getVariantTracks().find(x => x.id == val);
-                shakaPlayer.selectVariantTrack(t, true);
-            }
-        }
-    }
-
-    function changeAudio() {
-        let val = aSelect.value;
-        if (hlsInstance) hlsInstance.audioTrack = parseInt(val);
-        else if (shakaPlayer) shakaPlayer.selectAudioLanguage(val);
-    }
-</script>
-
-</body>
-</html>
+        else if (url.includes('.mpd
