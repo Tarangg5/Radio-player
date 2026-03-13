@@ -90,12 +90,23 @@
   </style>
 </head>
 <body>
-<div class="logo-container">
-    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSHbTtG3wGQFbFUaChzCmNG2v5bAsK8ESlbw&s" alt="IR Logo" class="railway-logo">
-</div>
   <div class="player-container" id="mainContainer">
+    <div class="logo-container">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSHbTtG3wGQFbFUaChzCmNG2v5bAsK8ESlbw&s" alt="IR Logo" class="railway-logo">
+    </div>
+
     <div class="header">
         <h1>SONU LIVE RADIO</h1>
+        ```
+
+---
+
+### Isse kya badlega?
+* **`margin: -50px auto 20px auto;`**: Ye line sabse important hai. `auto` se logo horizontal center ho jayega, aur `-50px` se wo player card ke border ke upar "float" karta hua dikhega jo kaafi modern lagta hai.
+* **Structure**: Logo ab player card ka hissa hai, toh mobile screen par bhi wo hamesha center mein hi rahega.
+
+Kya aap chahte hain ki main pure code ko ek baar phir se clean karke likh doon ya fir sirf color scheme mein kuch aur help chahiye?
+
         <div class="now-playing-box">
             <div class="info">
                 <span id="status-label">Now On Air</span>
