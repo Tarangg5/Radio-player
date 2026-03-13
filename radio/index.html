@@ -3,154 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IR Neon Sports Player</title>
+    <title>IR Neon Sports Player - Fixed</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
-
-        body { 
-            font-family: 'Orbitron', sans-serif; 
-            background: #050505; 
-            color: #fff; 
-            padding: 20px; 
-            text-align: center;
-        }
-
-        .container { 
-            max-width: 900px; 
-            margin: auto; 
-            background: rgba(20, 20, 20, 0.9); 
-            padding: 30px; 
-            border-radius: 20px; 
-            border: 2px solid #ff0055; 
-            box-shadow: 0 0 20px #ff0055;
-            position: relative;
-        }
-
-        .logo-container {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: 2px solid #00f2fe;
-            box-shadow: 0 0 15px #00f2fe;
-            overflow: hidden;
-            background: #000;
-        }
+        body { font-family: 'Orbitron', sans-serif; background: #050505; color: #fff; padding: 20px; text-align: center; }
+        .container { max-width: 900px; margin: auto; background: rgba(20, 20, 20, 0.9); padding: 30px; border-radius: 20px; border: 2px solid #ff0055; box-shadow: 0 0 20px #ff0055; position: relative; }
+        .logo-container { position: absolute; top: 20px; left: 20px; width: 60px; height: 60px; border-radius: 50%; border: 2px solid #00f2fe; box-shadow: 0 0 15px #00f2fe; overflow: hidden; background: #000; }
         .logo-container img { width: 100%; height: 100%; object-fit: cover; }
-
-        h2 {
-            font-size: 2.2em;
-            margin-bottom: 20px;
-            text-shadow: 0 0 15px #ff0055;
-        }
-
-        video { 
-            width: 100%; 
-            border-radius: 12px; 
-            margin-top: 20px; 
-            border: 3px solid #00f2fe; 
-            box-shadow: 0 0 25px #00f2fe; 
-        }
-
-        .controls { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 15px; 
-            margin-top: 60px; 
-        }
-
-        input, select { 
-            padding: 14px; 
-            border-radius: 8px; 
-            border: 2px solid #ff0055; 
-            background: #111; 
-            color: #fff; 
-            transition: 0.3s;
-        }
-        input:focus { border-color: #00f2fe; box-shadow: 0 0 10px #00f2fe; outline: none; }
-
+        h2 { font-size: 2.2em; margin-bottom: 20px; text-shadow: 0 0 15px #ff0055; }
+        video { width: 100%; border-radius: 12px; margin-top: 20px; border: 3px solid #00f2fe; box-shadow: 0 0 25px #00f2fe; background: #000; }
+        .controls { display: flex; flex-direction: column; gap: 15px; margin-top: 60px; }
+        input, select { padding: 14px; border-radius: 8px; border: 2px solid #ff0055; background: #111; color: #fff; font-family: 'Orbitron'; }
         .selector-group { display: flex; gap: 10px; }
         .selector-item { flex: 1; text-align: left; }
         label { font-size: 0.8em; color: #00f2fe; margin-bottom: 5px; display: block; }
-
-        button { 
-            padding: 18px; 
-            border-radius: 10px; 
-            background: transparent;
-            color: #ff0055; 
-            font-weight: bold; 
-            border: 2px solid #ff0055;
-            box-shadow: 0 0 10px #ff0055;
-            cursor: pointer;
-            transition: 0.4s;
-        }
+        button { padding: 18px; border-radius: 10px; background: transparent; color: #ff0055; font-weight: bold; border: 2px solid #ff0055; box-shadow: 0 0 10px #ff0055; cursor: pointer; transition: 0.4s; font-family: 'Orbitron'; }
         button:hover { background: #ff0055; color: #fff; box-shadow: 0 0 30px #ff0055; }
-
-        .status { margin-top: 15px; color: #00e676; text-shadow: 0 0 5px #00e676; font-size: 0.9em; }
+        #status { margin-top: 15px; color: #00e676; text-shadow: 0 0 5px #00e676; font-size: 0.9em; height: 20px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="logo-container">
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSHbTtG3wGQFbFUaChzCmNG2v5bAsK8ESlbw&s" alt="IR">
-    </div>
-
+    <div class="logo-container"><img src="logo.png" alt="IR"></div>
     <h2>IR NEON PLAYER</h2>
-    
     <div class="controls">
         <input type="text" id="urlInput" placeholder="Paste .m3u8 or .mpd link here...">
-        
         <input type="text" id="drmKeyInput" placeholder="Paste DRM Key (KID:KEY)">
-
         <div class="selector-group">
             <div class="selector-item">
                 <label>QUALITY</label>
-                <select id="qualitySelect" onchange="changeQuality()">
-                    <option value="auto">AUTO</option>
-                </select>
+                <select id="qualitySelect"><option value="auto">AUTO</option></select>
             </div>
             <div class="selector-item">
                 <label>AUDIO</label>
-                <select id="audioSelect" onchange="changeAudio()">
-                    <option value="default">DEFAULT</option>
-                </select>
+                <select id="audioSelect"><option value="default">DEFAULT</option></select>
             </div>
         </div>
-
-        <button onclick="startPlayer()">LAUNCH STREAM</button>
+        <button id="playBtn">LAUNCH STREAM</button>
     </div>
-
     <video id="video" controls autoplay playsinline></video>
-    <div id="status" class="status">SYSTEM READY...</div>
+    <div id="status">SYSTEM READY...</div>
 </div>
 
 <script>
-    let shakaPlayer = null;
-    let hlsInstance = null;
     const video = document.getElementById('video');
+    const status = document.getElementById('status');
     const qSelect = document.getElementById('qualitySelect');
     const aSelect = document.getElementById('audioSelect');
-    const status = document.getElementById('status');
+    let shakaPlayer = null;
+    let hlsInstance = null;
+
+    // Button click event listener (Zyada reliable hai)
+    document.getElementById('playBtn').addEventListener('click', startPlayer);
 
     async function startPlayer() {
         const url = document.getElementById('urlInput').value.trim();
         const drmInput = document.getElementById('drmKeyInput').value.trim();
         
+        status.innerText = "PROCESSING...";
+
+        // Reset previous sessions
         if (shakaPlayer) { await shakaPlayer.destroy(); shakaPlayer = null; }
         if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
         qSelect.innerHTML = '<option value="auto">AUTO</option>';
         aSelect.innerHTML = '<option value="default">DEFAULT</option>';
 
-        if (!url) { status.innerText = "ERROR: NO LINK"; return; }
+        if (!url) { status.innerText = "ERROR: PASTE LINK FIRST"; return; }
 
+        // --- HLS (.m3u8) Logic ---
         if (url.includes('.m3u8')) {
             if (Hls.isSupported()) {
-                hlsInstance = new Hls({ enableWorker: true, capLevelToPlayerSize: false });
+                hlsInstance = new Hls();
                 hlsInstance.loadSource(url);
                 hlsInstance.attachMedia(video);
                 hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
@@ -160,16 +86,54 @@
                         qSelect.appendChild(opt);
                     });
                     video.play();
-                    status.innerText = "HLS ACTIVE";
-                });
-                hlsInstance.on(Hls.Events.AUDIO_TRACKS_UPDATED, (e, data) => {
-                    aSelect.innerHTML = '<option value="default">DEFAULT</option>';
-                    data.audioTracks.forEach((t, i) => {
-                        let opt = document.createElement('option');
-                        opt.value = i; opt.text = t.name || t.lang;
-                        aSelect.appendChild(opt);
-                    });
+                    status.innerText = "PLAYING HLS STREAM";
                 });
             }
         } 
-        else if (url.includes('.mpd
+        // --- DASH (.mpd) Logic ---
+        else if (url.includes('.mpd')) {
+            shaka.polyfill.installAll();
+            shakaPlayer = new shaka.Player(video);
+            
+            if (drmInput.includes(':')) {
+                const parts = drmInput.split(':');
+                const kid = parts[0].trim();
+                const key = parts[1].trim();
+                shakaPlayer.configure({
+                    drm: { clearKeys: { [kid]: key } }
+                });
+                status.innerText = "DRM LOADED...";
+            }
+
+            try {
+                await shakaPlayer.load(url);
+                shakaPlayer.getVariantTracks().forEach(t => {
+                    let opt = document.createElement('option');
+                    opt.value = t.id; opt.text = t.height + 'p';
+                    qSelect.appendChild(opt);
+                });
+                video.play();
+                status.innerText = "PLAYING DASH STREAM";
+            } catch (e) {
+                status.innerText = "ERROR CODE: " + e.code;
+                console.error(e);
+            }
+        } else {
+            status.innerText = "INVALID FORMAT!";
+        }
+    }
+
+    // Quality Change Logic
+    qSelect.onchange = () => {
+        if (hlsInstance) hlsInstance.currentLevel = qSelect.value === "auto" ? -1 : parseInt(qSelect.value);
+        if (shakaPlayer) {
+            if (qSelect.value === "auto") shakaPlayer.configure({ abr: { enabled: true } });
+            else {
+                shakaPlayer.configure({ abr: { enabled: false } });
+                shakaPlayer.selectVariantTrack(shakaPlayer.getVariantTracks().find(t => t.id == qSelect.value), true);
+            }
+        }
+    };
+</script>
+</body>
+</html>
