@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IR Neon Sports Player - Fixed</title>
+    <title>IR Neon Sports Player - Full Fixed</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
@@ -56,16 +56,14 @@
     let shakaPlayer = null;
     let hlsInstance = null;
 
-    // Button click event listener (Zyada reliable hai)
     document.getElementById('playBtn').addEventListener('click', startPlayer);
 
     async function startPlayer() {
         const url = document.getElementById('urlInput').value.trim();
         const drmInput = document.getElementById('drmKeyInput').value.trim();
         
-        status.innerText = "PROCESSING...";
+        status.innerText = "INITIALIZING...";
 
-        // Reset previous sessions
         if (shakaPlayer) { await shakaPlayer.destroy(); shakaPlayer = null; }
         if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
         qSelect.innerHTML = '<option value="auto">AUTO</option>';
@@ -73,10 +71,9 @@
 
         if (!url) { status.innerText = "ERROR: PASTE LINK FIRST"; return; }
 
-        // --- HLS (.m3u8) Logic ---
         if (url.includes('.m3u8')) {
             if (Hls.isSupported()) {
-                hlsInstance = new Hls();
+                hlsInstance = new Hls({ enableWorker: true });
                 hlsInstance.loadSource(url);
                 hlsInstance.attachMedia(video);
                 hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
@@ -86,44 +83,59 @@
                         qSelect.appendChild(opt);
                     });
                     video.play();
-                    status.innerText = "PLAYING HLS STREAM";
+                    status.innerText = "HLS ACTIVE";
+                });
+                // HLS Audio Detection
+                hlsInstance.on(Hls.Events.AUDIO_TRACKS_UPDATED, (e, data) => {
+                    aSelect.innerHTML = '<option value="default">DEFAULT</option>';
+                    data.audioTracks.forEach((t, i) => {
+                        let opt = document.createElement('option');
+                        opt.value = i; opt.text = t.name || t.lang || `Track ${i+1}`;
+                        aSelect.appendChild(opt);
+                    });
                 });
             }
         } 
-        // --- DASH (.mpd) Logic ---
         else if (url.includes('.mpd')) {
             shaka.polyfill.installAll();
             shakaPlayer = new shaka.Player(video);
             
             if (drmInput.includes(':')) {
                 const parts = drmInput.split(':');
-                const kid = parts[0].trim();
-                const key = parts[1].trim();
                 shakaPlayer.configure({
-                    drm: { clearKeys: { [kid]: key } }
+                    drm: { clearKeys: { [parts[0].trim()]: parts[1].trim() } }
                 });
                 status.innerText = "DRM LOADED...";
             }
 
             try {
                 await shakaPlayer.load(url);
+                // Quality
                 shakaPlayer.getVariantTracks().forEach(t => {
                     let opt = document.createElement('option');
                     opt.value = t.id; opt.text = t.height + 'p';
                     qSelect.appendChild(opt);
                 });
+                // Audio
+                const langs = shakaPlayer.getAudioLanguages();
+                if (langs.length > 0) {
+                    aSelect.innerHTML = '';
+                    langs.forEach(l => {
+                        let opt = document.createElement('option');
+                        opt.value = l; 
+                        let name = l.toUpperCase();
+                        if(name === 'HI') name = 'HINDI';
+                        if(name === 'EN') name = 'ENGLISH';
+                        opt.text = name;
+                        aSelect.appendChild(opt);
+                    });
+                }
                 video.play();
-                status.innerText = "PLAYING DASH STREAM";
-            } catch (e) {
-                status.innerText = "ERROR CODE: " + e.code;
-                console.error(e);
-            }
-        } else {
-            status.innerText = "INVALID FORMAT!";
+                status.innerText = "DASH ACTIVE";
+            } catch (e) { status.innerText = "ERROR: " + e.code; }
         }
     }
 
-    // Quality Change Logic
     qSelect.onchange = () => {
         if (hlsInstance) hlsInstance.currentLevel = qSelect.value === "auto" ? -1 : parseInt(qSelect.value);
         if (shakaPlayer) {
@@ -133,6 +145,11 @@
                 shakaPlayer.selectVariantTrack(shakaPlayer.getVariantTracks().find(t => t.id == qSelect.value), true);
             }
         }
+    };
+
+    aSelect.onchange = () => {
+        if (hlsInstance) hlsInstance.audioTrack = parseInt(aSelect.value);
+        if (shakaPlayer) shakaPlayer.selectAudioLanguage(aSelect.value);
     };
 </script>
 </body>
