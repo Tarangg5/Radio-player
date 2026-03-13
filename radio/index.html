@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sports Player Pro - Audio & Quality</title>
+    <title>Master Player Pro - Audio Fixed</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
@@ -15,15 +15,15 @@
         .selector-group { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
         .selector-item { display: flex; flex-direction: column; text-align: left; flex: 1; min-width: 150px; }
         label { font-size: 0.8em; margin-bottom: 5px; color: #aaa; }
-        button { padding: 15px; border-radius: 6px; border: none; background: #00c853; color: white; font-weight: bold; cursor: pointer; font-size: 16px; }
-        button:hover { background: #00e676; }
+        button { padding: 15px; border-radius: 6px; border: none; background: #ff1744; color: white; font-weight: bold; cursor: pointer; font-size: 16px; }
+        button:hover { background: #d50000; }
         .status { margin-top: 10px; font-size: 0.85em; color: #00e676; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Multi-Audio Sports Player</h2>
+    <h2>Multi-Audio & 4K Player</h2>
     
     <div class="controls">
         <input type="text" id="urlInput" placeholder="Paste .m3u8 or .mpd link here...">
@@ -48,7 +48,7 @@
             </div>
         </div>
 
-        <button onclick="startPlayer()">START STREAMING</button>
+        <button onclick="startPlayer()">PLAY STREAM</button>
     </div>
 
     <video id="video" controls autoplay playsinline></video>
@@ -67,6 +67,7 @@
         const kId = document.getElementById('keyId').value.trim();
         const k = document.getElementById('key').value.trim();
         
+        // Reset Everything
         if (shakaPlayer) { await shakaPlayer.destroy(); shakaPlayer = null; }
         if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
         qSelect.innerHTML = '<option value="auto">Auto Quality</option>';
@@ -77,20 +78,26 @@
                 hlsInstance = new Hls({ enableWorker: true, capLevelToPlayerSize: false });
                 hlsInstance.loadSource(url);
                 hlsInstance.attachMedia(video);
+                
                 hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-                    // Quality Levels
+                    // Load Qualities
                     hlsInstance.levels.forEach((l, i) => {
                         let opt = document.createElement('option');
                         opt.value = i; opt.text = l.height + 'p';
                         qSelect.appendChild(opt);
                     });
-                    // Audio Tracks
-                    hlsInstance.audioTracks.forEach((track, i) => {
+                    video.play();
+                });
+
+                // HLS Audio Fix
+                hlsInstance.on(Hls.Events.AUDIO_TRACKS_UPDATED, (event, data) => {
+                    aSelect.innerHTML = '<option value="default">Default Audio</option>';
+                    data.audioTracks.forEach((track, i) => {
                         let opt = document.createElement('option');
-                        opt.value = i; opt.text = track.name || track.lang;
+                        opt.value = i; 
+                        opt.text = track.name || track.lang || `Track ${i+1}`;
                         aSelect.appendChild(opt);
                     });
-                    video.play();
                 });
             }
         } 
@@ -105,20 +112,30 @@
 
             try {
                 await shakaPlayer.load(url);
-                // Quality Tracks
+                // Load Qualities
                 shakaPlayer.getVariantTracks().forEach(t => {
                     let opt = document.createElement('option');
                     opt.value = t.id; opt.text = t.height + 'p';
                     qSelect.appendChild(opt);
                 });
-                // Audio Tracks
-                shakaPlayer.getAudioLanguagesAndRoles().forEach(langObj => {
-                    let opt = document.createElement('option');
-                    opt.value = langObj.language; opt.text = langObj.language.toUpperCase();
-                    aSelect.appendChild(opt);
-                });
+
+                // MPD Audio Fix
+                const languages = shakaPlayer.getAudioLanguages();
+                if (languages.length > 0) {
+                    aSelect.innerHTML = ''; // Clear default
+                    languages.forEach(lang => {
+                        let opt = document.createElement('option');
+                        opt.value = lang;
+                        // Beautiful Naming
+                        let name = lang.toUpperCase();
+                        if(name === 'HI') name = 'HINDI';
+                        if(name === 'EN') name = 'ENGLISH';
+                        opt.text = name;
+                        aSelect.appendChild(opt);
+                    });
+                }
                 video.play();
-            } catch (e) { alert("Error: " + e.code); }
+            } catch (e) { alert("DASH Error: " + e.code); }
         }
     }
 
