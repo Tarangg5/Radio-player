@@ -44,7 +44,23 @@
       transition: box-shadow 0.5s ease;
     }
         
-
+.controls { display: flex; justify-content: center; gap: 20px; margin-bottom: 15px; }
+.nav-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  padding: 8px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+.nav-btn:hover {
+  background: var(--primary);
+  color: black;
+  box-shadow: 0 0 15px var(--primary);
+}
+    
     .player-container.playing { box-shadow: 0 0 30px rgba(0, 242, 255, 0.2), 0 0 60px rgba(188, 19, 254, 0.2); }
     
     .header h1 { 
@@ -116,7 +132,13 @@
     
     <input type="text" id="searchBar" placeholder="Search (Patna, News, 90s...)" onkeyup="filterStations()">
     
-    <audio id="audioPlayer" controls></audio>
+    <audio id="audioPlayer" controls>
+      <div class="controls">
+    <button class="nav-btn" onclick="playPrevious()">&#10094; PREV</button>
+    <button class="nav-btn" onclick="playNext()">NEXT &#10095;</button>
+      </div>
+      
+    </audio>
     <ul class="playlist" id="playlist"></ul>
   </div>
 
@@ -224,6 +246,54 @@
 
 // Is line ko apne loadAudio function ke andar 'nowPlayingText.textContent = stationName;' ke niche add karein:
 // updateMediaSession(stationName);
+
+    let currentIndex = -1; // Abhi kaun sa station chal raha hai track karne ke liye
+
+// Purane loadAudio function ko thoda update karna hoga
+function loadAudio(audioSrc, listItem, stationName) {
+    detachHLS();
+    nowPlayingText.textContent = stationName;
+    document.title = "🎶 " + stationName;
+    
+    // Index update karein
+    currentIndex = audioFiles.findIndex(s => s.name === stationName);
+
+    if (audioSrc.endsWith('.m3u8') && window.Hls && Hls.isSupported()) {
+        hls = new Hls();
+        hls.loadSource(audioSrc);
+        hls.attachMedia(audioPlayer);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => audioPlayer.play());
+    } else {
+        audioPlayer.src = audioSrc;
+        audioPlayer.load();
+        audioPlayer.play().catch(() => { nowPlayingText.textContent = "Offline/Error"; });
+    }
+
+    // Active class update
+    const items = document.querySelectorAll('.playlist li');
+    items.forEach(item => item.classList.remove('active'));
+    if(listItem) {
+        listItem.classList.add('active');
+    } else {
+        // Agar buttons se change hua hai toh manual highlight
+        items[currentIndex].classList.add('active');
+        items[currentIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+
+function playNext() {
+    currentIndex++;
+    if (currentIndex >= audioFiles.length) currentIndex = 0; // Wapas pehle station par
+    const nextStation = audioFiles[currentIndex];
+    loadAudio(nextStation.src, null, nextStation.name);
+}
+
+function playPrevious() {
+    currentIndex--;
+    if (currentIndex < 0) currentIndex = audioFiles.length - 1; // Wapas aakhri station par
+    const prevStation = audioFiles[currentIndex];
+    loadAudio(prevStation.src, null, prevStation.name);
+}
     
   </script>
 </body>
