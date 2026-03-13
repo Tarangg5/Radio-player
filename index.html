@@ -239,11 +239,21 @@
       ]
     });
 
-    // Lock screen buttons setup
+    // Play/Pause controls
     navigator.mediaSession.setActionHandler('play', () => audioPlayer.play());
     navigator.mediaSession.setActionHandler('pause', () => audioPlayer.pause());
+
+    // LOCK SCREEN NEXT/PREV BUTTONS
+    navigator.mediaSession.setActionHandler('previoustrack', () => {
+        playPrevious();
+    });
+    
+    navigator.mediaSession.setActionHandler('nexttrack', () => {
+        playNext();
+    });
   }
 }
+
 
 // Is line ko apne loadAudio function ke andar 'nowPlayingText.textContent = stationName;' ke niche add karein:
 // updateMediaSession(stationName);
