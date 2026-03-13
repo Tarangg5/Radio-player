@@ -71,11 +71,20 @@
 
         if (!url) { status.innerText = "ERROR: PASTE LINK FIRST"; return; }
 
-        if (url.includes('.m3u8')) {
-            if (Hls.isSupported()) {
-                hlsInstance = new Hls({ enableWorker: true });
-                hlsInstance.loadSource(url);
-                hlsInstance.attachMedia(video);
+        // --- Is hisse ko replace karein (HLS Section) ---
+if (url.includes('.m3u8')) {
+    if (Hls.isSupported()) {
+        hlsInstance = new Hls({
+            enableWorker: true,
+            xhrSetup: function(xhr, url) {
+                // Sony ke liye headers
+                xhr.setRequestHeader('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+            }
+        });
+        hlsInstance.loadSource(url);
+        hlsInstance.attachMedia(video);
+        // ... baaki manifest parsed wala logic wahi rahega
+
                 hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
                     hlsInstance.levels.forEach((l, i) => {
                         let opt = document.createElement('option');
