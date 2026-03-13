@@ -255,7 +255,9 @@ function loadAudio(audioSrc, listItem, stationName) {
     detachHLS();
     nowPlayingText.textContent = stationName;
     document.title = "🎶 " + stationName;
-    
+    // loadAudio function ke andar ye line zaroor ho:
+updateMediaSession(stationName); 
+  
     // Index update karein
     currentIndex = audioFiles.findIndex(s => s.name === stationName);
 
