@@ -205,6 +205,26 @@
     }
 
     renderPlaylist(audioFiles);
+    function updateMediaSession(name) {
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: name,
+      artist: 'Sonu Live Radio',
+      album: 'Online FM Stream',
+      artwork: [
+        { src: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSHbTtG3wGQFbFUaChzCmNG2v5bAsK8ESlbw&s', sizes: '512x512', type: 'image/png' }
+      ]
+    });
+
+    // Lock screen buttons setup
+    navigator.mediaSession.setActionHandler('play', () => audioPlayer.play());
+    navigator.mediaSession.setActionHandler('pause', () => audioPlayer.pause());
+  }
+}
+
+// Is line ko apne loadAudio function ke andar 'nowPlayingText.textContent = stationName;' ke niche add karein:
+// updateMediaSession(stationName);
+    
   </script>
 </body>
 </html>
