@@ -15,8 +15,22 @@
     
     body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; background-color: var(--bg); color: white; display: flex; justify-content: center; min-height: 100vh; align-items: center; }
 
-    .logo-container { width: 60px; height: 60px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; border: 2px solid var(--railway); box-shadow: 0 0 10px var(--railway); overflow: hidden; }
-    .railway-logo { width: 85%; height: 85%; object-fit: contain; }
+    .logo-container { 
+  width: 70px; 
+  height: 70px; 
+  background: white; 
+  border-radius: 50%; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  margin: -50px auto 20px auto; /* Isse logo card ke thoda upar aur center mein aa jayega */
+  border: 3px solid var(--primary); 
+  box-shadow: 0 0 15px var(--primary); 
+  overflow: hidden;
+  position: relative;
+  z-index: 10;
+}
+  .railway-logo { width: 85%; height: 85%; object-fit: contain; }
     
     .player-container { 
       width: 100%; max-width: 420px; background: var(--card); padding: 25px; border-radius: 24px; position: relative;
