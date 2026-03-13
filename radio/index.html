@@ -3,123 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sports Player Pro - Quality Control</title>
+    <title>Master Player 4K Ready</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0b0b0b; color: white; padding: 20px; }
-        .container { max-width: 850px; margin: auto; background: #161616; padding: 25px; border-radius: 15px; box-shadow: 0 0 30px rgba(0,0,0,0.8); }
-        video { width: 100%; border-radius: 10px; background: black; margin-top: 15px; border: 1px solid #333; }
-        .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-        input, select { padding: 12px; border-radius: 6px; border: 1px solid #444; background: #222; color: white; }
-        .drm-inputs { display: flex; gap: 10px; }
-        .drm-inputs input { flex: 1; }
-        .btn-group { display: flex; gap: 10px; }
-        button { flex: 1; padding: 12px; border-radius: 6px; border: none; background: #ff1744; color: white; font-weight: bold; cursor: pointer; }
-        button:hover { background: #d50000; }
-        .quality-picker { margin-top: 10px; text-align: left; }
-        .status { margin-top: 10px; font-size: 0.85em; color: #00e676; }
+        body { font-family: sans-serif; background: #0b0b0b; color: white; padding: 20px; text-align: center; }
+        .container { max-width: 850px; margin: auto; background: #1a1a1a; padding: 20px; border-radius: 12px; }
+        video { width: 100%; border-radius: 8px; background: black; margin-top: 15px; border: 1px solid #444; }
+        .controls { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        input, select { padding: 12px; border-radius: 5px; border: 1px solid #333; background: #252525; color: white; }
+        button { padding: 12px; border-radius: 5px; border: none; background: #e91e63; color: white; font-weight: bold; cursor: pointer; }
+        .quality-box { margin-top: 10px; font-size: 0.9em; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Master Player with Quality Control</h2>
-    
+    <h2>4K Live Sports Player</h2>
     <div class="controls">
-        <input type="text" id="urlInput" placeholder="Paste .m3u8 or .mpd link here...">
-        <div class="drm-inputs">
-            <input type="text" id="keyId" placeholder="Key ID (Only for MPD)">
-            <input type="text" id="key" placeholder="Key (Only for MPD)">
+        <input type="text" id="urlInput" placeholder="Paste 4K .m3u8 or .mpd link...">
+        <div style="display: flex; gap: 5px;">
+            <input type="text" id="keyId" style="flex:1" placeholder="DRM Key ID">
+            <input type="text" id="key" style="flex:1" placeholder="DRM Key">
         </div>
-        
-        <div class="quality-picker">
-            <label>Select Quality: </label>
-            <select id="qualitySelect" onchange="changeQuality()">
-                <option value="auto">Auto Quality</option>
-            </select>
-        </div>
-
-        <div class="btn-group">
-            <button onclick="startPlayer()">Play Stream</button>
-        </div>
+        <select id="qualitySelect" onchange="changeQuality()">
+            <option value="auto">Auto Quality (4K Ready)</option>
+        </select>
+        <button onclick="startPlayer()">Play Stream</button>
     </div>
-
-    <video id="video" controls autoplay></video>
-    <div id="status" class="status">Ready to Play</div>
+    <video id="video" controls autoplay playsinline></video>
 </div>
 
 <script>
-    let currentShakaPlayer = null;
-    let currentHls = null;
-    const video = document.getElementById('video');
-    const qualitySelect = document.getElementById('qualitySelect');
+    let shakaPlayer = null;
+    let hlsInstance = null;
 
     async function startPlayer() {
         const url = document.getElementById('urlInput').value.trim();
-        const keyId = document.getElementById('keyId').value.trim();
-        const key = document.getElementById('key').value.trim();
-        
-        // Reset Everything
-        if (currentShakaPlayer) { await currentShakaPlayer.destroy(); currentShakaPlayer = null; }
-        if (currentHls) { currentHls.destroy(); currentHls = null; }
-        qualitySelect.innerHTML = '<option value="auto">Auto Quality</option>';
+        const video = document.getElementById('video');
+        const qSelect = document.getElementById('qualitySelect');
+
+        // Reset previous instances
+        if (shakaPlayer) { await shakaPlayer.destroy(); shakaPlayer = null; }
+        if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+        qSelect.innerHTML = '<option value="auto">Auto Quality</option>';
 
         if (url.includes('.m3u8')) {
+            // HLS 4K Optimization
             if (Hls.isSupported()) {
-                currentHls = new Hls();
-                currentHls.loadSource(url);
-                currentHls.attachMedia(video);
-                currentHls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    // Fill HLS Quality Levels
-                    currentHls.levels.forEach((level, index) => {
-                        const opt = document.createElement('option');
-                        opt.value = index;
-                        opt.text = level.height + 'p';
-                        qualitySelect.appendChild(opt);
+                hlsInstance = new Hls({
+                    enableWorker: true, // Performance boost
+                    capLevelToPlayerSize: false, // 4K force allow
+                    maxBufferLength: 30
+                });
+                hlsInstance.loadSource(url);
+                hlsInstance.attachMedia(video);
+                hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+                    hlsInstance.levels.forEach((l, i) => {
+                        let opt = document.createElement('option');
+                        opt.value = i;
+                        opt.text = l.height + 'p' + (l.height >= 2160 ? ' (4K)' : '');
+                        qSelect.appendChild(opt);
                     });
                     video.play();
                 });
             }
         } 
         else if (url.includes('.mpd')) {
+            // DASH 4K Optimization
             shaka.polyfill.installAll();
-            currentShakaPlayer = new shaka.Player(video);
-            if (keyId && key) {
-                currentShakaPlayer.configure({ drm: { clearKeys: { [keyId]: key } } });
+            shakaPlayer = new shaka.Player(video);
+            
+            // Allow 4K/UHD
+            shakaPlayer.configure({
+                restrictions: { minHeight: 0, maxHeight: 4320 },
+                abr: { enabled: true }
+            });
+
+            const kId = document.getElementById('keyId').value.trim();
+            const k = document.getElementById('key').value.trim();
+            if (kId && k) {
+                shakaPlayer.configure({ drm: { clearKeys: { [kId]: k } } });
             }
 
             try {
-                await currentShakaPlayer.load(url);
-                // Fill DASH Quality Levels
-                const tracks = currentShakaPlayer.getVariantTracks();
-                tracks.forEach((track) => {
-                    const opt = document.createElement('option');
-                    opt.value = track.id;
-                    opt.text = track.height + 'p';
-                    qualitySelect.appendChild(opt);
+                await shakaPlayer.load(url);
+                let tracks = shakaPlayer.getVariantTracks();
+                tracks.forEach(t => {
+                    let opt = document.createElement('option');
+                    opt.value = t.id;
+                    opt.text = t.height + 'p' + (t.height >= 2160 ? ' (4K)' : '');
+                    qSelect.appendChild(opt);
                 });
-                video.play();
-            } catch (e) { alert("DASH Error: " + e.code); }
+            } catch (e) { alert("Error: " + e.code); }
         }
     }
 
     function changeQuality() {
-        const val = qualitySelect.value;
-        if (currentHls) {
-            currentHls.currentLevel = (val === "auto") ? -1 : parseInt(val);
-        } else if (currentShakaPlayer) {
+        let val = document.getElementById('qualitySelect').value;
+        if (hlsInstance) {
+            hlsInstance.currentLevel = (val === "auto") ? -1 : parseInt(val);
+        } else if (shakaPlayer) {
             if (val === "auto") {
-                currentShakaPlayer.configure({ abr: { enabled: true } });
+                shakaPlayer.configure({ abr: { enabled: true } });
             } else {
-                currentShakaPlayer.configure({ abr: { enabled: false } });
-                const tracks = currentShakaPlayer.getVariantTracks();
-                const selectedTrack = tracks.find(t => t.id == val);
-                currentShakaPlayer.selectVariantTrack(selectedTrack, true);
+                shakaPlayer.configure({ abr: { enabled: false } });
+                let t = shakaPlayer.getVariantTracks().find(x => x.id == val);
+                shakaPlayer.selectVariantTrack(t, true);
             }
         }
     }
 </script>
-
 </body>
 </html>
