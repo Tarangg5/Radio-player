@@ -21,6 +21,9 @@
       box-shadow: 0 0 20px rgba(0, 242, 255, 0.1), 0 0 40px rgba(188, 19, 254, 0.1);
       transition: box-shadow 0.5s ease;
     }
+        .logo-container { width: 60px; height: 60px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; border: 2px solid var(--railway); box-shadow: 0 0 10px var(--railway); overflow: hidden; }
+    .railway-logo { width: 85%; height: 85%; object-fit: contain; }
+    
 
     .player-container.playing { box-shadow: 0 0 30px rgba(0, 242, 255, 0.2), 0 0 60px rgba(188, 19, 254, 0.2); }
     
@@ -72,7 +75,9 @@
   </style>
 </head>
 <body>
-
+<div class="logo-container">
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSHbTtG3wGQFbFUaChzCmNG2v5bAsK8ESlbw&s" alt="IR Logo" class="railway-logo">
+</div>
   <div class="player-container" id="mainContainer">
     <div class="header">
         <h1>SONU LIVE RADIO</h1>
