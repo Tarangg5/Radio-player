@@ -3,56 +3,197 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Player Pro - Audio Fixed</title>
+    <title>IR Neon Sports Player</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0b0b0b; color: white; padding: 20px; text-align: center; }
-        .container { max-width: 850px; margin: auto; background: #161616; padding: 25px; border-radius: 15px; box-shadow: 0 0 30px rgba(0,0,0,0.8); }
-        video { width: 100%; border-radius: 10px; background: black; margin-top: 15px; border: 1px solid #333; }
-        .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-        input, select { padding: 12px; border-radius: 6px; border: 1px solid #444; background: #222; color: white; }
-        .selector-group { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
-        .selector-item { display: flex; flex-direction: column; text-align: left; flex: 1; min-width: 150px; }
-        label { font-size: 0.8em; margin-bottom: 5px; color: #aaa; }
-        button { padding: 15px; border-radius: 6px; border: none; background: #ff1744; color: white; font-weight: bold; cursor: pointer; font-size: 16px; }
-        button:hover { background: #d50000; }
-        .status { margin-top: 10px; font-size: 0.85em; color: #00e676; }
+        /* --- Neon Cyberpunk Theme --- */
+        body { 
+            font-family: 'Orbitron', 'Segoe UI', sans-serif; /* Futuristic Font */
+            background: #050505; /* Pitch Black */
+            color: #fff; 
+            padding: 20px; 
+            text-align: center;
+            overflow-x: hidden;
+        }
+
+        /* Container with Neon Glow */
+        .container { 
+            max-width: 900px; 
+            margin: auto; 
+            background: rgba(20, 20, 20, 0.8); 
+            padding: 30px; 
+            border-radius: 20px; 
+            border: 2px solid #ff0055; /* Neon Pink Border */
+            box-shadow: 0 0 20px #ff0055, inset 0 0 10px #ff0055; /* Outer & Inner Glow */
+            position: relative; /* For Logo Positioning */
+        }
+
+        /* --- Your "IR" Logo --- */
+        .logo-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid #00f2fe; /* Neon Blue Border for Logo */
+            box-shadow: 0 0 15px #00f2fe;
+            overflow: hidden;
+            background: #000;
+        }
+        .logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Logo fits perfectly */
+        }
+
+        /* Main Heading */
+        h2 {
+            font-size: 2.5em;
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #fff;
+            text-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055, 0 0 30px #ff0055; /* Triple Neon Glow */
+        }
+
+        /* Video with Neon Border */
+        video { 
+            width: 100%; 
+            border-radius: 12px; 
+            background: #000; 
+            margin-top: 20px; 
+            border: 3px solid #00f2fe; /* Neon Blue Video Border */
+            box-shadow: 0 0 25px #00f2fe; 
+        }
+
+        /* Controls Section */
+        .controls { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            margin-bottom: 25px; 
+            margin-top: 70px; /* Space for Logo */
+        }
+
+        /* Neon Inputs & Selects */
+        input, select { 
+            padding: 15px; 
+            border-radius: 8px; 
+            border: 2px solid #ff0055; 
+            background: #111; 
+            color: #fff; 
+            font-size: 16px;
+            transition: 0.3s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #00f2fe;
+            box-shadow: 0 0 15px #00f2fe;
+        }
+
+        /* DRM Key Row */
+        .drm-row {
+            display: flex;
+            gap: 10px;
+        }
+        .drm-row input {
+            flex: 1;
+        }
+
+        /* Selector Group for Quality/Audio */
+        .selector-group { 
+            display: flex; 
+            gap: 15px; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+        }
+        .selector-item { 
+            display: flex; 
+            flex-direction: column; 
+            text-align: left; 
+            flex: 1; 
+            min-width: 200px; 
+        }
+        label { 
+            font-size: 0.9em; 
+            margin-bottom: 8px; 
+            color: #00f2fe; /* Neon Blue Labels */
+            text-shadow: 0 0 5px #00f2fe;
+        }
+
+        /* --- Neon Play Button --- */
+        button { 
+            padding: 18px; 
+            border-radius: 10px; 
+            border: none; 
+            background: transparent;
+            color: #ff0055; 
+            font-weight: bold; 
+            font-size: 18px; 
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer; 
+            border: 2px solid #ff0055;
+            box-shadow: 0 0 15px #ff0055;
+            transition: 0.4s;
+        }
+        button:hover { 
+            background: #ff0055;
+            color: #fff;
+            box-shadow: 0 0 30px #ff0055, 0 0 50px #ff0055;
+        }
+
+        /* Status Text */
+        .status { 
+            margin-top: 15px; 
+            font-size: 0.9em; 
+            color: #00e676; /* Neon Green Status */
+            text-shadow: 0 0 10px #00e676;
+        }
+
+        /* Futuristic Font Load */
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
+
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Multi-Audio & 4K Player</h2>
+    <div class="logo-container">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSHbTtG3wGQFbFUaChzCmNG2v5bAsK8ESlbw&s" alt="IR Logo">
+    </div>
+
+    <h2>IR NEON PLAYER</h2>
     
     <div class="controls">
         <input type="text" id="urlInput" placeholder="Paste .m3u8 or .mpd link here...">
         
-        <div style="display: flex; gap: 10px;">
-            <input type="text" id="keyId" style="flex:1" placeholder="DRM Key ID">
-            <input type="text" id="key" style="flex:1" placeholder="DRM Key">
+        <div class="drm-row">
+            <input type="text" id="keyId" placeholder="DRM Key ID">
+            <input type="text" id="key" placeholder="DRM Key">
         </div>
 
         <div class="selector-group">
             <div class="selector-item">
-                <label>Video Quality:</label>
+                <label>VIDEO QUALITY</label>
                 <select id="qualitySelect" onchange="changeQuality()">
-                    <option value="auto">Auto Quality</option>
+                    <option value="auto">AUTO (4K READY)</option>
                 </select>
             </div>
             <div class="selector-item">
-                <label>Audio Language:</label>
+                <label>AUDIO LANGUAGE</label>
                 <select id="audioSelect" onchange="changeAudio()">
-                    <option value="default">Default Audio</option>
+                    <option value="default">DEFAULT AUDIO</option>
                 </select>
             </div>
         </div>
 
-        <button onclick="startPlayer()">PLAY STREAM</button>
+        <button onclick="startPlayer()">LIVESTREAM START</button>
     </div>
 
     <video id="video" controls autoplay playsinline></video>
-    <div id="status" class="status">Ready to Play</div>
+    <div id="status" class="status">SYSTEM READY... AWAITING LINK</div>
 </div>
 
 <script>
@@ -61,26 +202,29 @@
     const video = document.getElementById('video');
     const qSelect = document.getElementById('qualitySelect');
     const aSelect = document.getElementById('audioSelect');
+    const status = document.getElementById('status');
 
     async function startPlayer() {
         const url = document.getElementById('urlInput').value.trim();
         const kId = document.getElementById('keyId').value.trim();
         const k = document.getElementById('key').value.trim();
         
-        // Reset Everything
         if (shakaPlayer) { await shakaPlayer.destroy(); shakaPlayer = null; }
         if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
-        qSelect.innerHTML = '<option value="auto">Auto Quality</option>';
-        aSelect.innerHTML = '<option value="default">Default Audio</option>';
+        qSelect.innerHTML = '<option value="auto">AUTO (4K READY)</option>';
+        aSelect.innerHTML = '<option value="default">DEFAULT AUDIO</option>';
+
+        if (!url) { status.innerText = "ERROR: NO LINK PROVIDED"; return; }
 
         if (url.includes('.m3u8')) {
+            status.innerText = "INITIALIZING HLS CORE...";
             if (Hls.isSupported()) {
                 hlsInstance = new Hls({ enableWorker: true, capLevelToPlayerSize: false });
                 hlsInstance.loadSource(url);
                 hlsInstance.attachMedia(video);
                 
                 hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-                    // Load Qualities
+                    status.innerText = "HLS STREAM ACTIVE";
                     hlsInstance.levels.forEach((l, i) => {
                         let opt = document.createElement('option');
                         opt.value = i; opt.text = l.height + 'p';
@@ -89,44 +233,42 @@
                     video.play();
                 });
 
-                // HLS Audio Fix
                 hlsInstance.on(Hls.Events.AUDIO_TRACKS_UPDATED, (event, data) => {
-                    aSelect.innerHTML = '<option value="default">Default Audio</option>';
+                    aSelect.innerHTML = '<option value="default">DEFAULT AUDIO</option>';
                     data.audioTracks.forEach((track, i) => {
                         let opt = document.createElement('option');
-                        opt.value = i; 
-                        opt.text = track.name || track.lang || `Track ${i+1}`;
+                        opt.value = i; opt.text = track.name || track.lang || `Track ${i+1}`;
                         aSelect.appendChild(opt);
                     });
                 });
             }
         } 
         else if (url.includes('.mpd')) {
+            status.innerText = "INITIALIZING DASH CORE...";
             shaka.polyfill.installAll();
             shakaPlayer = new shaka.Player(video);
             shakaPlayer.configure({ restrictions: { maxHeight: 4320 } });
 
             if (kId && k) {
+                status.innerText = "DRM KEYS DETECTED. DECRYPTING...";
                 shakaPlayer.configure({ drm: { clearKeys: { [kId]: k } } });
             }
 
             try {
                 await shakaPlayer.load(url);
-                // Load Qualities
+                status.innerText = "DASH STREAM ACTIVE";
                 shakaPlayer.getVariantTracks().forEach(t => {
                     let opt = document.createElement('option');
                     opt.value = t.id; opt.text = t.height + 'p';
                     qSelect.appendChild(opt);
                 });
 
-                // MPD Audio Fix
                 const languages = shakaPlayer.getAudioLanguages();
                 if (languages.length > 0) {
-                    aSelect.innerHTML = ''; // Clear default
+                    aSelect.innerHTML = ''; 
                     languages.forEach(lang => {
                         let opt = document.createElement('option');
                         opt.value = lang;
-                        // Beautiful Naming
                         let name = lang.toUpperCase();
                         if(name === 'HI') name = 'HINDI';
                         if(name === 'EN') name = 'ENGLISH';
@@ -135,8 +277,8 @@
                     });
                 }
                 video.play();
-            } catch (e) { alert("DASH Error: " + e.code); }
-        }
+            } catch (e) { status.innerText = "DASH ERROR: " + e.code; }
+        } else { status.innerText = "ERROR: INVALID FORMAT (.M3U8/.MPD ONLY)"; }
     }
 
     function changeQuality() {
