@@ -1,45 +1,56 @@
 <!DOCTYPE html>
-
-<!--
-Copyright (C) 2021 Michael Slíva <michael@sliva.dev>
-Licensed under the Academic Free License version 3.0
-
-You should have received a copy of the Academic Free License version 3.0 
-along with this program. If not, see <https://spdx.org/licenses/AFL-3.0.html>.
--->
-
 <html lang="en">
-	<head>
-		<title>MagicD3VIL's Radio Player</title>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-		<link rel="preload" href="./css/style.css" as="style">
-		<link rel="preload" href="./css/radio.css" as="style">
-		<link rel="stylesheet" href="./css/style.css">
-		<link rel="stylesheet" href="./css/radio.css">
-		<link rel="stylesheet" href="./css/fa.all.min.css">
-		<link rel='shortcut icon' type="image/x-icon" href='./favicon.ico'>
-		<link href="https://fonts.googleapis.com/css2?family=Exo+2&family=Lato&family=Montserrat&family=Ubuntu&family=IBM+Plex+Mono&display=swap" rel="stylesheet">	
-	</head>
-	
-	<body>
-		<script>0</script>
-		
-		<!-- MagicD3VIL's Radio Player -->
-			<div id="MagicPlayer">
-				<div id="playerInfo"><div id="playerInfoHeading">PLAYING: &nbsp;</div><div id="playerInfoPlayingContainer"><span id="playerInfoPlaying" class="marquee"></span></div></div>
-				<div id="playerMiddleLine"><p id="radioPlayer"><i onclick="radioPlayerPlay()" class="fa fa-play-circle"></i><i onclick="radioPlayerPause()" class="fa fa-pause-circle"></i><span class="span8">&nbsp;</span><input id="volume" type="range" min="0" max="100" step="1" oninput="setVolume(this.value)" onchange="setVolume(this.value)"><span class="span8">&nbsp;</span> 
-				<div id="equaliser-container"> <ol class="equaliser-column"> <li class="colour-bar"></li> </ol> <ol class="equaliser-column"> <li class="colour-bar"></li> </ol> <ol class="equaliser-column"> <li class="colour-bar"></li> </ol> <ol class="equaliser-column"> <li class="colour-bar"></li> </ol> <ol class="equaliser-column"> <li class="colour-bar"></li> </ol></div>
-				<span class="rememberHelp" id="playerAbout" title="MagicD3VIL's Radio Player"><i style ="font-size:1rem" class="far fa-question-circle"></i></span></div><div id="currentVolume"></div>
-				<div id="playerBottomLine"><p id="playerRememberHelp"><span class="rememberHelp" title="If you check this box, next time when you load or refresh this page your set volume will remain the same.&#10;&#13;By checking this box you agree to the use of cookies."><input type="checkbox" id="rememberVolume" onclick="rememberCheck()"/> Remember volume</span></p><div id="playerLogo"><p id="playerProviderLogo"><a href="https://clanhouse.eu" target="_blank"><img src="./clanhouse_24x28.png" alt="Clanhouse.eu Logo"></a></p><p id="playerRadioStationLogo"><a href="https://jetstreamradio.com/" target="_blank"><img src="./jetstream_28x28.png" alt="JetStream Radio Logo"></a></p></div>
-				<audio id="radio" preload="none">Your browser does not support <code>&lt;audio&gt;</code> element</audio></div>
-			</div>
-		<!-- END MagicD3VIL's Radio Player -->
-		
-		<!-- SCRIPTS -->
-			<script src="./js/jquery-3.4.1.min.js"></script>
-			<script src="./js/jquery.modal.min.js"></script>
-		
-			<!-- MagicD3VIL's Radio Player -->
-				<script src="./radioPlayer.js"></script>
-			<!-- END MagicD3VIL's Radio Player -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Live Sports Player</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: white; text-align: center; padding: 20px; }
+        video { width: 100%; max-width: 800px; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.5); background: black; }
+        .input-area { margin: 20px 0; }
+        input { width: 70%; padding: 10px; border-radius: 5px; border: none; }
+        button { padding: 10px 20px; border-radius: 5px; border: none; background: #e91e63; color: white; cursor: pointer; font-weight: bold; }
+        button:hover { background: #c2185b; }
+    </style>
+</head>
+<body>
+
+    <h2>Live Sports Stream Player</h2>
+
+    <div class="input-area">
+        <input type="text" id="streamUrl" placeholder="Apna .m3u8 link yahan paste karein...">
+        <button onclick="playStream()">Play</button>
+    </div>
+
+    <video id="video" controls></video>
+
+    <script>
+        function playStream() {
+            var video = document.getElementById('video');
+            var streamUrl = document.getElementById('streamUrl').value.trim();
+
+            if (!streamUrl) {
+                alert("Pehle link toh dalo!");
+                return;
+            }
+
+            if (Hls.isSupported()) {
+                var hls = new Hls();
+                hls.loadSource(streamUrl);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    video.play();
+                });
+            } 
+            else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = streamUrl;
+                video.addEventListener('loadedmetadata', function() {
+                    video.play();
+                });
+            }
+        }
+    </script>
+
+</body>
+</html>
