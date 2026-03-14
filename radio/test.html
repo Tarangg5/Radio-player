@@ -3,159 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IR NEON PRO - FINAL BYPASS</title>
+    <title>IR NEON PLAYER - FIXED</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
-        
-        body { 
-            font-family: 'Orbitron', sans-serif; 
-            background: #050505; 
-            color: #fff; 
-            margin: 0;
-            padding: 20px; 
-            text-align: center; 
-        }
-
-        .container { 
-            max-width: 900px; 
-            margin: auto; 
-            background: rgba(15, 15, 15, 0.98); 
-            padding: 30px; 
-            border-radius: 25px; 
-            border: 2px solid #ff0055; 
-            box-shadow: 0 0 30px #ff0055; 
-            position: relative;
-        }
-
-        .logo-container { 
-            position: absolute; 
-            top: 20px; 
-            left: 20px; 
-            width: 65px; 
-            height: 65px; 
-            border-radius: 50%; 
-            border: 2px solid #00f2fe; 
-            box-shadow: 0 0 15px #00f2fe; 
-            overflow: hidden; 
-            background: #000; 
-        }
+        body { font-family: 'Orbitron', sans-serif; background: #050505; color: #fff; text-align: center; padding: 20px; }
+        .container { max-width: 850px; margin: auto; background: #111; padding: 25px; border-radius: 20px; border: 2px solid #ff0055; box-shadow: 0 0 20px #ff0055; position: relative; }
+        .logo-container { position: absolute; top: 15px; left: 15px; width: 50px; height: 50px; border-radius: 50%; border: 2px solid #00f2fe; overflow: hidden; }
         .logo-container img { width: 100%; height: 100%; object-fit: cover; }
-
-        h2 { 
-            font-size: 1.8em; 
-            text-shadow: 0 0 15px #ff0055; 
-            margin-bottom: 25px;
-            letter-spacing: 2px;
-        }
-
-        video { 
-            width: 100%; 
-            border-radius: 15px; 
-            margin-top: 20px; 
-            border: 3px solid #00f2fe; 
-            box-shadow: 0 0 35px #00f2fe; 
-            background: #000; 
-        }
-
-        .controls { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 15px; 
-            margin-top: 70px; 
-        }
-
-        input, select { 
-            padding: 15px; 
-            border-radius: 10px; 
-            border: 2px solid #ff0055; 
-            background: #111; 
-            color: #fff; 
-            font-family: 'Orbitron';
-            outline: none;
-            font-size: 14px;
-        }
-
-        input:focus { border-color: #00f2fe; box-shadow: 0 0 10px #00f2fe; }
-
-        .selector-group { display: flex; gap: 10px; }
-        .selector-item { flex: 1; text-align: left; }
-        label { font-size: 0.7em; color: #00f2fe; margin-bottom: 5px; display: block; text-shadow: 0 0 5px #00f2fe; }
-
-        button { 
-            padding: 20px; 
-            border-radius: 12px; 
-            background: transparent; 
-            color: #ff0055; 
-            font-weight: bold; 
-            border: 2px solid #ff0055; 
-            box-shadow: 0 0 15px #ff0055; 
-            cursor: pointer; 
-            transition: 0.4s; 
-            font-family: 'Orbitron';
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        button:hover { background: #ff0055; color: #fff; box-shadow: 0 0 40px #ff0055; }
-
-        #status { margin-top: 20px; color: #00e676; text-shadow: 0 0 10px #00e676; font-size: 0.9em; min-height: 25px; }
-
-        /* M3U Generator Styling */
-        .m3u-box { 
-            margin-top: 30px; 
-            padding: 20px; 
-            border: 1px dashed #00f2fe; 
-            border-radius: 15px; 
-            background: rgba(0,0,0,0.6); 
-        }
-        textarea { 
-            width: 95%; 
-            height: 90px; 
-            font-size: 12px; 
-            color: #00e676; 
-            background: #111;
-            border: 1px solid #00f2fe;
-            border-radius: 8px;
-            margin-top: 10px;
-            padding: 10px;
-            resize: none;
-        }
+        video { width: 100%; border-radius: 10px; margin-top: 20px; border: 2px solid #00f2fe; box-shadow: 0 0 15px #00f2fe; background: #000; }
+        .controls { display: flex; flex-direction: column; gap: 10px; margin-top: 60px; }
+        input, select { padding: 12px; border-radius: 8px; border: 1.5px solid #ff0055; background: #1a1a1a; color: #fff; font-family: 'Orbitron'; outline: none; }
+        button { padding: 15px; border-radius: 8px; background: transparent; color: #ff0055; font-weight: bold; border: 2px solid #ff0055; cursor: pointer; transition: 0.3s; font-family: 'Orbitron'; }
+        button:hover { background: #ff0055; color: #fff; box-shadow: 0 0 20px #ff0055; }
+        #status { margin-top: 10px; color: #00e676; font-size: 0.8em; min-height: 20px; }
+        textarea { width: 95%; height: 60px; margin-top: 15px; background: #000; color: #00e676; border: 1px dashed #00f2fe; padding: 10px; font-size: 10px; resize: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="logo-container"><img src="logo.png" alt="IR"></div>
-    <h2>IR NEON ULTIMATE PLAYER</h2>
+    <h2>IR NEON PRO</h2>
 
     <div class="controls">
-        <input type="text" id="urlInput" placeholder="Paste .m3u8 or .mpd link here...">
+        <input type="text" id="urlInput" placeholder="Stream URL (.m3u8 or .mpd)">
         <input type="text" id="drmKeyInput" placeholder="DRM Key (KID:KEY)">
         <input type="text" id="cookieInput" placeholder="Cookie (__hdnea__=...)">
         
-        <div class="selector-group">
-            <div class="selector-item">
-                <label>VIDEO QUALITY</label>
-                <select id="qualitySelect"><option value="auto">AUTO (4K READY)</option></select>
-            </div>
-            <div class="selector-item">
-                <label>AUDIO TRACK</label>
-                <select id="audioSelect"><option value="default">DEFAULT</option></select>
-            </div>
+        <div style="display: flex; gap: 10px;">
+            <select id="qualitySelect" style="flex:1"><option value="auto">AUTO QUALITY</option></select>
+            <select id="audioSelect" style="flex:1"><option value="default">DEFAULT AUDIO</option></select>
         </div>
         
-        <button id="playBtn">LAUNCH BYPASS STREAM</button>
+        <button id="playBtn">START STREAMING</button>
     </div>
 
     <video id="video" controls autoplay playsinline></video>
-    <div id="status">SYSTEM READY... AWAITING COMMAND</div>
-
-    <div class="m3u-box">
-        <label style="color: #ff0055;">M3U CODE (FOR NAVIGATOR)</label>
-        <textarea id="m3uOutput" readonly placeholder="M3U code will appear here..."></textarea>
-    </div>
+    <div id="status">READY</div>
+    <textarea id="m3uOutput" readonly placeholder="M3U link will appear here..."></textarea>
 </div>
 
 <script>
@@ -163,97 +50,79 @@
     const status = document.getElementById('status');
     const qSelect = document.getElementById('qualitySelect');
     const aSelect = document.getElementById('audioSelect');
-    const m3uOutput = document.getElementById('m3uOutput');
-    const playBtn = document.getElementById('playBtn');
-    
+    const m3uOut = document.getElementById('m3uOutput');
+
     let shakaPlayer = null;
     let hlsInstance = null;
 
-    playBtn.addEventListener('click', startPlayer);
-
+    // --- MAIN FUNCTION ---
     async function startPlayer() {
         const url = document.getElementById('urlInput').value.trim();
-        const drmInput = document.getElementById('drmKeyInput').value.trim();
-        const cookieVal = document.getElementById('cookieInput').value.trim();
+        const drm = document.getElementById('drmKeyInput').value.trim();
+        const cookie = document.getElementById('cookieInput').value.trim();
+
+        if (!url) { alert("Pehle link daalo!"); return; }
         
-        status.innerText = "BYPASSING SECURITY & CONNECTING...";
+        status.innerText = "LOADING...";
 
         // Reset
         if (shakaPlayer) { await shakaPlayer.destroy(); shakaPlayer = null; }
         if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
-        qSelect.innerHTML = '<option value="auto">AUTO (4K READY)</option>';
-        aSelect.innerHTML = '<option value="default">DEFAULT</option>';
+        qSelect.innerHTML = '<option value="auto">AUTO</option>';
 
-        if (!url) { status.innerText = "ERROR: NO URL PROVIDED"; return; }
+        // M3U Gen
+        m3uOut.value = `#EXTINF:-1, IR LIVE\n${url}|User-Agent=Mozilla/5.0&Cookie=${cookie}`;
 
-        // --- M3U Generator Logic ---
-        let m3uLine = `#EXTINF:-1 tvg-name="IR_LIVE", IR Live Match\n`;
-        if (url.includes('.mpd') && drmInput.includes(':')) {
-            m3uLine += `#KODIPROP:inputstream.adaptive.license_type=clearkey\n#KODIPROP:inputstream.adaptive.license_key=${drmInput}\n`;
-        }
-        m3uLine += url + `|User-Agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64)&Cookie=${cookieVal}`;
-        m3uOutput.value = m3uLine;
-
-        // --- DASH (.mpd) for Star/Jio ---
-        if (url.includes('.mpd')) {
-            shaka.polyfill.installAll();
-            shakaPlayer = new shaka.Player(video);
-
-            // Ultimate Bypass Filters
-            shakaPlayer.getNetworkingEngine().registerRequestFilter((type, request) => {
-                request.allowCrossSiteCredentials = true; 
-                request.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
-                request.headers['Referer'] = 'https://www.jio.com/';
-                if (cookieVal) { request.headers['Cookie'] = cookieVal; }
-            });
-
-            if (drmInput.includes(':')) {
-                const [kid, key] = drmInput.split(':');
-                shakaPlayer.configure({ 
-                    drm: { clearKeys: { [kid.trim()]: key.trim() } },
-                    streaming: { bufferingGoal: 60, rebufferingGoal: 15 }
-                });
-            }
-
-            try {
-                await shakaPlayer.load(url);
-                status.innerText = "STREAM ACTIVE (DASH)";
-                video.play();
-                shakaPlayer.getVariantTracks().forEach(t => {
-                    let opt = document.createElement('option');
-                    opt.value = t.id; opt.text = t.height + 'p';
-                    qSelect.appendChild(opt);
-                });
-            } catch (e) { 
-                status.innerText = "DASH ERROR: " + e.code + " (Check Cookie/CORS)";
-            }
-        } 
-        // --- HLS (.m3u8) for Sony/Others ---
-        else if (url.includes('.m3u8')) {
+        // --- HLS (.m3u8) ---
+        if (url.includes('.m3u8')) {
             if (Hls.isSupported()) {
-                hlsInstance = new Hls({
-                    xhrSetup: (xhr) => {
-                        xhr.withCredentials = true;
-                        if (cookieVal) xhr.setRequestHeader('Cookie', cookieVal);
-                        xhr.setRequestHeader('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-                    }
-                });
+                hlsInstance = new Hls({ xhrSetup: (xhr) => { if(cookie) xhr.setRequestHeader('Cookie', cookie); } });
                 hlsInstance.loadSource(url);
                 hlsInstance.attachMedia(video);
                 hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-                    video.play();
-                    status.innerText = "STREAM ACTIVE (HLS)";
+                    status.innerText = "HLS PLAYING";
                     hlsInstance.levels.forEach((l, i) => {
                         let opt = document.createElement('option');
                         opt.value = i; opt.text = l.height + 'p';
                         qSelect.appendChild(opt);
                     });
+                    video.play();
                 });
             }
+        } 
+        // --- DASH (.mpd) ---
+        else if (url.includes('.mpd')) {
+            shaka.polyfill.installAll();
+            shakaPlayer = new shaka.Player(video);
+            
+            shakaPlayer.getNetworkingEngine().registerRequestFilter((type, request) => {
+                request.allowCrossSiteCredentials = true;
+                if (cookie) request.headers['Cookie'] = cookie;
+                request.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)';
+            });
+
+            if (drm.includes(':')) {
+                const [kid, key] = drm.split(':');
+                shakaPlayer.configure({ drm: { clearKeys: { [kid.trim()]: key.trim() } } });
+            }
+
+            try {
+                await shakaPlayer.load(url);
+                status.innerText = "DASH PLAYING";
+                shakaPlayer.getVariantTracks().forEach(t => {
+                    let opt = document.createElement('option');
+                    opt.value = t.id; opt.text = t.height + 'p';
+                    qSelect.appendChild(opt);
+                });
+                video.play();
+            } catch (e) { status.innerText = "ERROR: " + e.code; }
         }
     }
 
-    // Quality/Audio Handlers
+    // Button Listener
+    document.getElementById('playBtn').addEventListener('click', startPlayer);
+
+    // Quality Switcher
     qSelect.onchange = () => {
         if (hlsInstance) hlsInstance.currentLevel = qSelect.value === "auto" ? -1 : parseInt(qSelect.value);
         if (shakaPlayer) {
