@@ -1,115 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sonu Radio - Live Metadatha</title>
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-  <style>
-    :root { --primary: #00f2ff; --accent: #bc13fe; --bg: #050505; --card: #111111; }
-    body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; background-color: var(--bg); color: white; display: flex; justify-content: center; min-height: 100vh; align-items: center; }
-    
-    .player-container { width: 100%; max-width: 420px; background: var(--card); padding: 25px; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 0 20px rgba(0, 242, 255, 0.1); text-align: center; }
-    
-    .header h1 { margin: 0; font-size: 20px; background: linear-gradient(to right, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 2px; text-transform: uppercase; }
-    
-    .now-playing-box { margin: 20px 0; background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); min-height: 100px; display: flex; flex-direction: column; justify-content: center; }
-    #songTitle { font-weight: bold; font-size: 18px; color: var(--primary); margin-bottom: 5px; }
-    #singerTitle { font-size: 14px; color: #888; font-style: italic; }
-    
-    audio { width: 100%; margin-bottom: 20px; filter: invert(1); }
-    
-    .playlist { list-style: none; padding: 0; max-height: 250px; overflow-y: auto; text-align: left; }
-    .playlist li { background: rgba(255,255,255,0.02); margin-bottom: 8px; padding: 12px; cursor: pointer; border-radius: 10px; font-size: 14px; color: #aaa; transition: 0.3s; border: 1px solid transparent; }
-    .playlist li.active { background: rgba(0, 242, 255, 0.1); color: var(--primary); border-color: var(--primary); }
-    .playlist li:hover { background: rgba(255,255,255,0.05); }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IR NEON - JIO & SONY PRO</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
+        body { font-family: 'Orbitron', sans-serif; background: #050505; color: #fff; padding: 20px; text-align: center; }
+        .container { max-width: 900px; margin: auto; background: rgba(15, 15, 15, 0.95); padding: 25px; border-radius: 20px; border: 2px solid #ff0055; box-shadow: 0 0 25px #ff0055; position: relative; }
+        .logo-container { position: absolute; top: 20px; left: 20px; width: 60px; height: 60px; border-radius: 50%; border: 2px solid #00f2fe; box-shadow: 0 0 15px #00f2fe; overflow: hidden; background: #000; }
+        .logo-container img { width: 100%; height: 100%; object-fit: cover; }
+        h2 { font-size: 1.8em; text-shadow: 0 0 15px #ff0055; margin-bottom: 25px; }
+        video { width: 100%; border-radius: 12px; margin-top: 20px; border: 3px solid #00f2fe; box-shadow: 0 0 30px #00f2fe; background: #000; }
+        .controls { display: flex; flex-direction: column; gap: 12px; margin-top: 65px; }
+        input, select, textarea { padding: 12px; border-radius: 8px; border: 1.5px solid #ff0055; background: #111; color: #fff; font-family: 'Orbitron'; outline: none; font-size: 13px; }
+        input:focus { border-color: #00f2fe; box-shadow: 0 0 10px #00f2fe; }
+        .selector-group { display: flex; gap: 10px; }
+        .selector-item { flex: 1; text-align: left; }
+        label { font-size: 0.7em; color: #00f2fe; margin-bottom: 4px; display: block; }
+        button { padding: 16px; border-radius: 10px; background: transparent; color: #ff0055; font-weight: bold; border: 2px solid #ff0055; box-shadow: 0 0 12px #ff0055; cursor: pointer; transition: 0.3s; font-family: 'Orbitron'; }
+        button:hover { background: #ff0055; color: #fff; box-shadow: 0 0 35px #ff0055; }
+        #status { margin-top: 15px; color: #00e676; text-shadow: 0 0 5px #00e676; font-size: 0.8em; }
+    </style>
 </head>
 <body>
 
-  <div class="player-container">
-    <div class="header">
-        <h1>SONU RAyDIO</h1>
-        <div class="now-playing-box">
-            <div style="font-size: 10px; color: #555; margin-bottom: 8px; letter-spacing: 1px;">NOW STREAMING</div>
-            <div id="songTitle">Select a Station</div>
-            <div id="singerTitle">Artist Info</div>
-        </div>
-    </div>
-    
-    <audio id="audioPlayer" controls autoplay></audio>
-    <ul class="playlist" id="playlist"></ul>
-  </div>
+<div class="container">
+    <div class="logo-container"><img src="logo.png" alt="IR"></div>
+    <h2>IR NEON PLAYER</h2>
 
-  <script>
-    const audioPlayer = document.getElementById('audioPlayer');
-    const songText = document.getElementById('songTitle');
-    const singerText = document.getElementById('singerTitle');
-    const playlist = document.getElementById('playlist');
-
-    const audioFiles = [
-      { name: 'Hindi Melody', src: 'https://stream.zeno.fm/f25zvfe37p8uv', id: 'f25zvfe37p8uv' },
-      { name: 'Arijit Singh Hits', src: 'https://stream.zeno.fm/wn6muavgfr2tv', id: 'wn6muavgfr2tv' },
-      { name: 'Big FM 92.7', src: 'https://stream.zeno.fm/dbstwo3dvhhtv', id: 'dbstwo3dvhhtv' },
-      { name: 'Md Rafi Hits', src: 'https://stream.zeno.fm/2xx62x8ztm0uv', id: '2xx62x8ztm0uv' }
-    ];
-
-    let hls;
-    let metaInterval;
-
-        async function updateMetadata(station) {
-      if (!station.id) return;
-
-      try {
-        // Ab hum kisi teesre ki proxy nahi, apni khud ki API call kar rahe hain
-        const response = await fetch(`/api/meta?id=${station.id}`);
-        const data = await response.json();
+    <div class="controls">
+        <input type="text" id="urlInput" placeholder="Paste .m3u8 or .mpd link...">
+        <input type="text" id="drmKeyInput" placeholder="DRM Key (KID:KEY)">
+        <input type="text" id="cookieInput" placeholder="Paste Cookie (__hdnea__=...)">
         
-        if (data && data.streamTitle) {
-          const fullTitle = data.streamTitle;
-          if (fullTitle.includes(" - ")) {
-            const parts = fullTitle.split(" - ");
-            singerText.textContent = parts[0].trim();
-            songText.textContent = parts[1].trim();
-          } else {
-            songText.textContent = fullTitle;
-            singerText.textContent = station.name;
-          }
+        <div class="selector-group">
+            <div class="selector-item">
+                <label>QUALITY</label>
+                <select id="qualitySelect"><option value="auto">AUTO</option></select>
+            </div>
+            <div class="selector-item">
+                <label>AUDIO</label>
+                <select id="audioSelect"><option value="default">DEFAULT</option></select>
+            </div>
+        </div>
+        
+        <button id="playBtn">LAUNCH JIO/SONY STREAM</button>
+    </div>
+
+    <video id="video" controls autoplay playsinline></video>
+    <div id="status">SYSTEM READY...</div>
+</div>
+
+<script>
+    const video = document.getElementById('video');
+    const status = document.getElementById('status');
+    const qSelect = document.getElementById('qualitySelect');
+    const aSelect = document.getElementById('audioSelect');
+    let shakaPlayer = null;
+    let hlsInstance = null;
+
+    document.getElementById('playBtn').addEventListener('click', startPlayer);
+
+    async function startPlayer() {
+        const url = document.getElementById('urlInput').value.trim();
+        const drmInput = document.getElementById('drmKeyInput').value.trim();
+        const cookieVal = document.getElementById('cookieInput').value.trim();
+        
+        status.innerText = "BYPASSING JIO SECURITY...";
+
+        if (shakaPlayer) { await shakaPlayer.destroy(); shakaPlayer = null; }
+        if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+
+        if (!url) return;
+
+        // --- DASH Logic (For JioTV .mpd) ---
+        if (url.includes('.mpd')) {
+            shaka.polyfill.installAll();
+            shakaPlayer = new shaka.Player(video);
+
+            // Authentication Cookie & Headers Setup
+            shakaPlayer.getNetworkingEngine().registerRequestFilter((type, request) => {
+                if (cookieVal) {
+                    request.headers['Cookie'] = cookieVal;
+                }
+                request.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+            });
+
+            if (drmInput.includes(':')) {
+                const [kid, key] = drmInput.split(':');
+                shakaPlayer.configure({ drm: { clearKeys: { [kid.trim()]: key.trim() } } });
+            }
+
+            try {
+                await shakaPlayer.load(url);
+                status.innerText = "JIO STREAM ACTIVE";
+                video.play();
+                
+                // Track quality/audio
+                shakaPlayer.getVariantTracks().forEach(t => {
+                    let opt = document.createElement('option');
+                    opt.value = t.id; opt.text = t.height + 'p';
+                    qSelect.appendChild(opt);
+                });
+            } catch (e) { 
+                status.innerText = "ERROR: " + e.code + " (Check CORS Extension)";
+            }
+        } 
+        // --- HLS Logic ---
+        else if (url.includes('.m3u8')) {
+            if (Hls.isSupported()) {
+                hlsInstance = new Hls({
+                    xhrSetup: (xhr) => {
+                        if (cookieVal) xhr.setRequestHeader('Cookie', cookieVal);
+                        xhr.setRequestHeader('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+                    }
+                });
+                hlsInstance.loadSource(url);
+                hlsInstance.attachMedia(video);
+                hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+                    video.play();
+                    status.innerText = "HLS ACTIVE";
+                });
+            }
         }
-      } catch (e) {
-        console.log("Metadata Error");
-        songText.textContent = station.name;
-        singerText.textContent = "Live Radio";
-      }
     }
 
-
-    function loadStation(ch, li) {
-      if (hls) { hls.destroy(); hls = null; }
-      clearInterval(metaInterval);
-      
-      audioPlayer.src = ch.src;
-      audioPlayer.play();
-      
-      songText.textContent = "Loading Info...";
-      singerText.textContent = ch.name;
-
-      // Initial Fetch
-      updateMetadata(ch);
-      
-      // Refresh every 15 seconds
-      metaInterval = setInterval(() => updateMetadata(ch), 15000);
-
-      document.querySelectorAll('.playlist li').forEach(item => item.classList.remove('active'));
-      li.classList.add('active');
-    }
-
-    audioFiles.forEach(ch => {
-      const li = document.createElement('li');
-      li.textContent = ch.name;
-      li.onclick = () => loadStation(ch, li);
-      playlist.appendChild(li);
-    });
-  </script>
+    qSelect.onchange = () => {
+        if (shakaPlayer) {
+            shakaPlayer.configure({ abr: { enabled: qSelect.value === "auto" } });
+            if (qSelect.value !== "auto") {
+                const track = shakaPlayer.getVariantTracks().find(t => t.id == qSelect.value);
+                shakaPlayer.selectVariantTrack(track, true);
+            }
+        }
+    };
+</script>
 </body>
 </html>
