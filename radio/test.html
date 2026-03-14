@@ -64,51 +64,49 @@
 
     document.getElementById('playBtn').addEventListener('click', startPlayer);
 
-    async function startPlayer() {
-        const url = document.getElementById('urlInput').value.trim();
-        const drmInput = document.getElementById('drmKeyInput').value.trim();
-        const cookieVal = document.getElementById('cookieInput').value.trim();
-        
-        status.innerText = "BYPASSING JIO SECURITY...";
+    // --- StartPlayer function ke andar ye badlav kiya gaya hai ---
+async function startPlayer() {
+    const url = document.getElementById('urlInput').value.trim();
+    const drmInput = document.getElementById('drmKeyInput').value.trim();
+    const cookieVal = document.getElementById('cookieInput').value.trim();
+    
+    status.innerText = "ATTEMPTING JIO BYPASS...";
 
-        if (shakaPlayer) { await shakaPlayer.destroy(); shakaPlayer = null; }
-        if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+    if (shakaPlayer) { await shakaPlayer.destroy(); shakaPlayer = null; }
+    if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
 
-        if (!url) return;
+    // --- DASH/MPD (Star Sports) Logic ---
+    if (url.includes('.mpd')) {
+        shaka.polyfill.installAll();
+        shakaPlayer = new shaka.Player(video);
 
-        // --- DASH Logic (For JioTV .mpd) ---
-        if (url.includes('.mpd')) {
-            shaka.polyfill.installAll();
-            shakaPlayer = new shaka.Player(video);
+        // Sabse important step: Cookies allow karna
+        shakaPlayer.getNetworkingEngine().registerRequestFilter((type, request) => {
+            request.allowCrossSiteCredentials = true; // Ye Jio ke liye zaroori hai
+            if (cookieVal) {
+                request.headers['Cookie'] = cookieVal;
+            }
+            request.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+        });
 
-            // Authentication Cookie & Headers Setup
-            shakaPlayer.getNetworkingEngine().registerRequestFilter((type, request) => {
-                if (cookieVal) {
-                    request.headers['Cookie'] = cookieVal;
-                }
-                request.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+        if (drmInput.includes(':')) {
+            const [kid, key] = drmInput.split(':');
+            shakaPlayer.configure({ 
+                drm: { clearKeys: { [kid.trim()]: key.trim() } },
+                streaming: { bufferingGoal: 30 } // 4K/HD buffering fix
             });
+        }
 
-            if (drmInput.includes(':')) {
-                const [kid, key] = drmInput.split(':');
-                shakaPlayer.configure({ drm: { clearKeys: { [kid.trim()]: key.trim() } } });
-            }
+        try {
+            await shakaPlayer.load(url);
+            status.innerText = "STAR SPORTS ACTIVE";
+            video.play();
+        } catch (e) { 
+            status.innerText = "ERROR: " + e.code + " (Check if Cookie Expired)";
+        }
+    }
+}
 
-            try {
-                await shakaPlayer.load(url);
-                status.innerText = "JIO STREAM ACTIVE";
-                video.play();
-                
-                // Track quality/audio
-                shakaPlayer.getVariantTracks().forEach(t => {
-                    let opt = document.createElement('option');
-                    opt.value = t.id; opt.text = t.height + 'p';
-                    qSelect.appendChild(opt);
-                });
-            } catch (e) { 
-                status.innerText = "ERROR: " + e.code + " (Check CORS Extension)";
-            }
-        } 
         // --- HLS Logic ---
         else if (url.includes('.m3u8')) {
             if (Hls.isSupported()) {
