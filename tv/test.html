@@ -3,37 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sonu Live TV - Pro Fix</title>
+  <title>Sonu 4K Player - Final Fix</title>
   
-  <link href="https://vjs.zencdn.net/7.20.3/video-js.css" rel="stylesheet" />
-  <script src="https://vjs.zencdn.net/7.20.3/video.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-dash/5.1.1/videojs-contrib-dash.min.js"></script>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.ui.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/controls.min.css">
+  
   <style>
-    :root { --primary: #00f2ff; --bg: #050505; --railway: #ffd700; }
-    body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 10px; background: var(--bg); color: white; }
-    
-    .player-section { width: 100%; max-width: 800px; margin: 0 auto; position: sticky; top: 0; z-index: 100; background: #000; border-bottom: 2px solid #333; }
-    .video-js { width: 100%; aspect-ratio: 16/9; }
+    :root { --primary: #00f2ff; --bg: #050505; --card: #151515; }
+    body { font-family: sans-serif; margin: 0; padding: 10px; background: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; }
 
-    .channel-box { max-width: 800px; margin: 15px auto; padding: 10px; }
-    input#searchBar { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; background: #1a1a1a; color: white; border: 1px solid #444; outline: none; box-sizing: border-box; }
+    /* Player Container - Bilkul Stable */
+    .video-container { width: 100%; max-width: 850px; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid #333; position: sticky; top: 0; z-index: 1000; }
+    video { width: 100%; height: 100%; }
+
+    .channel-box { width: 100%; max-width: 850px; margin-top: 20px; }
+    #searchBar { width: 100%; padding: 12px; border-radius: 8px; background: #1a1a1a; color: white; border: 1px solid #444; outline: none; margin-bottom: 15px; box-sizing: border-box; }
 
     .channel-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
-    .channel-item { background: #111; padding: 10px; border-radius: 10px; text-align: center; cursor: pointer; border: 1px solid #222; transition: 0.2s; }
-    .channel-item:active { transform: scale(0.95); background: #222; }
+    .channel-item { background: var(--card); padding: 10px; border-radius: 10px; text-align: center; cursor: pointer; border: 1px solid #222; -webkit-tap-highlight-color: transparent; }
+    .channel-item:active { transform: scale(0.95); }
     .channel-item.active { border-color: var(--primary); background: rgba(0, 242, 255, 0.1); }
     .channel-item img { width: 40px; height: 40px; object-fit: contain; margin-bottom: 5px; pointer-events: none; }
     .channel-item span { display: block; font-size: 10px; font-weight: bold; pointer-events: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    /* Quality & Audio Icons fix */
-    .vjs-control-bar { background: rgba(0,0,0,0.7) !important; }
+    /* Shaka UI Custom Color */
+    .shaka-video-container .shaka-range-element { color: var(--primary) !important; }
   </style>
 </head>
 <body>
 
-  <div class="player-section" id="player-wrapper">
-    <video id="my-video" class="video-js vjs-big-play-centered" controls preload="auto" data-setup='{}'></video>
+  <div class="video-container" id="video-wrapper" data-shaka-player-container>
+    <video id="video" data-shaka-player autoplay></video>
   </div>
 
   <div class="channel-box">
@@ -43,30 +43,41 @@
 
   <script>
     const channels = [
-      { name: 'WORLD CUP HINDI', src: 'https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/nn1qrdjaha/out/v1/bc4fa7d9cebf47858bebf14ad589025e/cenc.mpd', key: '9909e33838e1152cc512c4636f513f8f:02f67060c94bcc3307280f505ad508ab' },
-      { name: 'AAJ TAK HD', src: 'https://aajtakhdlive-amd.akamaized.net/hls/live/2014415/aajtakhd/aajtakhdlive/live_1080p/chunks.m3u8' },
-      { name: 'NEWS18 HINDI', src: 'https://nw18live.cdn.jio.com/bpk-tv/News18_India_NW18_MOB/output01/News18_India_NW18_MOB-audio_98834_eng=98800-video=2293600.m3u8', key: '6da8c268d58a0fe4ff75d297359a8ad7:eb0ae4c2c24a52070154499bb09a36cb' },
-      { name: 'Discovery Science', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Discoveryscience2/default/manifest.mpd', key: '5458f45efedb4d6f8aa6ac76c85b621b:dbf8a0a306a64525ba3012fd225370c0' }
+      { name: 'WORLD CUP HINDI', src: 'https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/nn1qrdjaha/out/v1/bc4fa7d9cebf47858bebf14ad589025e/cenc.mpd', key: '9909e33838e1152cc512c4636f513f8f:02f67060c94bcc3307280f505ad508ab', logo: 'https://iili.io/1Nz0AP.png' },
+      { name: 'WORLD CUP ENG', src: 'https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/lz7yhtgbjb/out/v1/bedaa948e7a24dc0b5fd5d7b38534d8c/cenc.mpd', key: '470a5bda0ae8965c3ab4004c302bc1c8:b04888df6ed570c9435b97471504bd9b', logo: 'https://iili.io/1Nz0AP.png' },
+      { name: 'AAJ TAK HD', src: 'https://aajtakhdlive-amd.akamaized.net/hls/live/2014415/aajtakhd/aajtakhdlive/live_1080p/chunks.m3u8', logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcROsvSB70AOq6eVcWxOwV8mArbJ5kIWBH418Q&s' },
+      { name: 'NEWS18 HINDI', src: 'https://nw18live.cdn.jio.com/bpk-tv/News18_India_NW18_MOB/output01/News18_India_NW18_MOB-audio_98834_eng=98800-video=2293600.m3u8', key: '6da8c268d58a0fe4ff75d297359a8ad7:eb0ae4c2c24a52070154499bb09a36cb', logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTyjjXoJrm98pN9PWgGodxByoe3Yc8bfIZaNM79xmEGUpJvFm0qPGr4T48&s=10' },
+      { name: 'Discovery Science', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Discoveryscience2/default/manifest.mpd', key: '5458f45efedb4d6f8aa6ac76c85b621b:dbf8a0a306a64525ba3012fd225370c0', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/vIA7TExn.png' }
     ];
 
-    let player = videojs('my-video');
+    let player;
+    let ui;
 
-    function playChannel(src, key) {
-      const type = src.includes('.mpd') ? 'application/dash+xml' : 'application/x-mpegURL';
+    async function initPlayer() {
+      const video = document.getElementById('video');
+      const container = document.getElementById('video-wrapper');
       
-      const drmConfig = key ? {
-        "org.w3.clearkey": {
-          "clearkeys": { [key.split(':')[0]]: key.split(':')[1] }
-        }
-      } : {};
+      player = new shaka.Player(video);
+      ui = new shaka.ui.Overlay(player, container, video);
+      
+      // Error handling
+      player.addEventListener('error', (e) => console.error('Error code', e.detail.code, 'object', e.detail));
+    }
 
-      player.src({
-        src: src,
-        type: type,
-        keySystems: drmConfig
+    async function playChannel(src, key, name) {
+      const drmConfig = key ? { [key.split(':')[0]]: key.split(':')[1] } : {};
+      
+      player.configure({
+        drm: { clearKeys: drmConfig },
+        streaming: { bufferingGoal: 30 }
       });
 
-      player.play().catch(e => console.log("Auto-play blocked or error", e));
+      try {
+        await player.load(src);
+        console.log('Now playing:', name);
+      } catch (e) {
+        console.error('Load failed', e);
+      }
     }
 
     function renderChannels(list) {
@@ -75,13 +86,13 @@
       list.forEach(ch => {
         const div = document.createElement('div');
         div.className = 'channel-item';
-        div.innerHTML = `<img src="https://via.placeholder.com/40?text=TV"><span>${ch.name}</span>`;
+        div.innerHTML = `<img src="${ch.logo}" onerror="this.src='https://via.placeholder.com/40'"><span>${ch.name}</span>`;
         
-        div.onclick = () => {
-          playChannel(ch.src, ch.key);
+        div.addEventListener('click', () => {
+          playChannel(ch.src, ch.key, ch.name);
           document.querySelectorAll('.channel-item').forEach(i => i.classList.remove('active'));
           div.classList.add('active');
-        };
+        });
         
         container.appendChild(div);
       });
@@ -92,10 +103,15 @@
       renderChannels(channels.filter(c => c.name.toLowerCase().includes(term)));
     }
 
-    renderChannels(channels);
-    // Load default
-    if(channels.length > 0) playChannel(channels[0].src, channels[0].key);
-
+    document.addEventListener('shaka-ui-loaded', async () => {
+      await initPlayer();
+      renderChannels(channels);
+      if(channels.length > 0) playChannel(channels[0].src, channels[0].key, channels[0].name);
+    });
+    
+    document.addEventListener('DOMContentLoaded', () => {
+       if (!window.shaka) { console.error('Shaka not loaded'); }
+    });
   </script>
 </body>
 </html>
