@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IR NEON - JIO & SONY PRO</title>
+    <title>IR NEON PRO - JIO FIXED</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
@@ -15,11 +15,7 @@
         h2 { font-size: 1.8em; text-shadow: 0 0 15px #ff0055; margin-bottom: 25px; }
         video { width: 100%; border-radius: 12px; margin-top: 20px; border: 3px solid #00f2fe; box-shadow: 0 0 30px #00f2fe; background: #000; }
         .controls { display: flex; flex-direction: column; gap: 12px; margin-top: 65px; }
-        input, select, textarea { padding: 12px; border-radius: 8px; border: 1.5px solid #ff0055; background: #111; color: #fff; font-family: 'Orbitron'; outline: none; font-size: 13px; }
-        input:focus { border-color: #00f2fe; box-shadow: 0 0 10px #00f2fe; }
-        .selector-group { display: flex; gap: 10px; }
-        .selector-item { flex: 1; text-align: left; }
-        label { font-size: 0.7em; color: #00f2fe; margin-bottom: 4px; display: block; }
+        input, select { padding: 12px; border-radius: 8px; border: 1.5px solid #ff0055; background: #111; color: #fff; font-family: 'Orbitron'; outline: none; }
         button { padding: 16px; border-radius: 10px; background: transparent; color: #ff0055; font-weight: bold; border: 2px solid #ff0055; box-shadow: 0 0 12px #ff0055; cursor: pointer; transition: 0.3s; font-family: 'Orbitron'; }
         button:hover { background: #ff0055; color: #fff; box-shadow: 0 0 35px #ff0055; }
         #status { margin-top: 15px; color: #00e676; text-shadow: 0 0 5px #00e676; font-size: 0.8em; }
@@ -34,20 +30,14 @@
     <div class="controls">
         <input type="text" id="urlInput" placeholder="Paste .m3u8 or .mpd link...">
         <input type="text" id="drmKeyInput" placeholder="DRM Key (KID:KEY)">
-        <input type="text" id="cookieInput" placeholder="Paste Cookie (__hdnea__=...)">
+        <input type="text" id="cookieInput" placeholder="Cookie: __hdnea__=...">
         
-        <div class="selector-group">
-            <div class="selector-item">
-                <label>QUALITY</label>
-                <select id="qualitySelect"><option value="auto">AUTO</option></select>
-            </div>
-            <div class="selector-item">
-                <label>AUDIO</label>
-                <select id="audioSelect"><option value="default">DEFAULT</option></select>
-            </div>
+        <div style="display:flex; gap:10px;">
+            <select id="qualitySelect" style="flex:1"><option value="auto">AUTO</option></select>
+            <select id="audioSelect" style="flex:1"><option value="default">DEFAULT</option></select>
         </div>
         
-        <button id="playBtn">LAUNCH JIO/SONY STREAM</button>
+        <button id="playBtn">LAUNCH STREAM</button>
     </div>
 
     <video id="video" controls autoplay playsinline></video>
@@ -59,55 +49,65 @@
     const status = document.getElementById('status');
     const qSelect = document.getElementById('qualitySelect');
     const aSelect = document.getElementById('audioSelect');
+    const playBtn = document.getElementById('playBtn');
     let shakaPlayer = null;
     let hlsInstance = null;
 
-    document.getElementById('playBtn').addEventListener('click', startPlayer);
+    // Use addEventListener for 100% button reliability
+    playBtn.addEventListener('click', () => {
+        console.log("Button Clicked!"); // For testing
+        startPlayer();
+    });
 
-    // --- StartPlayer function ke andar ye badlav kiya gaya hai ---
-async function startPlayer() {
-    const url = document.getElementById('urlInput').value.trim();
-    const drmInput = document.getElementById('drmKeyInput').value.trim();
-    const cookieVal = document.getElementById('cookieInput').value.trim();
-    
-    status.innerText = "ATTEMPTING JIO BYPASS...";
+    async function startPlayer() {
+        const url = document.getElementById('urlInput').value.trim();
+        const drmInput = document.getElementById('drmKeyInput').value.trim();
+        const cookieVal = document.getElementById('cookieInput').value.trim();
+        
+        status.innerText = "INITIALIZING CORE...";
 
-    if (shakaPlayer) { await shakaPlayer.destroy(); shakaPlayer = null; }
-    if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+        // Reset previous instances
+        if (shakaPlayer) { await shakaPlayer.destroy(); shakaPlayer = null; }
+        if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+        qSelect.innerHTML = '<option value="auto">AUTO</option>';
+        aSelect.innerHTML = '<option value="default">DEFAULT</option>';
 
-    // --- DASH/MPD (Star Sports) Logic ---
-    if (url.includes('.mpd')) {
-        shaka.polyfill.installAll();
-        shakaPlayer = new shaka.Player(video);
+        if (!url) { status.innerText = "ERROR: NO URL PROVIDED"; return; }
 
-        // Sabse important step: Cookies allow karna
-        shakaPlayer.getNetworkingEngine().registerRequestFilter((type, request) => {
-            request.allowCrossSiteCredentials = true; // Ye Jio ke liye zaroori hai
-            if (cookieVal) {
-                request.headers['Cookie'] = cookieVal;
-            }
-            request.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
-        });
+        // --- DASH (.mpd) for Star Sports/Jio ---
+        if (url.includes('.mpd')) {
+            shaka.polyfill.installAll();
+            shakaPlayer = new shaka.Player(video);
 
-        if (drmInput.includes(':')) {
-            const [kid, key] = drmInput.split(':');
-            shakaPlayer.configure({ 
-                drm: { clearKeys: { [kid.trim()]: key.trim() } },
-                streaming: { bufferingGoal: 30 } // 4K/HD buffering fix
+            // Mandatory for JioTV Cookies
+            shakaPlayer.getNetworkingEngine().registerRequestFilter((type, request) => {
+                request.allowCrossSiteCredentials = true; 
+                if (cookieVal) {
+                    request.headers['Cookie'] = cookieVal;
+                }
+                request.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
             });
-        }
 
-        try {
-            await shakaPlayer.load(url);
-            status.innerText = "STAR SPORTS ACTIVE";
-            video.play();
-        } catch (e) { 
-            status.innerText = "ERROR: " + e.code + " (Check if Cookie Expired)";
-        }
-    }
-}
+            if (drmInput.includes(':')) {
+                const [kid, key] = drmInput.split(':');
+                shakaPlayer.configure({ drm: { clearKeys: { [kid.trim()]: key.trim() } } });
+            }
 
-        // --- HLS Logic ---
+            try {
+                await shakaPlayer.load(url);
+                status.innerText = "STREAM ACTIVE (DASH)";
+                video.play();
+                
+                shakaPlayer.getVariantTracks().forEach(t => {
+                    let opt = document.createElement('option');
+                    opt.value = t.id; opt.text = t.height + 'p';
+                    qSelect.appendChild(opt);
+                });
+            } catch (e) { 
+                status.innerText = "DASH ERROR: " + e.code;
+            }
+        } 
+        // --- HLS (.m3u8) for Sony/Others ---
         else if (url.includes('.m3u8')) {
             if (Hls.isSupported()) {
                 hlsInstance = new Hls({
@@ -120,13 +120,22 @@ async function startPlayer() {
                 hlsInstance.attachMedia(video);
                 hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
                     video.play();
-                    status.innerText = "HLS ACTIVE";
+                    status.innerText = "STREAM ACTIVE (HLS)";
+                    hlsInstance.levels.forEach((l, i) => {
+                        let opt = document.createElement('option');
+                        opt.value = i; opt.text = l.height + 'p';
+                        qSelect.appendChild(opt);
+                    });
                 });
             }
+        } else {
+            status.innerText = "ERROR: UNKNOWN FORMAT";
         }
     }
 
+    // Quality Change
     qSelect.onchange = () => {
+        if (hlsInstance) hlsInstance.currentLevel = qSelect.value === "auto" ? -1 : parseInt(qSelect.value);
         if (shakaPlayer) {
             shakaPlayer.configure({ abr: { enabled: qSelect.value === "auto" } });
             if (qSelect.value !== "auto") {
