@@ -3,127 +3,111 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sonu Live TV - Fix Loader</title>
+  <title>Sonu Live TV - VideoJS Fixed</title>
   
-  <script src="https://cdn.jsdelivr.net/npm/clappr@0.3.13/dist/clappr.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dash-shaka-playback@1.5.0/dist/dash-shaka-playback.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/clappr-level-selector-plugin@0.3.0/dist/level-selector.min.js"></script>
+  <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+  <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-eme@5.0.1/dist/videojs-contrib-eme.min.js"></script>
 
   <style>
-    :root { --primary: #00f2ff; --accent: #bc13fe; --bg: #050505; }
-    body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; padding: 10px; }
+    :root { --primary: #00f2ff; --bg: #0a0a0a; }
+    body { font-family: sans-serif; background: var(--bg); color: white; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
     
-    .player-container { width: 100%; max-width: 850px; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid #333; position: sticky; top: 10px; z-index: 999; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-    #video-player { width: 100%; height: 100%; }
+    /* Player Window Fix */
+    .player-box { width: 100%; max-width: 850px; background: #000; border-radius: 10px; overflow: hidden; border: 2px solid #333; box-shadow: 0 0 20px rgba(0,242,255,0.2); position: sticky; top: 10px; z-index: 1000; }
+    .video-js { width: 100% !important; height: auto !important; aspect-ratio: 16/9; }
 
-    .search-box { width: 100%; max-width: 850px; margin: 20px 0 10px 0; }
-    #searchBar { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #111; color: white; font-size: 16px; outline: none; }
-    #searchBar:focus { border-color: var(--primary); }
+    .search-box { width: 100%; max-width: 850px; margin: 20px 0; }
+    #searchBar { width: 100%; padding: 12px; border-radius: 5px; border: 1px solid #444; background: #111; color: #fff; box-sizing: border-box; }
 
-    .channel-list { width: 100%; max-width: 850px; display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 10px; }
-    .channel-card { background: #1a1a1a; padding: 10px 5px; border-radius: 10px; text-align: center; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
-    .channel-card:hover { border-color: var(--primary); background: #222; }
-    .channel-card.active { border-color: var(--accent); background: #251030; }
-    .channel-card img { width: 40px; height: 40px; object-fit: contain; margin-bottom: 5px; pointer-events: none; }
-    .channel-card span { display: block; font-size: 10px; font-weight: bold; pointer-events: none; white-space: nowrap; overflow: hidden; }
-
-    #audio-switch { margin: 10px 0; background: #222; color: var(--primary); padding: 5px 10px; border-radius: 5px; border: 1px solid var(--primary); font-size: 12px; }
+    .channel-list { width: 100%; max-width: 850px; display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+    .channel-card { background: #1a1a1a; padding: 10px; border-radius: 8px; text-align: center; cursor: pointer; border: 1px solid #333; transition: 0.3s; }
+    .channel-card:hover { border-color: var(--primary); transform: scale(1.05); }
+    .channel-card.active { border-color: #bc13fe; background: #221035; }
+    .channel-card img { width: 50px; height: 50px; object-fit: contain; margin-bottom: 5px; display: block; margin-left: auto; margin-right: auto; }
+    .channel-card span { font-size: 11px; font-weight: bold; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    
+    #status { margin-bottom: 10px; color: var(--primary); font-size: 14px; font-weight: bold; }
   </style>
 </head>
 <body>
 
-  <div class="player-container">
-    <div id="video-player"></div>
+  <div id="status">SYSTEM READY</div>
+
+  <div class="player-box">
+    <video id="my-video" class="video-js vjs-big-play-centered" controls preload="auto" playsinline></video>
   </div>
 
   <div class="search-box">
-    <select id="audio-switch" onchange="changeLang()"><option value="">Language</option></select>
-    <input type="text" id="searchBar" placeholder="Search channel..." onkeyup="doSearch()">
+    <input type="text" id="searchBar" placeholder="Search Channels..." onkeyup="search()">
   </div>
 
-  <div class="channel-list" id="listContainer"></div>
+  <div class="channel-list" id="channelList"></div>
 
   <script>
+    // Channels Data
     const channels = [
       { name: 'WORLD CUP HINDI', src: 'https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/nn1qrdjaha/out/v1/bc4fa7d9cebf47858bebf14ad589025e/cenc.mpd', key: '9909e33838e1152cc512c4636f513f8f:02f67060c94bcc3307280f505ad508ab', logo: 'https://iili.io/1Nz0AP.png' },
-      { name: 'AAJ TAK', src: 'https://aajtakhdlive-amd.akamaized.net/hls/live/2014415/aajtakhd/aajtakhdlive/live_1080p/chunks.m3u8', key: '', logo: 'https://static.wikia.nocookie.net/logopedia/images/e/e0/Aaj_Tak_2021.png' },
-      { name: 'ZEE TV', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Zeetv/default/manifest.mpd', key: 'ed068cf84f0640ccbc7c0e395c0a272e:bb722190f2bb446391020411a7d0828b', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/7/75/Zee_TV_logo.svg/1200px-Zee_TV_logo.svg.png' }
+      { name: 'ZEE TV', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Zeetv/default/manifest.mpd', key: 'ed068cf84f0640ccbc7c0e395c0a272e:bb722190f2bb446391020411a7d0828b', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/yHNSuG1V.png' },
+      { name: 'AAJ TAK', src: 'https://aajtakhdlive-amd.akamaized.net/hls/live/2014415/aajtakhd/aajtakhdlive/live_1080p/chunks.m3u8', key: '', logo: 'https://static.wikia.nocookie.net/logopedia/images/e/e0/Aaj_Tak_2021.png' }
     ];
 
-    let mainPlayer = null;
-    let shakaObj = null;
+    // Initialize Player
+    const player = videojs('my-video');
+    player.eme(); // DRM Support Enable
 
-    function play(url, key) {
-      // 1. पुराने प्लेयर को पूरी तरह साफ़ करें
-      if (mainPlayer) {
-        mainPlayer.destroy();
-        mainPlayer = null;
+    function playChannel(url, key, name) {
+      document.getElementById('status').innerText = "LOADING: " + name;
+
+      // Type Detection
+      let type = url.includes('.mpd') ? 'application/dash+xml' : 'application/x-mpegURL';
+
+      // DRM Setup
+      let emeOptions = {};
+      if (key && key.includes(':')) {
+        const [kid, kvalue] = key.split(':');
+        emeOptions = {
+          applicationKeySystem: 'org.w3.clearkey',
+          clearkeys: { [kid.trim()]: kvalue.trim() }
+        };
       }
 
-      // 2. MimeType पहचानें
-      const isMpd = url.includes('.mpd');
-      const mType = isMpd ? 'application/dash+xml' : 'application/x-mpegURL';
+      // Load Source
+      player.src({
+        src: url,
+        type: type,
+        keySystems: emeOptions
+      });
 
-      // 3. नया प्लेयर बनाएँ
-      mainPlayer = new Clappr.Player({
-        source: url,
-        parentId: "#video-player",
-        mimeType: mType,
-        plugins: [DashShakaPlayback, LevelSelector],
-        width: '100%',
-        height: '100%',
-        autoPlay: true,
-        shakaConfiguration: {
-          drm: {
-            clearKeys: key && key.includes(':') ? { [key.split(':')[0].trim()]: key.split(':')[1].trim() } : {}
-          }
-        },
-        shakaOnBeforeLoad: function(s) {
-          shakaObj = s;
-          s.addEventListener('trackschanged', () => {
-            const menu = document.getElementById('audio-switch');
-            const langs = s.getAudioLanguages();
-            menu.innerHTML = '<option value="">Language</option>';
-            langs.forEach(l => {
-              let opt = document.createElement('option');
-              opt.value = l; opt.text = l.toUpperCase();
-              menu.appendChild(opt);
-            });
-          });
-        },
-        levelSelectorConfig: { title: 'Quality', labelCallback: (l) => l.level.height + 'P' }
+      player.play().catch(e => {
+        document.getElementById('status').innerText = "ERROR: LINK BLOCKED OR EXPIRED";
       });
     }
 
-    function changeLang() {
-      const val = document.getElementById('audio-switch').value;
-      if (shakaObj && val) shakaObj.selectAudioLanguage(val);
-    }
-
-    function render(data) {
-      const container = document.getElementById('listContainer');
+    function render(list) {
+      const container = document.getElementById('channelList');
       container.innerHTML = '';
-      data.forEach(item => {
+      list.forEach(ch => {
         const card = document.createElement('div');
         card.className = 'channel-card';
-        card.innerHTML = `<img src="${item.logo}" onerror="this.src='https://via.placeholder.com/40'"><span>${item.name}</span>`;
+        card.innerHTML = `<img src="${ch.logo}" onerror="this.src='https://via.placeholder.com/50'"><span>${ch.name}</span>`;
         card.onclick = () => {
           document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('active'));
           card.classList.add('active');
-          play(item.src, item.key);
+          playChannel(ch.src, ch.key, ch.name);
         };
         container.appendChild(card);
       });
     }
 
-    function doSearch() {
+    function search() {
       const q = document.getElementById('searchBar').value.toLowerCase();
       render(channels.filter(c => c.name.toLowerCase().includes(q)));
     }
 
-    // Start
+    // Default Load
     render(channels);
-    if(channels.length > 0) play(channels[0].src, channels[0].key);
+    if(channels.length > 0) playChannel(channels[0].src, channels[0].key, channels[0].name);
   </script>
 </body>
 </html>
