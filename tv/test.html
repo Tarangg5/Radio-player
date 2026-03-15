@@ -3,100 +3,97 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sonu Live TV - VideoJS Fixed</title>
+  <title>Sonu TV - Supported Fix</title>
   
-  <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
-  <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-eme@5.0.1/dist/videojs-contrib-eme.min.js"></script>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/controls.css">
+  
   <style>
-    :root { --primary: #00f2ff; --bg: #0a0a0a; }
-    body { font-family: sans-serif; background: var(--bg); color: white; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
+    :root { --neon: #00f2ff; --bg: #050505; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
     
-    /* Player Window Fix */
-    .player-box { width: 100%; max-width: 850px; background: #000; border-radius: 10px; overflow: hidden; border: 2px solid #333; box-shadow: 0 0 20px rgba(0,242,255,0.2); position: sticky; top: 10px; z-index: 1000; }
-    .video-js { width: 100% !important; height: auto !important; aspect-ratio: 16/9; }
+    /* Fixed Player Window */
+    .video-container { width: 100%; max-width: 800px; border: 2px solid #333; border-radius: 12px; overflow: hidden; background: #000; box-shadow: 0 0 20px rgba(0,242,255,0.1); }
+    video { width: 100%; aspect-ratio: 16/9; display: block; }
 
-    .search-box { width: 100%; max-width: 850px; margin: 20px 0; }
-    #searchBar { width: 100%; padding: 12px; border-radius: 5px; border: 1px solid #444; background: #111; color: #fff; box-sizing: border-box; }
+    .search-box { width: 100%; max-width: 800px; margin: 20px 0; }
+    input#searchBar { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #111; color: white; outline: none; }
 
-    .channel-list { width: 100%; max-width: 850px; display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
-    .channel-card { background: #1a1a1a; padding: 10px; border-radius: 8px; text-align: center; cursor: pointer; border: 1px solid #333; transition: 0.3s; }
-    .channel-card:hover { border-color: var(--primary); transform: scale(1.05); }
-    .channel-card.active { border-color: #bc13fe; background: #221035; }
-    .channel-card img { width: 50px; height: 50px; object-fit: contain; margin-bottom: 5px; display: block; margin-left: auto; margin-right: auto; }
-    .channel-card span { font-size: 11px; font-weight: bold; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .channel-list { width: 100%; max-width: 800px; display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+    .card { background: #151515; padding: 10px; border-radius: 10px; text-align: center; cursor: pointer; border: 1px solid #222; }
+    .card:hover { border-color: var(--neon); background: #1a1a1a; }
+    .card.active { border-color: #bc13fe; background: #200a2b; }
+    .card img { width: 40px; height: 40px; object-fit: contain; margin-bottom: 5px; }
+    .card span { display: block; font-size: 10px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     
-    #status { margin-bottom: 10px; color: var(--primary); font-size: 14px; font-weight: bold; }
+    #status { font-size: 12px; color: var(--neon); margin-bottom: 8px; text-transform: uppercase; }
   </style>
 </head>
 <body>
 
-  <div id="status">SYSTEM READY</div>
+  <div id="status">System: Online</div>
 
-  <div class="player-box">
-    <video id="my-video" class="video-js vjs-big-play-centered" controls preload="auto" playsinline></video>
+  <div class="video-container" id="videoParent">
+    <video id="video" autoplay></video>
   </div>
 
   <div class="search-box">
     <input type="text" id="searchBar" placeholder="Search Channels..." onkeyup="search()">
   </div>
 
-  <div class="channel-list" id="channelList"></div>
+  <div class="channel-list" id="list"></div>
 
   <script>
-    // Channels Data
     const channels = [
       { name: 'WORLD CUP HINDI', src: 'https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/nn1qrdjaha/out/v1/bc4fa7d9cebf47858bebf14ad589025e/cenc.mpd', key: '9909e33838e1152cc512c4636f513f8f:02f67060c94bcc3307280f505ad508ab', logo: 'https://iili.io/1Nz0AP.png' },
-      { name: 'ZEE TV', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Zeetv/default/manifest.mpd', key: 'ed068cf84f0640ccbc7c0e395c0a272e:bb722190f2bb446391020411a7d0828b', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/yHNSuG1V.png' },
+      { name: 'ZEE TV', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Zeetv/default/manifest.mpd', key: 'ed068cf84f0640ccbc7c0e395c0a272e:bb722190f2bb446391020411a7d0828b', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/7/75/Zee_TV_logo.svg/1200px-Zee_TV_logo.svg.png' },
       { name: 'AAJ TAK', src: 'https://aajtakhdlive-amd.akamaized.net/hls/live/2014415/aajtakhd/aajtakhdlive/live_1080p/chunks.m3u8', key: '', logo: 'https://static.wikia.nocookie.net/logopedia/images/e/e0/Aaj_Tak_2021.png' }
     ];
 
-    // Initialize Player
-    const player = videojs('my-video');
-    player.eme(); // DRM Support Enable
+    let player;
 
-    function playChannel(url, key, name) {
-      document.getElementById('status').innerText = "LOADING: " + name;
+    async function initPlayer() {
+      shaka.polyfill.installAll();
+      const video = document.getElementById('video');
+      player = new shaka.Player(video);
 
-      // Type Detection
-      let type = url.includes('.mpd') ? 'application/dash+xml' : 'application/x-mpegURL';
-
-      // DRM Setup
-      let emeOptions = {};
-      if (key && key.includes(':')) {
-        const [kid, kvalue] = key.split(':');
-        emeOptions = {
-          applicationKeySystem: 'org.w3.clearkey',
-          clearkeys: { [kid.trim()]: kvalue.trim() }
-        };
-      }
-
-      // Load Source
-      player.src({
-        src: url,
-        type: type,
-        keySystems: emeOptions
-      });
-
-      player.play().catch(e => {
-        document.getElementById('status').innerText = "ERROR: LINK BLOCKED OR EXPIRED";
-      });
+      // Error Listener
+      player.addEventListener('error', (e) => console.error('Error code', e.detail.code, 'object', e.detail));
     }
 
-    function render(list) {
-      const container = document.getElementById('channelList');
-      container.innerHTML = '';
-      list.forEach(ch => {
-        const card = document.createElement('div');
-        card.className = 'channel-card';
-        card.innerHTML = `<img src="${ch.logo}" onerror="this.src='https://via.placeholder.com/50'"><span>${ch.name}</span>`;
-        card.onclick = () => {
-          document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('active'));
-          card.classList.add('active');
-          playChannel(ch.src, ch.key, ch.name);
+    async function loadChannel(url, key, name) {
+      document.getElementById('status').innerText = "Loading: " + name;
+      
+      try {
+        // DRM Configuration Fix
+        const config = {
+          drm: {
+            clearKeys: key && key.includes(':') ? { [key.split(':')[0].trim()]: key.split(':')[1].trim() } : {}
+          }
         };
-        container.appendChild(card);
+        
+        await player.configure(config);
+        await player.load(url);
+        document.getElementById('status').innerText = "Streaming: " + name;
+      } catch (e) {
+        document.getElementById('status').innerText = "Error: Use a Proxy / Worker";
+        console.error('Load failed', e);
+      }
+    }
+
+    function render(data) {
+      const list = document.getElementById('list');
+      list.innerHTML = '';
+      data.forEach(ch => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `<img src="${ch.logo}" onerror="this.src='https://via.placeholder.com/40'"><span>${ch.name}</span>`;
+        card.onclick = () => {
+          document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+          card.classList.add('active');
+          loadChannel(ch.src, ch.key, ch.name);
+        };
+        list.appendChild(card);
       });
     }
 
@@ -105,9 +102,11 @@
       render(channels.filter(c => c.name.toLowerCase().includes(q)));
     }
 
-    // Default Load
-    render(channels);
-    if(channels.length > 0) playChannel(channels[0].src, channels[0].key, channels[0].name);
+    // Bootstrap
+    initPlayer().then(() => {
+      render(channels);
+      if(channels.length > 0) loadChannel(channels[0].src, channels[0].key, channels[0].name);
+    });
   </script>
 </body>
 </html>
