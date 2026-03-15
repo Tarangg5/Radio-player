@@ -3,55 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SONU NEON TV - Hybrid Player</title>
+    <title>SONU NEON PLAYER - Final Audio Fix</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
-        :root { --neon: #00f2fe; --pink: #ff0055; --bg: #050505; }
-        body { font-family: 'Orbitron', sans-serif; background: var(--bg); color: #fff; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
-        
-        .player-container { width: 100%; max-width: 850px; background: #000; border-radius: 15px; border: 2px solid var(--pink); box-shadow: 0 0 20px var(--pink); position: sticky; top: 0; z-index: 100; overflow: hidden; }
-        video { width: 100%; aspect-ratio: 16/9; display: block; background: #000; }
-
-        .control-panel { width: 100%; max-width: 850px; margin: 15px 0; display: flex; gap: 10px; flex-wrap: wrap; }
-        input, select { padding: 10px; border-radius: 8px; border: 1px solid var(--neon); background: #111; color: #fff; font-family: 'Orbitron'; outline: none; flex: 1; }
-        
-        .channel-list { width: 100%; max-width: 850px; display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 10px; }
-        .channel-card { background: #151515; padding: 10px; border-radius: 12px; text-align: center; cursor: pointer; border: 1px solid #333; transition: 0.3s; }
-        .channel-card:hover { border-color: var(--neon); transform: translateY(-3px); }
-        .channel-card.active { border-color: var(--pink); background: rgba(255, 0, 85, 0.1); box-shadow: 0 0 10px var(--pink); }
+        body { font-family: 'Orbitron', sans-serif; background: #050505; color: #fff; padding: 20px; text-align: center; }
+        .container { max-width: 900px; margin: auto; background: rgba(20, 20, 20, 0.9); padding: 30px; border-radius: 20px; border: 2px solid #ff0055; box-shadow: 0 0 20px #ff0055; position: relative; }
+        h2 { font-size: 2.2em; margin-bottom: 20px; text-shadow: 0 0 15px #ff0055; color: #ff0055; }
+        .player-box { width: 100%; border-radius: 12px; border: 3px solid #00f2fe; box-shadow: 0 0 25px #00f2fe; background: #000; overflow: hidden; position: sticky; top: 0; z-index: 10; }
+        video { width: 100%; aspect-ratio: 16/9; display: block; }
+        .controls { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+        input, select { padding: 14px; border-radius: 8px; border: 2px solid #ff0055; background: #111; color: #fff; font-family: 'Orbitron'; outline: none; }
+        .selector-group { display: flex; gap: 10px; }
+        .selector-item { flex: 1; text-align: left; }
+        label { font-size: 0.8em; color: #00f2fe; margin-bottom: 5px; display: block; }
+        #status { margin-top: 15px; color: #00e676; text-shadow: 0 0 5px #00e676; font-size: 0.9em; height: 20px; }
+        .channel-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; margin-top: 25px; }
+        .channel-card { background: #151515; padding: 10px; border-radius: 12px; cursor: pointer; border: 1px solid #333; transition: 0.3s; }
+        .channel-card:hover { border-color: #00f2fe; transform: translateY(-3px); }
+        .channel-card.active { border-color: #ff0055; background: rgba(255, 0, 85, 0.1); }
         .channel-card img { width: 45px; height: 45px; object-fit: contain; margin-bottom: 5px; }
         .channel-card span { display: block; font-size: 9px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-        #status { font-size: 12px; color: #00e676; margin-bottom: 5px; text-shadow: 0 0 5px #00e676; }
     </style>
 </head>
 <body>
 
+<div class="container">
+    <h2>SONU NEON TV</h2>
     <div id="status">SYSTEM READY</div>
 
-    <div class="player-container">
+    <div class="player-box">
         <video id="video" controls autoplay playsinline></video>
     </div>
 
-    <div class="control-panel">
-        <input type="text" id="searchBar" placeholder="Search Channels..." onkeyup="filter()">
-        <select id="qualitySelect" onchange="changeQuality()"><option value="auto">AUTO QUALITY</option></select>
-        <select id="audioSelect" onchange="changeAudio()"><option value="default">DEFAULT AUDIO</option></select>
+    <div class="controls">
+        <input type="text" id="searchBar" placeholder="Search Channel..." onkeyup="doSearch()">
+        <div class="selector-group">
+            <div class="selector-item">
+                <label>QUALITY</label>
+                <select id="qualitySelect" onchange="changeQuality()"><option value="auto">AUTO</option></select>
+            </div>
+            <div class="selector-item">
+                <label>AUDIO</label>
+                <select id="audioSelect" onchange="changeAudio()"><option value="default">DEFAULT</option></select>
+            </div>
+        </div>
     </div>
 
-    <div class="channel-list" id="list"></div>
+    <div class="channel-list" id="channelList"></div>
+</div>
 
-    <script>
-        const video = document.getElementById('video');
-        const qSelect = document.getElementById('qualitySelect');
-        const aSelect = document.getElementById('audioSelect');
-        const status = document.getElementById('status');
-        let shakaPlayer = null;
-        let hlsInstance = null;
+<script>
+    const video = document.getElementById('video');
+    const qSelect = document.getElementById('qualitySelect');
+    const aSelect = document.getElementById('audioSelect');
+    const status = document.getElementById('status');
+    let shakaPlayer = null;
+    let hlsInstance = null;
 
-        const channels = [
+    const channels = [
   { name: 'WORLD CUP HINDI', src: 'https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/nn1qrdjaha/out/v1/bc4fa7d9cebf47858bebf14ad589025e/cenc.mpd', key: '9909e33838e1152cc512c4636f513f8f:02f67060c94bcc3307280f505ad508ab', logo: 'https://iili.io/1Nz0AP.png' },
   { name: 'WORLD CUP ENG', src: 'https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/lz7yhtgbjb/out/v1/bedaa948e7a24dc0b5fd5d7b38534d8c/cenc.mpd', key: '470a5bda0ae8965c3ab4004c302bc1c8:b04888df6ed570c9435b97471504bd9b', logo: 'https://iili.io/1Nz0AP.png' },
   { name: 'TNT SPORTS 4', src: 'https://ta.bia-cf.live.pv-cdn.net/bom-nitro/live/clients/dash/enc/ecp6xidc5d/out/v1/b8a94677c56e4411aef7ecc2431cec0a/cenc.mpd', key: '192b1115da041585c77200128549efa1:634e10efe4abbb14be400a3ccbac0258', logo: 'https://iili.io/1Nz0AP.png' },
@@ -99,98 +110,106 @@
   { name: 'Discovey', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Discoverychannel2/default/manifest.mpd', key: 'b70a8cf9450c4d6484b4ac4d3c6761c0:0908be844260409cbac180bf0181da40', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/UyI5ljKM.png' },
 ];
 
-        async function play(url, key, name) {
-            status.innerText = "INITIALIZING: " + name;
-            
-            // Clean old instances
-            if (shakaPlayer) { await shakaPlayer.destroy(); shakaPlayer = null; }
-            if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
-            qSelect.innerHTML = '<option value="auto">AUTO QUALITY</option>';
-            aSelect.innerHTML = '<option value="default">DEFAULT AUDIO</option>';
+    async function play(url, key, name) {
+        status.innerText = "LOADING: " + name;
+        if (shakaPlayer) { await shakaPlayer.destroy(); shakaPlayer = null; }
+        if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+        qSelect.innerHTML = '<option value="auto">AUTO</option>';
+        aSelect.innerHTML = '<option value="default">DEFAULT</option>';
 
-            if (url.includes('.m3u8')) {
-                if (Hls.isSupported()) {
-                    hlsInstance = new Hls({ xhrSetup: (xhr) => xhr.setRequestHeader('User-Agent', 'Mozilla/5.0') });
-                    hlsInstance.loadSource(url);
-                    hlsInstance.attachMedia(video);
-                    hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
-                        hlsInstance.levels.forEach((l, i) => {
-                            let opt = document.createElement('option');
-                            opt.value = i; opt.text = l.height + 'P';
-                            qSelect.appendChild(opt);
-                        });
-                        video.play();
-                        status.innerText = "HLS ACTIVE";
-                    });
-                }
-            } else {
-                shaka.polyfill.installAll();
-                shakaPlayer = new shaka.Player(video);
-                if (key) {
-                    const [kid, kvalue] = key.split(':');
-                    shakaPlayer.configure({ drm: { clearKeys: { [kid.trim()]: kvalue.trim() } } });
-                }
-                try {
-                    await shakaPlayer.load(url);
-                    shakaPlayer.getVariantTracks().forEach(t => {
+        if (url.includes('.m3u8')) {
+            if (Hls.isSupported()) {
+                hlsInstance = new Hls();
+                hlsInstance.loadSource(url);
+                hlsInstance.attachMedia(video);
+                hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+                    hlsInstance.levels.forEach((l, i) => {
                         let opt = document.createElement('option');
-                        opt.value = t.id; opt.text = t.height + 'P';
+                        opt.value = i; opt.text = l.height + 'P';
                         qSelect.appendChild(opt);
                     });
-                    const langs = shakaPlayer.getAudioLanguages();
-                    if(langs.length > 0) {
-                        aSelect.innerHTML = '';
-                        langs.forEach(l => {
-                            let opt = document.createElement('option');
-                            opt.value = l; opt.text = l.toUpperCase();
-                            aSelect.appendChild(opt);
-                        });
-                    }
                     video.play();
-                    status.innerText = "DASH ACTIVE";
-                } catch (e) { status.innerText = "ERROR: " + e.code; }
+                });
+                hlsInstance.on(Hls.Events.AUDIO_TRACKS_UPDATED, (e, data) => {
+                    aSelect.innerHTML = '';
+                    data.audioTracks.forEach((t, i) => {
+                        let opt = document.createElement('option');
+                        opt.value = i; opt.text = (t.name || t.lang || `Track ${i+1}`).toUpperCase();
+                        aSelect.appendChild(opt);
+                    });
+                });
+                status.innerText = "HLS MODE ACTIVE";
             }
-        }
-
-        function changeQuality() {
-            const val = qSelect.value;
-            if (hlsInstance) hlsInstance.currentLevel = val === "auto" ? -1 : parseInt(val);
-            if (shakaPlayer) {
-                if (val === "auto") shakaPlayer.configure({ abr: { enabled: true } });
-                else {
-                    shakaPlayer.configure({ abr: { enabled: false } });
-                    shakaPlayer.selectVariantTrack(shakaPlayer.getVariantTracks().find(t => t.id == val), true);
+        } else {
+            shaka.polyfill.installAll();
+            shakaPlayer = new shaka.Player(video);
+            if (key) {
+                const parts = key.split(':');
+                shakaPlayer.configure({ drm: { clearKeys: { [parts[0].trim()]: parts[1].trim() } } });
+            }
+            try {
+                await shakaPlayer.load(url);
+                shakaPlayer.getVariantTracks().forEach(t => {
+                    let opt = document.createElement('option');
+                    opt.value = t.id; opt.text = t.height + 'P';
+                    qSelect.appendChild(opt);
+                });
+                const langs = shakaPlayer.getAudioLanguages();
+                if(langs.length > 0) {
+                    aSelect.innerHTML = '';
+                    langs.forEach(l => {
+                        let opt = document.createElement('option');
+                        opt.value = l; 
+                        opt.text = (l === 'hi' ? 'HINDI' : l === 'en' ? 'ENGLISH' : l).toUpperCase();
+                        aSelect.appendChild(opt);
+                    });
                 }
+                video.play();
+                status.innerText = "DASH MODE ACTIVE";
+            } catch (e) { status.innerText = "ERROR: " + e.code; }
+        }
+    }
+
+    function changeQuality() {
+        const val = qSelect.value;
+        if (hlsInstance) hlsInstance.currentLevel = val === "auto" ? -1 : parseInt(val);
+        if (shakaPlayer) {
+            if (val === "auto") shakaPlayer.configure({ abr: { enabled: true } });
+            else {
+                shakaPlayer.configure({ abr: { enabled: false } });
+                shakaPlayer.selectVariantTrack(shakaPlayer.getVariantTracks().find(t => t.id == val), true);
             }
         }
+    }
 
-        function changeAudio() {
-            if (shakaPlayer) shakaPlayer.selectAudioLanguage(aSelect.value);
-        }
+    function changeAudio() {
+        if (shakaPlayer) shakaPlayer.selectAudioLanguage(aSelect.value);
+        if (hlsInstance) hlsInstance.audioTrack = parseInt(aSelect.value);
+    }
 
-        function render(data) {
-            const list = document.getElementById('list');
-            list.innerHTML = '';
-            data.forEach(ch => {
-                const card = document.createElement('div');
-                card.className = 'channel-card';
-                card.innerHTML = `<img src="${ch.logo}"><span>${ch.name}</span>`;
-                card.onclick = () => {
-                    document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('active'));
-                    card.classList.add('active');
-                    play(ch.src, ch.key, ch.name);
-                };
-                list.appendChild(card);
-            });
-        }
+    function render(data) {
+        const container = document.getElementById('channelList');
+        container.innerHTML = '';
+        data.forEach(ch => {
+            const card = document.createElement('div');
+            card.className = 'channel-card';
+            card.innerHTML = `<img src="${ch.logo}" onerror="this.src='https://via.placeholder.com/40'"><span>${ch.name}</span>`;
+            card.onclick = () => {
+                document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                play(ch.src, ch.key, ch.name);
+            };
+            container.appendChild(card);
+        });
+    }
 
-        function filter() {
-            const q = document.getElementById('searchBar').value.toLowerCase();
-            render(channels.filter(c => c.name.toLowerCase().includes(q)));
-        }
+    function doSearch() {
+        const q = document.getElementById('searchBar').value.toLowerCase();
+        render(channels.filter(c => c.name.toLowerCase().includes(q)));
+    }
 
-        render(channels);
-        if(channels.length > 0) play(channels[0].src, channels[0].key, channels[0].name);
-    </script>
+    render(channels);
+    if(channels.length > 0) play(channels[0].src, channels[0].key, channels[0].name);
+</script>
 </body>
 </html>
