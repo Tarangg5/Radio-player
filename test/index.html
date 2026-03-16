@@ -1,105 +1,83 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Ultimate IPTV Panel</title>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
-
-<style>
-
-body{
-background:#111;
-color:white;
-font-family:Arial;
-}
-
-#channels{
-width:300px;
-height:100vh;
-overflow:auto;
-background:#1b1b1b;
-float:left;
-}
-
-.channel{
-padding:10px;
-border-bottom:1px solid #333;
-cursor:pointer;
-}
-
-.channel:hover{
-background:#333;
-}
-
-#player{
-margin-left:300px;
-padding:20px;
-}
-
-video{
-width:100%;
-max-width:900px;
-}
-
-</style>
-
+    <meta charset="UTF-8">
+    <title>Star Sports 1 Hindi - Live Player</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
+    <style>
+        body { 
+            background: #121212; 
+            color: white; 
+            font-family: sans-serif; 
+            display: flex; 
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        .container { width: 90%; max-width: 900px; text-align: center; }
+        video { width: 100%; border: 2px solid #ed1c24; border-radius: 8px; background: #000; }
+        h2 { margin-bottom: 15px; color: #ed1c24; }
+    </style>
 </head>
-
 <body>
 
-<div id="channels"></div>
+    <div class="container">
+        <h2>🔴 Star Sports 1 Hindi (Live)</h2>
+        <video id="video" controls autoplay crossorigin="anonymous"></video>
+        <p style="font-size: 12px; color: #888; margin-top: 10px;">Note: Make sure CORS Extension is ON in your browser.</p>
+    </div>
 
-<div id="player">
-<video id="video" controls autoplay></video>
-</div>
+    <script>
+        const manifestUri = 'https://jiotvpllive.cdn.jio.com/bpk-tv/Star_Sports_1_Hindi_BTS/output/index.mpd';
+        
+        // DRM ClearKey Configuration
+        const keyId = '8ea9b607549252068e260a5f4d7dd321';
+        const key = '350c0aaffedf51cc1502e9543c7c885e';
+        
+        // Cookie Header string
+        const myCookie = "__hdnea__=st=1773629375~exp=1773715775~acl=/*~hmac=ef55190f024fdd08cbd1abb181b06b9166148359dd2f24a0f7036ab745bb3628";
 
-<script>
+        async function initApp() {
+            shaka.polyfil.installAll();
+            if (shaka.Player.isBrowserSupported()) {
+                initPlayer();
+            } else {
+                alert('Browser not supported!');
+            }
+        }
 
-const proxy = "https://quiet-lake-4bc3.sonuujamuicamp.workers.dev?url=";
+        async function initPlayer() {
+            const video = document.getElementById('video');
+            const player = new shaka.Player(video);
 
-const channels = [
-{
-name:"Star Sports 1 Hindi",
-stream:"https://jiotvpllive.cdn.jio.com/bpk-tv/Star_Sports_1_Hindi_BTS/output/index.mpd",
-keyid:"8ea9b607549252068e260a5f4d7dd321",
-key:"350c0aaffedf51cc1502e9543c7c885e"
-}
-];
+            // 1. Networking Filter to inject Cookies
+            player.getNetworkingEngine().registerRequestFilter(function(type, request) {
+                // Har request (manifest aur segments) mein cookie add hogi
+                request.headers['Cookie'] = myCookie;
+            });
 
-const channelList = document.getElementById("channels");
+            // 2. DRM Setup (ClearKey)
+            player.configure({
+                drm: {
+                    clearKeys: {
+                        [keyId]: key
+                    }
+                }
+            });
 
-channels.forEach((c,i)=>{
-const div = document.createElement("div");
-div.className="channel";
-div.innerText=c.name;
-div.onclick=()=>playChannel(i);
-channelList.appendChild(div);
-});
+            // 3. Load the stream
+            try {
+                await player.load(manifestUri);
+                console.log('Video Loaded Successfully!');
+            } catch (e) {
+                console.error('Error loading video:', e);
+                if(e.code == 1001) alert("CORS Error: Please enable 'Allow CORS' extension.");
+            }
+        }
 
-async function playChannel(i){
-
-const c = channels[i];
-
-const video = document.getElementById("video");
-
-const player = new shaka.Player(video);
-
-player.configure({
-drm:{
-clearKeys:{
-[c.keyid]:c.key
-}
-}
-});
-
-await player.load(proxy + encodeURIComponent(c.stream));
-
-}
-
-playChannel(0);
-
-</script>
-
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
 </body>
 </html>
