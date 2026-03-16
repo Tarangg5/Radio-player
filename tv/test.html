@@ -87,11 +87,42 @@
 
     // चैनल्स में 'cat' प्रॉपर्टी जोड़ दी है
     const channels = [
-        { name: 'WORLD CUP HINDI', src: 'https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/nn1qrdjaha/out/v1/bc4fa7d9cebf47858bebf14ad589025e/cenc.mpd', key: '9909e33838e1152cc512c4636f513f8f:02f67060c94bcc3307280f505ad508ab', logo: 'https://iili.io/1Nz0AP.png', cat: 'sports' },
-        { name: 'WORLD CUP ENG', src: 'https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/lz7yhtgbjb/out/v1/bedaa948e7a24dc0b5fd5d7b38534d8c/cenc.mpd', key: '470a5bda0ae8965c3ab4004c302bc1c8:b04888df6ed570c9435b97471504bd9b', logo: 'https://iili.io/1Nz0AP.png', cat: 'sports' },
-        { name: 'AAJ TAK HD', src: 'https://aajtakhdlive-amd.akamaized.net/hls/live/2014415/aajtakhd/aajtakhdlive/live_1080p/chunks.m3u8', key: '', logo: 'https://static.wikia.nocookie.net/logopedia/images/e/e0/Aaj_Tak_2021.png', cat: 'news' },
-        { name: 'ZEE TV SD', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Zeetv/default/manifest.mpd', key: 'ed068cf84f0640ccbc7c0e395c0a272e:bb722190f2bb446391020411a7d0828b', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/7/75/Zee_TV_logo.svg/1200px-Zee_TV_logo.svg.png', cat: 'movies' }
-    ];
+  // --- SPORTS & TRAVEL ---
+  { name: 'WORLD CUP HINDI', src: 'https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/nn1qrdjaha/out/v1/bc4fa7d9cebf47858bebf14ad589025e/cenc.mpd', key: '9909e33838e1152cc512c4636f513f8f:02f67060c94bcc3307280f505ad508ab', logo: 'https://iili.io/1Nz0AP.png', cat: 'sports' },
+  { name: 'WORLD CUP ENG', src: 'https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/lz7yhtgbjb/out/v1/bedaa948e7a24dc0b5fd5d7b38534d8c/cenc.mpd', key: '470a5bda0ae8965c3ab4004c302bc1c8:b04888df6ed570c9435b97471504bd9b', logo: 'https://iili.io/1Nz0AP.png', cat: 'sports' },
+  { name: 'TNT SPORTS 4', src: 'https://ta.bia-cf.live.pv-cdn.net/bom-nitro/live/clients/dash/enc/ecp6xidc5d/out/v1/b8a94677c56e4411aef7ecc2431cec0a/cenc.mpd', key: '192b1115da041585c77200128549efa1:634e10efe4abbb14be400a3ccbac0258', logo: 'https://iili.io/1Nz0AP.png', cat: 'sports' },
+  { name: 'TNT 2 SPORTS', src: 'https://ottb.live.cf.ww.aiv-cdn.net/lhr-nitro/live/dash/enc/f0qvkrra8j/out/v1/f8fa17f087564f51aa4d5c700be43ec4/cenc.mpd', key: '9f51f3dc6313ac8bc668e2d9d1c04dfa:74bc63e5a193454a91ca494975db33f9', logo: 'https://iili.io/1Nz0AP.png', cat: 'sports' },
+  { name: 'TRAVELXP 4K HDR', src: 'https://deltatesttatasky.akamaized.net/out/i/968284.m3u8', key: '6da8c268d58a0fe4ff75d297359a8ad7:eb0ae4c2c24a52070154499bb09a36cb', logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIHMD2TGEtpU89__Um3s4dMGtQEgeO2LnPxQ&s', cat: 'sports' },
+
+  // --- NEWS ---
+  { name: 'NEWS18 BIHAR HINDI', src: 'https://nw18live.cdn.jio.com/bpk-tv/News18_Bihar_Jharkhand_NW18_MOB/output01/News18_Bihar_Jharkhand_NW18_MOB.m3u8', key: 'd0f2e5c39e70c18f29bf77768a1ad89a:d6853c51fcf37a18905f0609972395d7', logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4sRcSkdkCAlHZD-NpwR9d8QFKkuu-Rkdye1ZZKrkLqg&s=10', cat: 'news' },
+  { name: 'NEWS18 HINDI', src: 'https://nw18live.cdn.jio.com/bpk-tv/News18_India_NW18_MOB/output01/News18_India_NW18_MOB.m3u8', key: '6da8c268d58a0fe4ff75d297359a8ad7:eb0ae4c2c24a52070154499bb09a36cb', logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTyjjXoJrm98pN9PWgGodxByoe3Yc8bfIZaNM79xmEGUpJvFm0qPGr4T48&s=10', cat: 'news' },
+  { name: 'INDIA TV', src: 'https://pl-indiatvnews.akamaized.net/out/v1/db79179b608641ceaa5a4d0dd0dca8da/index_3.m3u8', key: '', logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcROsvSB70AOq6eVcWxOwV8mArbJ5kIWBH418Q&s', cat: 'news' },
+  { name: 'CNN NEWS18', src: 'https://nw18live.cdn.jio.com/bpk-tv/CNN_News18_NW18_MOB/output01/CNN_News18_NW18_MOB.m3u8', key: '', logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQjFsyL4rE1mmrmrzMYh_nHEVIC7T6RA5hCCEz7ahEL4ZBpzLiFLIxijAk&s=10', cat: 'news' },
+  { name: 'AAJ TAK HD', src: 'https://aajtakhdlive-amd.akamaized.net/hls/live/2014415/aajtakhd/aajtakhdlive/live_1080p/chunks.m3u8', key: '', logo: 'https://yt3.googleusercontent.com/MqNixkUgqY_rJiz34wzNf4yhWdrQWQ-F2pu9tJ7TXsSRjseqbUVASuAhuIN-L74cm6lZljkssA=s900-c-k-c0x00ffffff-no-rj', cat: 'news' },
+  { name: 'INDIA TODAY', src: 'https://indiatodaylive.akamaized.net/hls/live/2014320/indiatoday/indiatodaylive/live_720p/chunks.m3u8', key: '', logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6aPOhY7E0ZWHtQejmwSgjuqIDqKt40qA7NQ&s', cat: 'news' },
+  { name: 'ZEE NEWS', src: 'https://dknttpxmr0dwf.cloudfront.net/index_57.m3u8', key: '', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Zee_news.svg/3840px-Zee_news.svg.png', cat: 'news' },
+  { name: 'NDTV INDIA', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Ndtvindia2/default/manifest.mpd', key: 'd78c01625c3f4ed98912609799298544:b91bb882f9624872ada6125006fe5c73', logo: 'https://d388d59m61mm0v.cloudfront.net/optimized/content/common/logos/channel/logos/iqfloc.png', cat: 'news' },
+
+  // --- MOVIES & ENTERTAINMENT ---
+  { name: 'AND TV SD', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Andtv/default/manifest.mpd', key: '26df86eeebb04d7fbc45c948f76e81fd:5f3a23f1a73c4c96ababce5fffe7b06b', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/T1CCvaAQ.png', cat: 'movies' },
+  { name: 'AND PICTURES SD', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Andpictures/default/manifest.mpd', key: '8dea532cabfe4f71ba20f62310e7949f:7a214a974e4f4d1d9bb66364d5f0cb92', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/HivVrdof.png', cat: 'movies' },
+  { name: 'ZEE TV SD', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Zeetv/default/manifest.mpd', key: 'ed068cf84f0640ccbc7c0e395c0a272e:bb722190f2bb446391020411a7d0828b', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/yHNSuG1V.png', cat: 'movies' },
+  { name: 'ZEE CINEMA SD', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Zeecinema/default/manifest.mpd', key: '43513b13f4b542e39c9265921dfc1726:b0b2678bcd274c37b888a6c987d502ed', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/qss9gFuH.png', cat: 'movies' },
+  { name: 'ZEE BOLLYWOOD', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Zeebollywood/default/manifest.mpd', key: 'e61523260c614746b25b9a5523fe9a39:72ddbf37f76f49acbb8e140e7279e7a1', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/EqDlflgi.png', cat: 'movies' },
+  { name: 'ZEE ANMOL CINEMA', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Zeeanmolcinema/default/manifest.mpd', key: '812411cba8bc42c79eb2b19cd78ad3f3:468a0b8d3d5d42d8a5c41bb875390a74', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/diYkUOnX.png', cat: 'movies' },
+
+  // --- KIDS & LIFESTYLE ---
+  { name: 'DISCOVERY KIDS', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Discoverykids2/default/manifest.mpd', key: '601f58d4b7094d2baf78c85d1d9cb6c9:609e0cc03198455fa36fd2cc3e7f940d', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/RzedYhFG.png', cat: 'kids' },
+  { name: 'ZING', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Zing/default/manifest.mpd', key: 'f0fb14eebe474a6ab74c8301d55a7224:f9f8b2e30704458b8db844a285ce32be', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/Nyi83z1G.png', cat: 'kids' },
+  { name: 'KOREAN DRAMA ACTIVE', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Koreandramas2/default/manifest.mpd', key: 'ed197e7253c04946903f03bad9afac91:99ebb8683ea74b70a9fda1cbdc2cc1b4', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/BNu8WvFw.png', cat: 'kids' },
+
+  // --- INFOTAINMENT ---
+  { name: 'DISCOVERY CHANNEL', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Discoverychannel2/default/manifest.mpd', key: 'b70a8cf9450c4d6484b4ac4d3c6761c0:0908be844260409cbac180bf0181da40', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/UyI5ljKM.png', cat: 'movies' },
+  { name: 'DISCOVERY SCIENCE', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Discoveryscience2/default/manifest.mpd', key: '5458f45efedb4d6f8aa6ac76c85b621b:dbf8a0a306a64525ba3012fd225370c0', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/vIA7TExn.png', cat: 'movies' },
+  { name: 'TLC', src: 'https://d1g8wgjurz8via.cloudfront.net/bpk-tv/Tlc2/default/manifest.mpd', key: 'e48e7373d6be47ecab83a20849f6823e:513ce07a2ee24ffdbe667eff5a9d46a8', logo: 'https://imagesdishtvd2h.whatsonindia.com/dasimages/channel/landscape/360x270/FOvFsIgt.png', cat: 'movies' }
+];
+
 
     async function play(url, key, name) {
         status.innerText = "LOADING: " + name;
