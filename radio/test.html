@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SONU Neon Pro - Final Clean</title>
+    <title>SONU Neon Pro - Verified Clean</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.6.0/shaka-player.ui.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.6.0/controls.min.css">
@@ -18,6 +18,7 @@
         input, button { padding: 12px; border-radius: 8px; border: 1px solid #ff0055; background: #111; color: #fff; font-family: 'Orbitron'; outline: none; }
         button { background: #ff0055; cursor: pointer; font-weight: bold; text-transform: uppercase; }
         #status { text-align: center; margin: 10px 0; font-size: 0.8em; color: #00f2fe; }
+        #manualPlayBtn { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #ff0055; color: white; padding: 15px 25px; border-radius: 8px; cursor: pointer; z-index: 2000; display: none; border: none; font-family: 'Orbitron'; }
     </style>
 </head>
 <body>
@@ -26,8 +27,9 @@
     <h2 style="color:#ff0055; text-align:center;">SONU NEON PRO</h2>
     <div class="shaka-video-container" id="videoContainer" data-shaka-player-container>
         <video id="video" autoplay playsinline data-shaka-player></video>
+        <button id="manualPlayBtn">▶ CLICK TO PLAY</button>
     </div>
-    <div id="status">SYSTEM READY</div>
+    <div id="status">READY</div>
     <div class="controls-grid">
         <input type="text" id="urlInput" placeholder="Paste .mpd link here...">
         <input type="text" id="drmKeyInput" placeholder="DRM Key (KID:KEY)">
@@ -39,14 +41,16 @@
     let player, ui;
     const video = document.getElementById('video');
     const status = document.getElementById('status');
+    const manualBtn = document.getElementById('manualPlayBtn');
     const PROXY = "https://testtvjio.sonuujamuicamp.workers.dev/?url=";
 
     async function initApp() {
         shaka.polyfill.installAll();
         player = new shaka.Player(video);
-        ui = new shaka.ui.Overlay(player, document.getElementById('videoContainer'), video);
+        const container = document.getElementById('videoContainer');
+        ui = new shaka.ui.Overlay(player, container, video);
 
-        [span_6](start_span)// Streaming Config from your file[span_6](end_span)
+        [span_2](start_span)// Advanced Buffering Config[span_2](end_span)
         player.configure({
             streaming: {
                 lowLatencyMode: true,
@@ -56,7 +60,7 @@
             }
         });
 
-        [span_7](start_span)// Request Filter (The Bypass Engine)[span_7](end_span)
+        [span_3](start_span)// Request Filter (JioTV Bypass)[span_3](end_span)
         player.getNetworkingEngine().registerRequestFilter((type, request) => {
             request.headers['Referer'] = 'https://www.jiotv.com/';
             request.headers['User-Agent'] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
@@ -70,23 +74,33 @@
         if (!url) return;
         status.innerText = "BYPASSING SERVER...";
 
-        [span_8](start_span)// DRM Clearkey Setup[span_8](end_span)
         if (drm.includes(':')) {
-            const [kid, key] = drm.split(':');
+            const parts = drm.split(':');
             player.configure({
-                drm: { clearKeys: { [kid.trim()]: key.trim() } }
+                drm: { clearKeys: { [parts[0].trim()]: parts[1].trim() } }
             });
         }
 
         try {
             const finalUrl = PROXY + encodeURIComponent(url);
             await player.load(finalUrl);
-            status.innerText = "STREAM LOADED - PLAYING";
-            await video.play();
+            status.innerText = "LOADED - PRESS PLAY IF NO VIDEO";
+            
+            [span_4](start_span)// Force Play Attempt[span_4](end_span)
+            try {
+                await video.play();
+            } catch (e) {
+                manualBtn.style.display = 'block';
+            }
         } catch (e) {
-            status.innerText = "ERROR CODE: " + e.code;
+            status.innerText = "ERROR: " + e.code;
         }
     }
+
+    manualBtn.addEventListener('click', () => {
+        video.play();
+        manualBtn.style.display = 'none';
+    });
 
     document.getElementById('playBtn').addEventListener('click', startStream);
     document.addEventListener('shaka-ui-loaded', initApp);
