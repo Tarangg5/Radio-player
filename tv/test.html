@@ -98,49 +98,43 @@
 
     async function initApp() {
         shaka.polyfill.installAll();
-        player = new shaka.Player(video);
-        ui = new shaka.ui.Overlay(player, container, video);
-        
-        player.getNetworkingEngine().registerRequestFilter((type, request) => {
-            if (currentChannel) {
-                request.headers['Referer'] = 'https://www.jiotv.com/';
-                request.headers['User-Agent'] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
+    async function initApp() {
+    shaka.polyfill.installAll();
+    player = new shaka.Player(video);
+    ui = new shaka.ui.Overlay(player, container, video);
+    
+    // Shaka Player error handling
+    player.addEventListener('error', (event) => console.error('Error code', event.detail.code, event.detail));
 
-                if (currentChannel.cookie) {
-                    request.headers['Cookie'] = currentChannel.cookie;
-                    if (!request.uris[0].includes('__hdnea__=')) {
-                        const sep = request.uris[0].includes('?') ? '&' : '?';
-                        request.uris[0] += sep + currentChannel.cookie;
-                    }
-                }
+    render(channels);
+    if(channels.length > 0) playChannel(channels[0]);
+}
+
+async function playChannel(ch) {
+    status.innerText = "LOADING: " + ch.name;
+    currentChannel = ch;
+
+    // DRM Setup
+    if (ch.key) {
+        const [kid, key] = ch.key.split(':');
+        player.configure({
+            drm: {
+                clearKeys: { [kid.trim()]: key.trim() }
             }
         });
-
-        ui.configure({ 'controlPanelElements': ['play_pause', 'spacer', 'quality', 'language', 'fullscreen'] });
-
-        render(channels);
-        if(channels.length > 0) playChannel(channels[0]);
     }
 
-    async function playChannel(ch) {
-        status.innerText = "LOADING: " + ch.name;
-        manualBtn.style.display = 'none';
-        currentChannel = ch;
-
-        if (ch.key) {
-            const [kid, key] = ch.key.split(':');
-            player.configure({ drm: { clearKeys: { [kid.trim()]: key.trim() } } });
-        }
-
-        try {
-            const finalUrl = ch.src.startsWith('http') ? PROXY + encodeURIComponent(ch.src) : ch.src;
-            await player.load(finalUrl);
-            status.innerText = "ONLINE: " + ch.name;
-        } catch (e) {
-            status.innerText = "ERROR: " + e.code;
-            manualBtn.style.display = 'block';
-        }
+    try {
+        // Worker ke through URL pass karein
+        const finalUrl = PROXY + encodeURIComponent(ch.src);
+        await player.load(finalUrl);
+        status.innerText = "ONLINE: " + ch.name;
+    } catch (e) {
+        status.innerText = "ERROR: " + e.code;
+        console.error("Load failed", e);
     }
+}
+
 
     function render(data) {
         const list = document.getElementById('channelList');
