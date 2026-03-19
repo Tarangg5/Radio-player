@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SONU Neon Pro - Verified Clean</title>
-    
+    <title>SONU NEON PRO - FIXED</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.6.0/shaka-player.ui.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.6.0/controls.min.css">
-    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
         body { font-family: 'Orbitron', sans-serif; background: #000; color: #fff; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
@@ -15,10 +13,9 @@
         .shaka-video-container { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; border-radius: 10px; overflow: hidden; }
         video { width: 100%; height: 100%; object-fit: contain; }
         .controls-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 20px; }
-        input, button { padding: 12px; border-radius: 8px; border: 1px solid #ff0055; background: #111; color: #fff; font-family: 'Orbitron'; outline: none; }
-        button { background: #ff0055; cursor: pointer; font-weight: bold; text-transform: uppercase; }
+        textarea { width: 100%; height: 100px; padding: 12px; border-radius: 8px; border: 1px solid #ff0055; background: #111; color: #00f2fe; font-family: monospace; font-size: 11px; outline: none; box-sizing: border-box; resize: none; }
+        button { padding: 15px; border-radius: 8px; background: #ff0055; color: #fff; font-weight: bold; border: none; cursor: pointer; font-family: 'Orbitron'; text-transform: uppercase; }
         #status { text-align: center; margin: 10px 0; font-size: 0.8em; color: #00f2fe; }
-        #manualPlayBtn { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #ff0055; color: white; padding: 15px 25px; border-radius: 8px; cursor: pointer; z-index: 2000; display: none; border: none; font-family: 'Orbitron'; }
     </style>
 </head>
 <body>
@@ -27,13 +24,11 @@
     <h2 style="color:#ff0055; text-align:center;">SONU NEON PRO</h2>
     <div class="shaka-video-container" id="videoContainer" data-shaka-player-container>
         <video id="video" autoplay playsinline data-shaka-player></video>
-        <button id="manualPlayBtn">▶ CLICK TO PLAY</button>
     </div>
-    <div id="status">READY</div>
+    <div id="status">READY: PASTE FULL URL BELOW</div>
     <div class="controls-grid">
-        <input type="text" id="urlInput" placeholder="Paste .mpd link here...">
-        <input type="text" id="drmKeyInput" placeholder="DRM Key (KID:KEY)">
-        <button id="playBtn">LAUNCH BYPASS STREAM</button>
+        <textarea id="fullLink" placeholder="Paste link with |Cookie|User-Agent|drmLicense here..."></textarea>
+        <button id="playBtn">PARSE & PLAY STREAM</button>
     </div>
 </div>
 
@@ -41,66 +36,68 @@
     let player, ui;
     const video = document.getElementById('video');
     const status = document.getElementById('status');
-    const manualBtn = document.getElementById('manualPlayBtn');
     const PROXY = "https://testtvjio.sonuujamuicamp.workers.dev/?url=";
 
     async function initApp() {
         shaka.polyfill.installAll();
         player = new shaka.Player(video);
-        const container = document.getElementById('videoContainer');
-        ui = new shaka.ui.Overlay(player, container, video);
+        ui = new shaka.ui.Overlay(player, document.getElementById('videoContainer'), video);
 
-        [span_2](start_span)// Advanced Buffering Config[span_2](end_span)
         player.configure({
-            streaming: {
-                lowLatencyMode: true,
-                bufferingGoal: 15,
-                rebufferingGoal: 2,
-                bufferBehind: 15
-            }
-        });
-
-        [span_3](start_span)// Request Filter (JioTV Bypass)[span_3](end_span)
-        player.getNetworkingEngine().registerRequestFilter((type, request) => {
-            request.headers['Referer'] = 'https://www.jiotv.com/';
-            request.headers['User-Agent'] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
+            streaming: { lowLatencyMode: true, bufferingGoal: 15 }
         });
     }
 
     async function startStream() {
-        const url = document.getElementById('urlInput').value.trim();
-        const drm = document.getElementById('drmKeyInput').value.trim();
-        
-        if (!url) return;
-        status.innerText = "BYPASSING SERVER...";
+        const input = document.getElementById('fullLink').value.trim();
+        if (!input) return;
 
-        if (drm.includes(':')) {
-            const parts = drm.split(':');
+        status.innerText = "EXTRACTING DATA...";
+        
+        // Parsing link components
+        const parts = input.split('|');
+        const mainUrl = parts[0];
+        let cookie = "";
+        let drmKey = "";
+        let userAgent = "plaYtv/7.1.3 (Linux;Android 13) ExoPlayerLib/824.0";
+
+        parts.forEach(p => {
+            if (p.toLowerCase().startsWith("cookie=")) cookie = p.split('=')[1];
+            if (p.toLowerCase().startsWith("user-agent=")) userAgent = p.split('=')[1];
+            if (p.toLowerCase().startsWith("drmlicense=")) drmKey = p.split('=')[1];
+        });
+
+        // DRM Configuration
+        if (drmKey && drmKey.includes(':')) {
+            const [kid, key] = drmKey.split(':');
             player.configure({
-                drm: { clearKeys: { [parts[0].trim()]: parts[1].trim() } }
+                drm: { clearKeys: { [kid.trim()]: key.trim() } }
             });
         }
 
-        try {
-            const finalUrl = PROXY + encodeURIComponent(url);
-            await player.load(finalUrl);
-            status.innerText = "LOADED - PRESS PLAY IF NO VIDEO";
-            
-            [span_4](start_span)// Force Play Attempt[span_4](end_span)
-            try {
-                await video.play();
-            } catch (e) {
-                manualBtn.style.display = 'block';
+        // Header Filtering
+        player.getNetworkingEngine().registerRequestFilter((type, request) => {
+            request.headers['Referer'] = 'https://jiotv.com/';
+            request.headers['User-Agent'] = userAgent;
+            if (cookie) {
+                request.headers['Cookie'] = cookie;
+                if (!request.uris[0].includes('__hdnea__=')) {
+                    const sep = request.uris[0].includes('?') ? '&' : '?';
+                    request.uris[0] += sep + cookie;
+                }
             }
+        });
+
+        try {
+            const finalUrl = PROXY + encodeURIComponent(mainUrl);
+            await player.load(finalUrl);
+            status.innerText = "STREAMING ACTIVE";
+            video.play();
         } catch (e) {
-            status.innerText = "ERROR: " + e.code;
+            status.innerText = "FAILED: " + e.code;
+            console.error(e);
         }
     }
-
-    manualBtn.addEventListener('click', () => {
-        video.play();
-        manualBtn.style.display = 'none';
-    });
 
     document.getElementById('playBtn').addEventListener('click', startStream);
     document.addEventListener('shaka-ui-loaded', initApp);
