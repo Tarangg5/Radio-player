@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SONU NEON PRO - FIXED</title>
+    <title>SONU NEON PRO - BYPASS FIXED</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.6.0/shaka-player.ui.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.6.0/controls.min.css">
     <style>
@@ -25,10 +25,10 @@
     <div class="shaka-video-container" id="videoContainer" data-shaka-player-container>
         <video id="video" autoplay playsinline data-shaka-player></video>
     </div>
-    <div id="status">READY: PASTE FULL URL BELOW</div>
+    <div id="status">READY: PASTE FULL LINK BELOW</div>
     <div class="controls-grid">
         <textarea id="fullLink" placeholder="Paste link with |Cookie|User-Agent|drmLicense here..."></textarea>
-        <button id="playBtn">PARSE & PLAY STREAM</button>
+        <button id="playBtn">PROCESS & PLAY STREAM</button>
     </div>
 </div>
 
@@ -42,7 +42,6 @@
         shaka.polyfill.installAll();
         player = new shaka.Player(video);
         ui = new shaka.ui.Overlay(player, document.getElementById('videoContainer'), video);
-
         player.configure({
             streaming: { lowLatencyMode: true, bufferingGoal: 15 }
         });
@@ -51,10 +50,8 @@
     async function startStream() {
         const input = document.getElementById('fullLink').value.trim();
         if (!input) return;
-
-        status.innerText = "EXTRACTING DATA...";
+        status.innerText = "PARSING LINK...";
         
-        // Parsing link components
         const parts = input.split('|');
         const mainUrl = parts[0];
         let cookie = "";
@@ -62,12 +59,12 @@
         let userAgent = "plaYtv/7.1.3 (Linux;Android 13) ExoPlayerLib/824.0";
 
         parts.forEach(p => {
-            if (p.toLowerCase().startsWith("cookie=")) cookie = p.split('=')[1];
-            if (p.toLowerCase().startsWith("user-agent=")) userAgent = p.split('=')[1];
-            if (p.toLowerCase().startsWith("drmlicense=")) drmKey = p.split('=')[1];
+            const low = p.toLowerCase();
+            if (low.includes("cookie=")) cookie = p.split('=')[1];
+            if (low.includes("user-agent=")) userAgent = p.split('=')[1];
+            if (low.includes("drmlicense=")) drmKey = p.split('=')[1];
         });
 
-        // DRM Configuration
         if (drmKey && drmKey.includes(':')) {
             const [kid, key] = drmKey.split(':');
             player.configure({
@@ -75,7 +72,6 @@
             });
         }
 
-        // Header Filtering
         player.getNetworkingEngine().registerRequestFilter((type, request) => {
             request.headers['Referer'] = 'https://jiotv.com/';
             request.headers['User-Agent'] = userAgent;
@@ -91,11 +87,10 @@
         try {
             const finalUrl = PROXY + encodeURIComponent(mainUrl);
             await player.load(finalUrl);
-            status.innerText = "STREAMING ACTIVE";
+            status.innerText = "STREAMING NOW";
             video.play();
         } catch (e) {
-            status.innerText = "FAILED: " + e.code;
-            console.error(e);
+            status.innerText = "ERROR: " + e.code;
         }
     }
 
