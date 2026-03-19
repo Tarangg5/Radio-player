@@ -14,9 +14,9 @@
         
         body { font-family: 'Orbitron', sans-serif; background: #000; color: #fff; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 95%; max-width: 1000px; margin: auto; text-align: center; }
-        h2 { color: #ff0055; text-transform: uppercase; letter-spacing: 2px; }
+        h2 { color: #ff0055; text-transform: uppercase; letter-spacing: 2px; margin: 20px 0; }
 
-        /* Video Container logic from your cookie file */
+        [span_0](start_span)/* Video Container[span_0](end_span) */
         .shaka-video-container { 
             width: 100%; 
             aspect-ratio: 16/9; 
@@ -25,45 +25,48 @@
             border-radius: 12px; 
             overflow: hidden; 
             position: relative;
-            box-shadow: 0 0 20px rgba(255, 0, 85, 0.2);
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.3);
         }
-        video { width: 100%; height: 100%; object-fit: contain; }
+        video { width: 100%; height: 100%; object-fit: contain; [span_1](start_span)}
 
-        #status { margin: 10px 0; color: #00f2fe; font-size: 0.8em; font-weight: bold; }
+        #status { margin: 10px 0; color: #00f2fe; font-size: 0.8em; font-weight: bold; text-transform: uppercase; }
 
-        /* Search & Categories */
+        /* Controls & Search */
         .controls { width: 100%; margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
         #searchBar { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ff0055; background: #111; color: #fff; font-family: 'Orbitron'; outline: none; box-sizing: border-box; }
         
-        .category-wrapper { display: flex; gap: 8px; overflow-x: auto; padding: 10px 0; justify-content: center; }
-        .cat-btn { padding: 8px 15px; border-radius: 20px; border: 1px solid #444; background: #111; color: #aaa; cursor: pointer; font-size: 0.7em; transition: 0.3s; }
-        .cat-btn.active { background: #ff0055; color: #fff; border-color: #ff0055; }
+        .category-wrapper { display: flex; gap: 8px; overflow-x: auto; padding: 10px 0; justify-content: center; scrollbar-width: none; }
+        .category-wrapper::-webkit-scrollbar { display: none; }
+        .cat-btn { padding: 8px 18px; border-radius: 20px; border: 1px solid #444; background: #111; color: #aaa; cursor: pointer; font-size: 0.7em; transition: 0.3s; white-space: nowrap; }
+        .cat-btn.active { background: #ff0055; color: #fff; border-color: #ff0055; box-shadow: 0 0 10px #ff0055; }
 
-        /* Channel List */
-        .channel-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; margin-top: 20px; width: 100%; }
-        .channel-card { background: #111; padding: 10px; border-radius: 10px; cursor: pointer; border: 1px solid #222; transition: 0.2s; display: flex; flex-direction: column; align-items: center; }
-        .channel-card:hover { border-color: #00f2fe; transform: translateY(-3px); }
-        .channel-card.active { border-color: #ff0055; background: rgba(255, 0, 85, 0.1); }
-        .channel-card img { width: 45px; height: 45px; object-fit: contain; margin-bottom: 5px; }
-        .channel-card span { font-size: 9px; font-weight: bold; text-align: center; }
+        /* Channel List Grid */
+        .channel-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 15px; margin-top: 20px; width: 100%; }
+        .channel-card { background: #111; padding: 12px; border-radius: 12px; cursor: pointer; border: 1px solid #222; transition: 0.3s; display: flex; flex-direction: column; align-items: center; }
+        .channel-card:hover { border-color: #00f2fe; transform: translateY(-5px); background: #1a1a1a; }
+        .channel-card.active { border-color: #ff0055; background: rgba(255, 0, 85, 0.15); }
+        .channel-card img { width: 50px; height: 50px; object-fit: contain; margin-bottom: 8px; border-radius: 5px; }
+        .channel-card span { font-size: 10px; font-weight: bold; text-align: center; color: #eee; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
 
-        /* Manual Play Button (From your source) */
+        /* Manual Play Button[span_1](end_span) */
         .manual-play-button {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(255, 0, 85, 0.9); color: white; padding: 15px 25px;
-            border-radius: 8px; cursor: pointer; z-index: 2000; display: none;
+            background: rgba(0, 0, 0, 0.85); color: white; padding: 20px 30px;
+            border-radius: 10px; cursor: pointer; z-index: 2000; display: none;
+            border: 2px solid #ff0055; font-size: 1.1em; transition: 0.3s;
         }
+        .manual-play-button:hover { background: #ff0055; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2>SONU NEON TV PRO</h2>
-    <div id="status">SYSTEM READY</div>
+    <div id="status">INITIALIZING SYSTEM...</div>
 
     <div class="shaka-video-container" id="videoContainer" data-shaka-player-container>
-        <video id="video" autoplay playsinline data-shaka-player></video>
-        <div class="manual-play-button" id="manualBtn">▶ CLICK TO PLAY</div>
+        [span_2](start_span)<video id="video" autoplay playsinline data-shaka-player></video>[span_2](end_span)
+        [span_3](start_span)<div class="manual-play-button" id="manualBtn">▶ CLICK TO PLAY</div>[span_3](end_span)
     </div>
 
     <div class="controls">
@@ -72,6 +75,7 @@
             <button class="cat-btn" onclick="filterCat('sports', this)">SPORTS</button>
             <button class="cat-btn" onclick="filterCat('news', this)">NEWS</button>
             <button class="cat-btn" onclick="filterCat('movies', this)">MOVIES</button>
+            <button class="cat-btn" onclick="filterCat('kids', this)">KIDS & INFO</button>
         </div>
         <input type="text" id="searchBar" placeholder="Search Channel..." onkeyup="doSearch()">
     </div>
@@ -89,29 +93,43 @@
     let ui = null;
     let currentCategory = 'all';
 
-    // --- YOUR PRO DATA (Add your Worker URL here) ---
-    const PROXY = "https://your-worker.workers.dev/?url="; // Apna Cloudflare Worker URL yahan dalein
+    // --- CONFIGURATION ---
+    [span_4](start_span)// Yahan apna Cloudflare Worker URL dalein[span_4](end_span)
+    const PROXY = "https://testtvjio.sonuujamuicamp.workers.dev/?url="; 
 
+    // --- CHANNEL DATA ---
     const channels = [
         { 
             name: 'JIO TV HINDI', 
-            src: 'https://example.com/stream.mpd', 
-            key: 'KID:KEY', 
-            [span_2](start_span)cookie: 'hmac=YOUR_HMAC_TOKEN', // Aapka Cookie/HMAC yahan aayega[span_2](end_span)
+            src: 'https://jiotvpllive.cdn.jio.com/bpk-tv/Star_Sports_1_Hindi_BTS/output/index.mpd', // Asli link yahan dalein
+            key: '8ea9b607549252068e260a5f4d7dd321:350c0aaffedf51cc1502e9543c7c885e', 
+            [span_5](start_span)cookie: '__hdnea__=st=1773887993~exp=1773909593~acl=/*~hmac=b7397b7521203b5fe05c96bcd0731be1d6b3e0ffb4c6433535d3e623b707d752', // Cookie yahan dalein[span_5](end_span)
             logo: 'https://iili.io/1Nz0AP.png', 
             cat: 'sports' 
         },
-        // Baaki channels yahan add karein...
+        { 
+            name: 'WORLD CUP HINDI', 
+            src: 'https://otte.cache.aiv-cdn.net/bom-nitro/live/clients/dash/enc/nn1qrdjaha/out/v1/bc4fa7d9cebf47858bebf14ad589025e/cenc.mpd', 
+            key: '9909e33838e1152cc512c4636f513f8f:02f67060c94bcc3307280f505ad508ab', 
+            logo: 'https://iili.io/1Nz0AP.png', 
+            cat: 'sports' 
+        },
+        { 
+            name: 'NEWS18 BIHAR', 
+            src: 'https://nw18live.cdn.jio.com/bpk-tv/News18_Bihar_Jharkhand_NW18_MOB/output01/News18_Bihar_Jharkhand_NW18_MOB-audio_98835_hin=98800-video=2293600.m3u8', 
+            logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4sRcSkdkCAlHZD-NpwR9d8QFKkuu-Rkdye1ZZKrkLqg&s=10', 
+            cat: 'news' 
+        }
     ];
 
     async function initApp() {
-        [span_3](start_span)shaka.polyfill.installAll();[span_3](end_span)
-        player = new shaka.Player(video);
-        ui = new shaka.ui.Overlay(player, container, video);
+        [span_6](start_span)shaka.polyfill.installAll();[span_6](end_span)
+        [span_7](start_span)player = new shaka.Player(video);[span_7](end_span)
+        [span_8](start_span)ui = new shaka.ui.Overlay(player, container, video);[span_8](end_span)
         
-        // UI Configuration (From your source)
+        [span_9](start_span)// Shaka UI Config[span_9](end_span)
         ui.configure({
-            [span_4](start_span)'controlPanelElements': ['play_pause', 'time_and_duration', 'spacer', 'quality', 'language', 'fullscreen'][span_4](end_span)
+            'controlPanelElements': ['play_pause', 'time_and_duration', 'spacer', 'quality', 'language', 'picture_in_picture', 'fullscreen']
         });
 
         render(channels);
@@ -122,47 +140,57 @@
         status.innerText = "LOADING: " + ch.name;
         manualBtn.style.display = 'none';
 
-        [span_5](start_span)// Networking Filter (Logic from your cookie file)[span_5](end_span)
+        [span_10](start_span)// Networking Filter (For Cookies & Headers)[span_10](end_span)
         player.getNetworkingEngine().registerRequestFilter((type, request) => {
-            [span_6](start_span)request.headers['Referer'] = 'https://www.jiotv.com/';[span_6](end_span)
-            [span_7](start_span)request.headers['User-Agent'] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";[span_7](end_span)
+            request.headers['Referer'] = 'https://www.jiotv.com/';
+            request.headers['User-Agent'] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
 
             if (ch.cookie) {
-                [span_8](start_span)request.headers['Cookie'] = ch.cookie;[span_8](end_span)
-                [span_9](start_span)// Append cookie to URL if needed[span_9](end_span)
+                request.headers['Cookie'] = ch.cookie;
+                [span_11](start_span)// Append HMAC token to segment URLs[span_11](end_span)
                 if (!request.uris[0].includes('__hdnea__=')) {
                     const sep = request.uris[0].includes('?') ? '&' : '?';
-                    [span_10](start_span)request.uris[0] += sep + ch.cookie;[span_10](end_span)
+                    request.uris[0] += sep + ch.cookie;
                 }
             }
         });
 
-        [span_11](start_span)// DRM Config[span_11](end_span)
+        [span_12](start_span)// DRM Clearkey Configuration[span_12](end_span)
         if (ch.key) {
             const [kid, key] = ch.key.split(':');
             player.configure({
-                [span_12](start_span)drm: { clearKeys: { [kid.trim()]: key.trim() } }[span_12](end_span)
+                drm: { clearKeys: { [kid.trim()]: key.trim() } }
             });
         }
 
+        [span_13](start_span)// Streaming Settings for Low Latency[span_13](end_span)
+        player.configure({
+            streaming: {
+                lowLatencyMode: true,
+                bufferingGoal: 10,
+                rebufferingGoal: 2
+            }
+        });
+
         try {
+            [span_14](start_span)[span_15](start_span)// Encode URL to pass through Cloudflare Proxy[span_14](end_span)[span_15](end_span)
             const finalUrl = ch.src.startsWith('http') ? PROXY + encodeURIComponent(ch.src) : ch.src;
-            [span_13](start_span)await player.load(finalUrl);[span_13](end_span)
-            status.innerText = "PLAYING: " + ch.name;
+            await player.load(finalUrl);
+            status.innerText = "ONLINE: " + ch.name;
         } catch (e) {
             status.innerText = "ERROR: " + e.code;
-            [span_14](start_span)manualBtn.style.display = 'block';[span_14](end_span)
+            [span_16](start_span)manualBtn.style.display = 'block';[span_16](end_span)
         }
     }
 
-    // --- UI FUNCTIONS ---
+    // --- UI LOGIC ---
     function render(data) {
         const list = document.getElementById('channelList');
         list.innerHTML = '';
         data.forEach(ch => {
             const card = document.createElement('div');
             card.className = 'channel-card';
-            card.innerHTML = `<img src="${ch.logo}"><span>${ch.name}</span>`;
+            card.innerHTML = `<img src="${ch.logo}" onerror="this.src='https://via.placeholder.com/50'"><span>${ch.name}</span>`;
             card.onclick = () => {
                 document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('active'));
                 card.classList.add('active');
@@ -187,7 +215,7 @@
         render(filtered);
     }
 
-    manualBtn.onclick = () => { video.play(); manualBtn.style.display = 'none'; [span_15](start_span)};[span_15](end_span)
+    manualBtn.onclick = () => { video.play(); manualBtn.style.display = 'none'; [span_17](start_span)};[span_17](end_span)
 
     document.addEventListener('shaka-ui-loaded', initApp);
 </script>
