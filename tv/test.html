@@ -16,7 +16,6 @@
         .container { width: 95%; max-width: 1000px; margin: auto; text-align: center; }
         h2 { color: #ff0055; text-transform: uppercase; letter-spacing: 2px; margin: 20px 0; }
 
-        [span_4](start_span)/* Video Container[span_4](end_span) */
         .shaka-video-container { 
             width: 100%; aspect-ratio: 16/9; background: #000; border: 2px solid #333; 
             border-radius: 12px; overflow: hidden; position: relative;
@@ -26,7 +25,6 @@
 
         #status { margin: 10px 0; color: #00f2fe; font-size: 0.8em; font-weight: bold; }
 
-        /* Controls & Search */
         .controls { width: 100%; margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
         #searchBar { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ff0055; background: #111; color: #fff; font-family: 'Orbitron'; outline: none; box-sizing: border-box; }
         
@@ -34,7 +32,6 @@
         .cat-btn { padding: 8px 18px; border-radius: 20px; border: 1px solid #444; background: #111; color: #aaa; cursor: pointer; font-size: 0.7em; transition: 0.3s; }
         .cat-btn.active { background: #ff0055; color: #fff; border-color: #ff0055; }
 
-        /* Channel List Grid */
         .channel-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 15px; margin-top: 20px; width: 100%; }
         .channel-card { background: #111; padding: 12px; border-radius: 12px; cursor: pointer; border: 1px solid #222; transition: 0.3s; display: flex; flex-direction: column; align-items: center; }
         .channel-card:hover { border-color: #00f2fe; transform: translateY(-5px); }
@@ -42,7 +39,6 @@
         .channel-card img { width: 50px; height: 50px; object-fit: contain; margin-bottom: 8px; }
         .channel-card span { font-size: 10px; font-weight: bold; text-align: center; }
 
-        [span_5](start_span)/* Manual Play Button[span_5](end_span) */
         .manual-play-button {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: rgba(0, 0, 0, 0.85); color: white; padding: 20px 30px;
@@ -83,9 +79,8 @@
     let player = null;
     let ui = null;
     let currentCategory = 'all';
-    let currentChannel = null; [span_6](start_span)// Important: Filter ke liye use hoga[span_6](end_span)
+    let currentChannel = null;
 
-    // --- CONFIG ---
     const PROXY = "https://testtvjio.sonuujamuicamp.workers.dev/?url="; 
 
     const channels = [
@@ -95,7 +90,7 @@
             key: '8ea9b607549252068e260a5f4d7dd321:350c0aaffedf51cc1502e9543c7c885e', 
             cookie: '__hdnea__=st=1773887993~exp=1773909593~acl=/*~hmac=b7397b7521203b5fe05c96bcd0731be1d6b3e0ffb4c6433535d3e623b707d752', // Cookie yahan dalein[span_5](end_span)
             logo: 'https://iili.io/1Nz0AP.png', 
-            cat: 'sports' 
+            cat: 'sports'  
         },
         { 
             name: 'WORLD CUP', 
@@ -107,11 +102,10 @@
     ];
 
     async function initApp() {
-        shaka.polyfill.installAll(); [span_7](start_span)//[span_7](end_span)
-        player = new shaka.Player(video); [span_8](start_span)//[span_8](end_span)
-        ui = new shaka.ui.Overlay(player, container, video); [span_9](start_span)//[span_9](end_span)
+        shaka.polyfill.installAll();
+        player = new shaka.Player(video);
+        ui = new shaka.ui.Overlay(player, container, video);
         
-        [span_10](start_span)// --- FIX: Networking Filter ek hi baar register hoga[span_10](end_span) ---
         player.getNetworkingEngine().registerRequestFilter((type, request) => {
             if (currentChannel) {
                 request.headers['Referer'] = 'https://www.jiotv.com/';
@@ -127,7 +121,7 @@
             }
         });
 
-        ui.configure({ 'controlPanelElements': ['play_pause', 'spacer', 'quality', 'language', 'fullscreen'] }); [span_11](start_span)//[span_11](end_span)
+        ui.configure({ 'controlPanelElements': ['play_pause', 'spacer', 'quality', 'language', 'fullscreen'] });
 
         render(channels);
         if(channels.length > 0) playChannel(channels[0]);
@@ -136,9 +130,8 @@
     async function playChannel(ch) {
         status.innerText = "LOADING: " + ch.name;
         manualBtn.style.display = 'none';
-        currentChannel = ch; // Filter isi ko use karega
+        currentChannel = ch;
 
-        [span_12](start_span)// DRM ClearKey Config[span_12](end_span)
         if (ch.key) {
             const [kid, key] = ch.key.split(':');
             player.configure({ drm: { clearKeys: { [kid.trim()]: key.trim() } } });
@@ -146,11 +139,11 @@
 
         try {
             const finalUrl = ch.src.startsWith('http') ? PROXY + encodeURIComponent(ch.src) : ch.src;
-            await player.load(finalUrl); [span_13](start_span)//[span_13](end_span)
+            await player.load(finalUrl);
             status.innerText = "ONLINE: " + ch.name;
         } catch (e) {
             status.innerText = "ERROR: " + e.code;
-            manualBtn.style.display = 'block'; [span_14](start_span)//[span_14](end_span)
+            manualBtn.style.display = 'block';
         }
     }
 
@@ -185,7 +178,7 @@
         render(f);
     }
 
-    manualBtn.onclick = () => { video.play(); manualBtn.style.display = 'none'; }; [span_15](start_span)//[span_15](end_span)
+    manualBtn.onclick = () => { video.play(); manualBtn.style.display = 'none'; };
     document.addEventListener('shaka-ui-loaded', initApp);
 </script>
 </body>
