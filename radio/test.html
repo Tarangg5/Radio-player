@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SONU Neon Pro - Clean</title>
+    <title>SONU Neon Pro - Playing Fixed</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.6.0/shaka-player.ui.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.6.0/controls.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
         body { font-family: 'Orbitron', sans-serif; background: #000; color: #fff; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
-        .container { width: 100%; max-width: 900px; background: rgba(15, 15, 15, 0.98); padding: 20px; border-radius: 15px; border: 2px solid #ff0055; box-shadow: 0 0 20px #ff0055; }
+        .container { width: 100%; max-width: 900px; background: #0a0a0a; padding: 20px; border-radius: 15px; border: 2px solid #ff0055; box-shadow: 0 0 20px #ff0055; }
         .shaka-video-container { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; border-radius: 10px; overflow: hidden; }
         video { width: 100%; height: 100%; object-fit: contain; }
         .controls-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 20px; }
         input, button { padding: 12px; border-radius: 8px; border: 1px solid #ff0055; background: #111; color: #fff; font-family: 'Orbitron'; outline: none; }
-        button { background: #ff0055; cursor: pointer; font-weight: bold; text-transform: uppercase; }
+        button { background: #ff0055; cursor: pointer; font-weight: bold; }
         #status { text-align: center; margin: 10px 0; font-size: 0.8em; color: #00f2fe; }
     </style>
 </head>
@@ -27,9 +27,9 @@
     </div>
     <div id="status">READY</div>
     <div class="controls-grid">
-        <input type="text" id="urlInput" placeholder="Paste .mpd link here...">
-        <input type="text" id="drmKeyInput" placeholder="DRM Key (KID:KEY)">
-        <button id="playBtn">LAUNCH STREAM</button>
+        <input type="text" id="urlInput" placeholder="Paste .mpd link...">
+        <input type="text" id="drmKeyInput" placeholder="KID:KEY">
+        <button id="playBtn">LAUNCH BYPASS STREAM</button>
     </div>
 </div>
 
@@ -44,10 +44,30 @@
         player = new shaka.Player(video);
         ui = new shaka.ui.Overlay(player, document.getElementById('videoContainer'), video);
 
-        // Headers Bypass (From your file)
+        [span_3](start_span)// Advanced Configuration (From your file[span_3](end_span))
+        player.configure({
+            streaming: {
+                [span_4](start_span)lowLatencyMode: true,[span_4](end_span)
+                [span_5](start_span)bufferingGoal: 15,[span_5](end_span)
+                [span_6](start_span)rebufferingGoal: 2,[span_6](end_span)
+                [span_7](start_span)bufferBehind: 15,[span_7](end_span)
+                retryParameters: {
+                    [span_8](start_span)timeout: 10000,[span_8](end_span)
+                    [span_9](start_span)maxAttempts: 5[span_9](end_span)
+                }
+            },
+            manifest: {
+                retryParameters: {
+                    [span_10](start_span)timeout: 8000,[span_10](end_span)
+                    [span_11](start_span)maxAttempts: 3[span_11](end_span)
+                }
+            }
+        });
+
+        [span_12](start_span)// Bypass Headers (From your file[span_12](end_span))
         player.getNetworkingEngine().registerRequestFilter((type, request) => {
-            request.headers['Referer'] = 'https://www.jiotv.com/';
-            request.headers['User-Agent'] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
+            [span_13](start_span)request.headers['Referer'] = 'https://www.jiotv.com/';[span_13](end_span)
+            [span_14](start_span)request.headers['User-Agent'] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";[span_14](end_span)
         });
     }
 
@@ -56,21 +76,24 @@
         const drm = document.getElementById('drmKeyInput').value.trim();
         
         if (!url) return;
-        status.innerText = "CONNECTING...";
+        status.innerText = "BYPASSING SERVER...";
 
         if (drm.includes(':')) {
             const [kid, key] = drm.split(':');
-            player.configure({ drm: { clearKeys: { [kid.trim()]: key.trim() } } });
+            player.configure({
+                [span_15](start_span)drm: { clearKeys: { [kid.trim()]: key.trim() } }[span_15](end_span)
+            });
         }
 
         try {
-            // Encode URL for Proxy
             const finalUrl = PROXY + encodeURIComponent(url);
-            await player.load(finalUrl);
-            status.innerText = "STREAM LOADED";
-            video.play();
+            [span_16](start_span)await player.load(finalUrl);[span_16](end_span)
+            status.innerText = "STREAM LOADED - ATTEMPTING PLAY";
+            
+            // Manual Play Trigger
+            [span_17](start_span)await video.play();[span_17](end_span)
         } catch (e) {
-            status.innerText = "ERROR: " + e.code;
+            [span_18](start_span)status.innerText = "LOAD ERROR: " + e.code;[span_18](end_span)
         }
     }
 
