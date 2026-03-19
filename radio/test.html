@@ -3,27 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SONU Neon Pro - Final Fix</title>
+    <title>SONU Neon Pro - Clean</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.6.0/shaka-player.ui.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.6.0/controls.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
-        body { font-family: 'Orbitron', sans-serif; background: #050505; color: #fff; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
-        .container { width: 100%; max-width: 900px; background: rgba(20, 20, 20, 0.95); padding: 20px; border-radius: 15px; border: 2px solid #ff0055; box-shadow: 0 0 25px rgba(255, 0, 85, 0.4); }
+        body { font-family: 'Orbitron', sans-serif; background: #000; color: #fff; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 100%; max-width: 900px; background: rgba(15, 15, 15, 0.98); padding: 20px; border-radius: 15px; border: 2px solid #ff0055; box-shadow: 0 0 20px #ff0055; }
         .shaka-video-container { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; border-radius: 10px; overflow: hidden; }
         video { width: 100%; height: 100%; object-fit: contain; }
-        
-        /* Play Button logic from your file */
-        .manual-play-button {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(255, 0, 85, 0.9); color: white; padding: 15px 25px;
-            border-radius: 8px; cursor: pointer; font-size: 18px; z-index: 2000;
-            display: none; border: none; font-family: 'Orbitron';
-        }
-
         .controls-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 20px; }
-        input, select, button { padding: 12px; border-radius: 8px; border: 1px solid #ff0055; background: #111; color: #fff; font-family: 'Orbitron'; outline: none; }
-        button { background: #ff0055; cursor: pointer; font-weight: bold; }
+        input, button { padding: 12px; border-radius: 8px; border: 1px solid #ff0055; background: #111; color: #fff; font-family: 'Orbitron'; outline: none; }
+        button { background: #ff0055; cursor: pointer; font-weight: bold; text-transform: uppercase; }
         #status { text-align: center; margin: 10px 0; font-size: 0.8em; color: #00f2fe; }
     </style>
 </head>
@@ -33,12 +24,11 @@
     <h2 style="color:#ff0055; text-align:center;">SONU NEON PRO</h2>
     <div class="shaka-video-container" id="videoContainer" data-shaka-player-container>
         <video id="video" autoplay playsinline data-shaka-player></video>
-        <button class="manual-play-button" id="manualPlayBtn">▶ CLICK TO PLAY</button>
     </div>
     <div id="status">READY</div>
     <div class="controls-grid">
-        <input type="text" id="urlInput" placeholder="Paste .mpd link...">
-        <input type="text" id="drmKeyInput" placeholder="KID:KEY">
+        <input type="text" id="urlInput" placeholder="Paste .mpd link here...">
+        <input type="text" id="drmKeyInput" placeholder="DRM Key (KID:KEY)">
         <button id="playBtn">LAUNCH STREAM</button>
     </div>
 </div>
@@ -47,7 +37,6 @@
     let player, ui;
     const video = document.getElementById('video');
     const status = document.getElementById('status');
-    const manualBtn = document.getElementById('manualPlayBtn');
     const PROXY = "https://testtvjio.sonuujamuicamp.workers.dev/?url=";
 
     async function initApp() {
@@ -55,7 +44,7 @@
         player = new shaka.Player(video);
         ui = new shaka.ui.Overlay(player, document.getElementById('videoContainer'), video);
 
-        [span_2](start_span)// Bypass Logic from your uploaded file[span_2](end_span)
+        // Headers Bypass (From your file)
         player.getNetworkingEngine().registerRequestFilter((type, request) => {
             request.headers['Referer'] = 'https://www.jiotv.com/';
             request.headers['User-Agent'] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
@@ -66,32 +55,24 @@
         const url = document.getElementById('urlInput').value.trim();
         const drm = document.getElementById('drmKeyInput').value.trim();
         
+        if (!url) return;
+        status.innerText = "CONNECTING...";
+
         if (drm.includes(':')) {
             const [kid, key] = drm.split(':');
-            player.configure({ drm: { clearKeys: { [kid]: key } } });
+            player.configure({ drm: { clearKeys: { [kid.trim()]: key.trim() } } });
         }
 
         try {
-            // Using Proxy for Test 2 logic
-            const finalUrl = url.includes('localhost') ? url : PROXY + encodeURIComponent(url);
+            // Encode URL for Proxy
+            const finalUrl = PROXY + encodeURIComponent(url);
             await player.load(finalUrl);
-            status.innerText = "LOADED - PRESS PLAY IF NOT STARTED";
-            
-            [span_3](start_span)// Autoplay attempt[span_3](end_span)
-            try {
-                await video.play();
-            } catch (e) {
-                manualBtn.style.display = 'block'; [span_4](start_span)// Show button if blocked[span_4](end_span)
-            }
+            status.innerText = "STREAM LOADED";
+            video.play();
         } catch (e) {
-            status.innerText = "LOAD ERROR: " + e.code;
+            status.innerText = "ERROR: " + e.code;
         }
     }
-
-    manualBtn.addEventListener('click', () => {
-        video.play();
-        manualBtn.style.display = 'none';
-    });
 
     document.getElementById('playBtn').addEventListener('click', startStream);
     document.addEventListener('shaka-ui-loaded', initApp);
