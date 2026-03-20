@@ -65,6 +65,7 @@
     <button class="cat-btn" onclick="filterCat('Hindi Movies', this)">HINDI MOVIES</button>
 </div>
 
+
         <input type="text" id="searchBar" placeholder="Search Channel..." onkeyup="doSearch()">
         <div class="selector-group">
             <div class="selector-item">
@@ -251,12 +252,10 @@
 
 function filterCat(cat, btn) {
     // This now matches "Hindi Movies" exactly as written in the channel objects
+function filterCat(cat, btn) {
     currentCategory = cat;
     document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    
-    // Clear search bar when switching categories to avoid confusion
-    document.getElementById('searchBar').value = ''; 
     doSearch();
 }
 
@@ -264,12 +263,11 @@ function doSearch() {
     const q = document.getElementById('searchBar').value.toLowerCase();
     let filtered = channels;
 
-    // Filter by Category first
     if (currentCategory !== 'all') {
-        filtered = channels.filter(c => c.cat === currentCategory);
+        // This ensures an exact match with 'Hindi Movies' or other categories
+        filtered = filtered.filter(c => c.cat === currentCategory);
     }
 
-    // Then filter by Search Query
     if (q) {
         filtered = filtered.filter(c => c.name.toLowerCase().includes(q));
     }
