@@ -57,13 +57,14 @@
 
     <div class="controls">
         <div class="category-wrapper" id="catWrapper">
-            <button class="cat-btn active" onclick="filterCat('all', this)">ALL</button>
-            <button class="cat-btn" onclick="filterCat('sports', this)">SPORTS</button>
-            <button class="cat-btn" onclick="filterCat('news', this)">NEWS</button>
-            <button class="cat-btn" onclick="filterCat('movies', this)">MOVIES</button>
-            <button class="cat-btn" onclick="filterCat('kids', this)">kids & info</button>
-            <button class="cat-btn" onclick="filterCat('HindiMovies', this)">Hindi Movies</button>
-        </div>
+    <button class="cat-btn active" onclick="filterCat('all', this)">ALL</button>
+    <button class="cat-btn" onclick="filterCat('sports', this)">SPORTS</button>
+    <button class="cat-btn" onclick="filterCat('news', this)">NEWS</button>
+    <button class="cat-btn" onclick="filterCat('movies', this)">MOVIES</button>
+    <button class="cat-btn" onclick="filterCat('kids', this)">KIDS & INFO</button>
+    <button class="cat-btn" onclick="filterCat('Hindi Movies', this)">HINDI MOVIES</button>
+</div>
+
         <input type="text" id="searchBar" placeholder="Search Channel..." onkeyup="doSearch()">
         <div class="selector-group">
             <div class="selector-item">
@@ -246,38 +247,39 @@
         if (hlsInstance) hlsInstance.audioTrack = parseInt(aSelect.value);
     }
 
-    function filterCat(cat, btn) {
-        currentCategory = cat;
-        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        doSearch();
+    // ... [Keep your channels array here] ...
+
+function filterCat(cat, btn) {
+    // This now matches "Hindi Movies" exactly as written in the channel objects
+    currentCategory = cat;
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    // Clear search bar when switching categories to avoid confusion
+    document.getElementById('searchBar').value = ''; 
+    doSearch();
+}
+
+function doSearch() {
+    const q = document.getElementById('searchBar').value.toLowerCase();
+    let filtered = channels;
+
+    // Filter by Category first
+    if (currentCategory !== 'all') {
+        filtered = channels.filter(c => c.cat === currentCategory);
     }
 
-    function render(data) {
-        const container = document.getElementById('channelList');
-        container.innerHTML = '';
-        data.forEach(ch => {
-            const card = document.createElement('div');
-            card.className = 'channel-card';
-            card.innerHTML = `<img src="${ch.logo}" onerror="this.src='https://via.placeholder.com/40'"><span>${ch.name}</span>`;
-            card.onclick = () => {
-                document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('active'));
-                card.classList.add('active');
-                play(ch.src, ch.key, ch.name);
-            };
-            container.appendChild(card);
-        });
-    }
-
-    function doSearch() {
-        const q = document.getElementById('searchBar').value.toLowerCase();
-        let filtered = channels;
-        if (currentCategory !== 'all') {
-            filtered = filtered.filter(c => c.cat === currentCategory);
-        }
+    // Then filter by Search Query
+    if (q) {
         filtered = filtered.filter(c => c.name.toLowerCase().includes(q));
-        render(filtered);
     }
+
+    render(filtered);
+}
+
+// Ensure the initial render works
+
+
 
     render(channels);
     if(channels.length > 0) play(channels[0].src, channels[0].key, channels[0].name);
