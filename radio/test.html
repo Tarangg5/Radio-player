@@ -130,31 +130,54 @@
                 status.innerText = "DRM LOADED...";
             }
 
-            try {
+                        try {
                 await shakaPlayer.load(url);
-                // Quality
-                shakaPlayer.getVariantTracks().forEach(t => {
-                    let opt = document.createElement('option');
-                    opt.value = t.id; opt.text = t.height + 'p';
-                    qSelect.appendChild(opt);
+                
+                // --- 1. QUALITY SELECTION (Duplicates Fixed) ---
+                const tracks = shakaPlayer.getVariantTracks().sort((a, b) => b.height - a.height);
+                const seen = new Set();
+                qSelect.innerHTML = '<option value="auto">AUTO</option>';
+                
+                tracks.forEach(t => {
+                    if (!seen.has(t.height)) {
+                        let opt = document.createElement('option');
+                        opt.value = t.id; opt.text = t.height + 'p';
+                        qSelect.appendChild(opt);
+                        seen.add(t.height);
+                    }
                 });
-                // Audio
+
+                // --- 2. AUDIO SELECTION LOGIC (Fixed) ---
                 const langs = shakaPlayer.getAudioLanguages();
+                aSelect.innerHTML = ''; // Purana data saaf karein
+                
                 if (langs.length > 0) {
-                    aSelect.innerHTML = '';
                     langs.forEach(l => {
                         let opt = document.createElement('option');
                         opt.value = l; 
-                        let name = l.toUpperCase();
-                        if(name === 'HI') name = 'HINDI';
-                        if(name === 'EN') name = 'ENGLISH';
-                        opt.text = name;
+                        // Language name ko sundar banayein
+                        let displayLang = l.toUpperCase();
+                        if(displayLang === 'HI') displayLang = 'HINDI';
+                        if(displayLang === 'EN') displayLang = 'ENGLISH';
+                        if(displayLang === 'MR') displayLang = 'MARATHI';
+                        
+                        opt.text = displayLang;
                         aSelect.appendChild(opt);
                     });
+                } else {
+                    aSelect.innerHTML = '<option value="default">DEFAULT AUDIO</option>';
                 }
+
+                // Force Best Quality on load
+                if (tracks.length > 0) {
+                    shakaPlayer.selectVariantTrack(tracks[0], true);
+                    qSelect.value = tracks[0].id;
+                }
+
                 video.play();
-                status.innerText = "DASH ACTIVE";
+                status.innerText = "DASH ACTIVE | AUDIO LOADED";
             } catch (e) { status.innerText = "ERROR: " + e.code; }
+
                 }
     }
 
@@ -169,10 +192,16 @@
         }
     };
 
-    aSelect.onchange = () => {
-        if (hlsInstance) hlsInstance.audioTrack = parseInt(aSelect.value);
-        if (shakaPlayer) shakaPlayer.selectAudioLanguage(aSelect.value);
+        aSelect.onchange = () => {
+        if (shakaPlayer) {
+            shakaPlayer.selectAudioLanguage(aSelect.value);
+            status.innerText = "AUDIO CHANGED TO: " + aSelect.value.toUpperCase();
+        }
+        if (hlsInstance) {
+            hlsInstance.audioTrack = parseInt(aSelect.value);
+        }
     };
+
 </script>
 </body>
 </html>
