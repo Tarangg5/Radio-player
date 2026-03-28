@@ -79,7 +79,7 @@
     <div class="channel-list" id="channelList"></div>
 </div>
 <script>
-    const video = document.getElementById('video');
+                        const video = document.getElementById('video');
     const qSelect = document.getElementById('qualitySelect');
     const aSelect = document.getElementById('audioSelect');
     const status = document.getElementById('status');
@@ -88,13 +88,12 @@
     const M3U_API = "https://cool-salad-7156.sonuujamuicamp.workers.dev/";
     
     let shakaPlayer = null;
-    let hlsInstance = null;
     let currentCategory = 'all';
-    let allChannels = []; // Worker se data yahan aayega
+    let allChannels = []; 
 
-    // 1. Worker se M3U Data fetch karke parse karne ka function
+    // 1. M3U Data fetch aur parse karne ka logic
     async function loadM3UData() {
-        status.innerText = "FETCHING CHANNELS...";
+        status.innerText = "SYSTEM INITIATING: FETCHING CHANNELS...";
         try {
             const res = await fetch(M3U_API);
             const text = await res.text();
@@ -107,7 +106,7 @@
                     const logo = lines[i].match(/tvg-logo="([^"]+)"/)?.[1] || "";
                     const cat = lines[i].match(/group-title="([^"]+)"/)?.[1]?.toLowerCase() || "others";
                     
-                    // Key aur Cookie nikalein (M3U format ke hisab se)
+                    // M3U Structure: #EXTINF -> #KODIPROP -> #EXTHTTP -> URL
                     const keyLine = lines[i+1]?.includes('license_key') ? lines[i+1] : lines[i+2];
                     const cookieLine = lines[i+2]?.includes('EXTHTTP') ? lines[i+2] : lines[i+3];
                     const url = lines[i+4]?.trim() || lines[i+3]?.trim();
@@ -117,34 +116,37 @@
                     let cookie = "";
                     try { cookie = JSON.parse(cookieJson).Cookie; } catch(e){}
 
-                    parsedChannels.push({ name, logo, cat, src: url, key, cookie });
+                    if(url && url.startsWith('http')) {
+                        parsedChannels.push({ name, logo, cat, src: url, key, cookie });
+                    }
                 }
             }
             allChannels = parsedChannels;
             render(allChannels);
             if(allChannels.length > 0) play(allChannels[0]);
         } catch (e) {
-            status.innerText = "WORKER FETCH FAILED!";
+            status.innerText = "SYSTEM ERROR: WORKER OFFLINE";
+            console.error(e);
         }
     }
 
     async function play(ch) {
-        status.innerText = "LOADING: " + ch.name;
+        status.innerText = "DECODING: " + ch.name;
+        
+        // Purane instances saaf karein
         if (shakaPlayer) { await shakaPlayer.destroy(); shakaPlayer = null; }
-        if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
 
-        // DASH Player Setup
         shaka.polyfill.installAll();
         shakaPlayer = new shaka.Player(video);
 
-        // --- 2. JIO HEADERS & COOKIE LOGIC ---
+        // --- JIO HEADERS & COOKIE PERSISTENCE LOGIC ---
         shakaPlayer.getNetworkingEngine().registerRequestFilter((type, request) => {
             request.headers["Referer"] = "https://www.jiotv.com/";
             request.headers["User-Agent"] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
 
             if (ch.cookie) {
                 request.headers["Cookie"] = ch.cookie;
-                // Token append to segments
+                // Append token to segments (Persistence)
                 if (type === shaka.net.NetworkingEngine.RequestType.SEGMENT || type === shaka.net.NetworkingEngine.RequestType.MANIFEST) {
                     if (!request.uris[0].includes("__hdnea__")) {
                         const sep = request.uris[0].includes("?") ? "&" : "?";
@@ -154,22 +156,67 @@
             }
         });
 
-        // DRM Configuration
+        // DRM (ClearKey) Config
         if (ch.key) {
             const parts = ch.key.split(':');
-            shakaPlayer.configure({ drm: { clearKeys: { [parts[0]]: parts[1] } } });
+            shakaPlayer.configure({ 
+                drm: { clearKeys: { [parts[0].trim()]: parts[1].trim() } },
+                streaming: { lowLatencyMode: true, bufferingGoal: 30 }
+            });
         }
 
         try {
             await shakaPlayer.load(ch.src);
-            status.innerText = "PLAYING: " + ch.name;
+            status.innerText = "ONLINE: " + ch.name;
+            
+            // --- QUALITY SELECTION LOGIC ---
+            qSelect.innerHTML = '<option value="auto">AUTO</option>';
+            const tracks = shakaPlayer.getVariantTracks();
+            tracks.sort((a, b) => b.height - a.height); // Higher resolution first
+            tracks.forEach(t => {
+                let opt = document.createElement('option');
+                opt.value = t.id;
+                opt.text = t.height + 'P';
+                qSelect.appendChild(opt);
+            });
+
+            // --- AUDIO SELECTION LOGIC ---
+            aSelect.innerHTML = '';
+            const langs = shakaPlayer.getAudioLanguages();
+            if(langs.length > 0) {
+                langs.forEach(l => {
+                    let opt = document.createElement('option');
+                    opt.value = l;
+                    opt.text = (l === 'hi' ? 'HINDI' : l === 'en' ? 'ENGLISH' : l).toUpperCase();
+                    aSelect.appendChild(opt);
+                });
+            } else {
+                aSelect.innerHTML = '<option value="default">DEFAULT</option>';
+            }
+
             video.play();
         } catch (e) { 
-            status.innerText = "ERROR: STREAM FAILED"; 
+            status.innerText = "STREAM OFFLINE (ERROR " + e.code + ")"; 
         }
     }
 
-    // Baaki ke helper functions (Search, Render, Quality) wahi rahenge
+    function changeQuality() {
+        const val = qSelect.value;
+        if (shakaPlayer) {
+            if (val === "auto") {
+                shakaPlayer.configure({ abr: { enabled: true } });
+            } else {
+                shakaPlayer.configure({ abr: { enabled: false } });
+                const track = shakaPlayer.getVariantTracks().find(t => t.id == val);
+                shakaPlayer.selectVariantTrack(track, true);
+            }
+        }
+    }
+
+    function changeAudio() {
+        if (shakaPlayer) shakaPlayer.selectAudioLanguage(aSelect.value);
+    }
+
     function render(data) {
         const container = document.getElementById('channelList');
         container.innerHTML = '';
@@ -177,9 +224,20 @@
             const card = document.createElement('div');
             card.className = 'channel-card';
             card.innerHTML = `<img src="${ch.logo}" onerror="this.src='https://via.placeholder.com/40'"><span>${ch.name}</span>`;
-            card.onclick = () => play(ch);
+            card.onclick = () => {
+                document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                play(ch);
+            };
             container.appendChild(card);
         });
+    }
+
+    function filterCat(cat, btn) {
+        currentCategory = cat;
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        doSearch();
     }
 
     function doSearch() {
@@ -192,9 +250,8 @@
         render(filtered);
     }
 
-    // Start App
-    loadM3UData();
-                        
+    // Initialize App
+    document.addEventListener('DOMContentLoaded', loadM3UData);
 
 
     
