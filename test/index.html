@@ -165,15 +165,29 @@
             });
         }
 
-        try {
+                try {
             await shakaPlayer.load(ch.src);
             status.innerText = "ONLINE: " + ch.name;
             
-            // --- QUALITY SELECTION LOGIC ---
+            // --- FIXED QUALITY SELECTION LOGIC (Deduplication) ---
             qSelect.innerHTML = '<option value="auto">AUTO</option>';
+            
             const tracks = shakaPlayer.getVariantTracks();
-            tracks.sort((a, b) => b.height - a.height); // Higher resolution first
-            tracks.forEach(t => {
+            
+            // Map ka use karke duplicate heights ko remove karenge
+            const seenHeights = new Set();
+            const uniqueTracks = tracks.filter(t => {
+                if (seenHeights.has(t.height)) {
+                    return false;
+                }
+                seenHeights.add(t.height);
+                return true;
+            });
+
+            // Sorting: High resolution upar rahegi
+            uniqueTracks.sort((a, b) => b.height - a.height);
+
+            uniqueTracks.forEach(t => {
                 let opt = document.createElement('option');
                 opt.value = t.id;
                 opt.text = t.height + 'P';
@@ -198,7 +212,7 @@
         } catch (e) { 
             status.innerText = "STREAM OFFLINE (ERROR " + e.code + ")"; 
         }
-    }
+
 
     function changeQuality() {
         const val = qSelect.value;
