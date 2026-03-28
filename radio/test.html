@@ -132,26 +132,26 @@
 
             try {
                 await shakaPlayer.load(url);
-                
-                // Sorting quality (High to Low)
-                const tracks = shakaPlayer.getVariantTracks().sort((a, b) => b.height - a.height);
-                const seen = new Set();
-                
-                tracks.forEach(t => {
-                    if (!seen.has(t.height)) {
-                        let opt = document.createElement('option');
-                        opt.value = t.id; opt.text = t.height + 'p';
-                        qSelect.appendChild(opt);
-                        seen.add(t.height);
-                    }
+                // Quality
+                shakaPlayer.getVariantTracks().forEach(t => {
+                    let opt = document.createElement('option');
+                    opt.value = t.id; opt.text = t.height + 'p';
+                    qSelect.appendChild(opt);
                 });
-
-                // Force Best Quality on load
-                if (tracks.length > 0) {
-                    shakaPlayer.selectVariantTrack(tracks[0], true);
-                    qSelect.value = tracks[0].id;
+                // Audio
+                const langs = shakaPlayer.getAudioLanguages();
+                if (langs.length > 0) {
+                    aSelect.innerHTML = '';
+                    langs.forEach(l => {
+                        let opt = document.createElement('option');
+                        opt.value = l; 
+                        let name = l.toUpperCase();
+                        if(name === 'HI') name = 'HINDI';
+                        if(name === 'EN') name = 'ENGLISH';
+                        opt.text = name;
+                        aSelect.appendChild(opt);
+                    });
                 }
-
                 video.play();
                 status.innerText = "DASH ACTIVE";
             } catch (e) { status.innerText = "ERROR: " + e.code; }
