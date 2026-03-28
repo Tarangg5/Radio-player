@@ -3,131 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SONU NEON ULTIMATE</title>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.ui.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/controls.min.css">
-
+    <title>SONU Neon Sports Player - Jio Fixed</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
-        
-        body { margin: 0; background: #050505; color: #fff; font-family: 'Orbitron', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .wrapper { width: 100%; max-width: 850px; background: #111; border: 2px solid #ff0055; border-radius: 15px; padding: 15px; box-shadow: 0 0 30px rgba(255, 0, 85, 0.3); }
-        
-        .video-shell { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 10px; overflow: hidden; position: relative; }
-        video { width: 100%; height: 100%; }
-
-        .input-area { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
-        textarea { width: 100%; height: 100px; background: #000; color: #00f2fe; border: 1px solid #333; border-radius: 8px; padding: 10px; font-family: monospace; font-size: 12px; outline: none; resize: none; }
-        
-        button { background: #ff0055; color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; font-family: 'Orbitron'; font-weight: bold; text-transform: uppercase; transition: 0.3s; }
-        button:hover { background: #ff0077; box-shadow: 0 0 15px #ff0055; }
-        
-        #status { margin-top: 10px; text-align: center; font-size: 0.8em; color: #aaa; }
-        .play-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 10; cursor: pointer; }
+        body { font-family: 'Orbitron', sans-serif; background: #050505; color: #fff; padding: 20px; text-align: center; }
+        .container { max-width: 900px; margin: auto; background: rgba(20, 20, 20, 0.9); padding: 30px; border-radius: 20px; border: 2px solid #ff0055; box-shadow: 0 0 20px #ff0055; position: relative; }
+        .logo-container { position: absolute; top: 20px; left: 20px; width: 60px; height: 60px; border-radius: 50%; border: 2px solid #00f2fe; box-shadow: 0 0 15px #00f2fe; overflow: hidden; background: #000; }
+        .logo-container img { width: 100%; height: 100%; object-fit: cover; }
+        h2 { font-size: 2.2em; margin-bottom: 20px; text-shadow: 0 0 15px #ff0055; }
+        video { width: 100%; border-radius: 12px; margin-top: 20px; border: 3px solid #00f2fe; box-shadow: 0 0 25px #00f2fe; background: #000; }
+        .controls { display: flex; flex-direction: column; gap: 15px; margin-top: 60px; }
+        input, select { padding: 14px; border-radius: 8px; border: 2px solid #ff0055; background: #111; color: #fff; font-family: 'Orbitron'; outline: none; }
+        .selector-group { display: flex; gap: 10px; }
+        .selector-item { flex: 1; text-align: left; }
+        label { font-size: 0.8em; color: #00f2fe; margin-bottom: 5px; display: block; }
+        button { padding: 18px; border-radius: 10px; background: transparent; color: #ff0055; font-weight: bold; border: 2px solid #ff0055; box-shadow: 0 0 10px #ff0055; cursor: pointer; transition: 0.4s; font-family: 'Orbitron'; }
+        button:hover { background: #ff0055; color: #fff; box-shadow: 0 0 30px #ff0055; }
+        #status { margin-top: 15px; color: #00e676; text-shadow: 0 0 5px #00e676; font-size: 0.9em; height: 20px; }
     </style>
 </head>
 <body>
 
-    <div class="wrapper">
-        <h2 style="text-align: center; color: #ff0055; margin-top: 0;">SONU NEON LIVE</h2>
+<div class="container">
+    <div class="logo-container"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSHbTtG3wGQFbFUaChzCmNG2v5bAsK8ESlbw&s" alt="IR"></div>
+    <h2>SONU NEON PLAYER</h2>
+    <div class="controls">
+        <input type="text" id="urlInput" placeholder="Paste .m3u8 or .mpd link here...">
+        <input type="text" id="drmKeyInput" placeholder="Paste DRM Key (KID:KEY)">
+        <input type="text" id="cookieInput" placeholder="Paste Cookie (__hdnea__=...)">
         
-        <div class="video-shell" id="videoParent" data-shaka-player-container>
-            <video id="mainVideo" autoplay playsinline data-shaka-player></video>
-            <div class="play-overlay" id="forcePlay">▶ CLICK TO START</div>
+        <div class="selector-group">
+            <div class="selector-item">
+                <label>QUALITY</label>
+                <select id="qualitySelect"><option value="auto">AUTO</option></select>
+            </div>
+            <div class="selector-item">
+                <label>AUDIO</label>
+                <select id="audioSelect"><option value="default">DEFAULT</option></select>
+            </div>
         </div>
-
-        <div id="status">READY: PASTE FULL LINK AND HIT LOAD</div>
-
-        <div class="input-area">
-            <textarea id="rawInput" placeholder="Paste your link with |Cookie|User-Agent|drmLicense here..."></textarea>
-            <button onclick="processLink()">LOAD STREAM</button>
-        </div>
+        <button id="playBtn">LAUNCH STREAM</button>
     </div>
+    <video id="video" controls autoplay playsinline></video>
+    <div id="status">SYSTEM READY...</div>
+</div>
 
 <script>
-    let player, ui;
-    const video = document.getElementById('mainVideo');
+    const video = document.getElementById('video');
     const status = document.getElementById('status');
-    const overlay = document.getElementById('forcePlay');
-    
-    // Cloudflare Worker Proxy
-    const PROXY = "https://testtvjio.sonuujamuicamp.workers.dev/?url=";
+    const qSelect = document.getElementById('qualitySelect');
+    const aSelect = document.getElementById('audioSelect');
+    let shakaPlayer = null;
+    let hlsInstance = null;
 
-    async function init() {
-        shaka.polyfill.installAll();
-        player = new shaka.Player(video);
-        ui = new shaka.ui.Overlay(player, document.getElementById('videoParent'), video);
+    document.getElementById('playBtn').addEventListener('click', startPlayer);
 
-        // Network filters for bypass
-        player.getNetworkingEngine().registerRequestFilter((type, request) => {
-            const data = parseInput();
-            if(!data.url) return;
+    async function startPlayer() {
+        const url = document.getElementById('urlInput').value.trim();
+        const drmInput = document.getElementById('drmKeyInput').value.trim();
+        const manualCookie = document.getElementById('cookieInput').value.trim();
+        
+        status.innerText = "INITIALIZING...";
 
-            request.headers['Referer'] = 'https://jiotv.com/';
-            request.headers['User-Agent'] = data.ua || 'plaYtv/7.1.3 (Linux;Android 13) ExoPlayerLib/824.0';
-            
-            if (data.cookie) {
-                request.headers['Cookie'] = data.cookie;
-                // Append cookie to segment URLs if needed
-                if (!request.uris[0].includes('__hdnea__=')) {
-                    const sep = request.uris[0].includes('?') ? '&' : '?';
-                    request.uris[0] += sep + data.cookie;
-                }
+        if (shakaPlayer) { await shakaPlayer.destroy(); shakaPlayer = null; }
+        if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+        qSelect.innerHTML = '<option value="auto">AUTO</option>';
+        aSelect.innerHTML = '<option value="default">DEFAULT</option>';
+
+        if (!url) { status.innerText = "ERROR: PASTE LINK FIRST"; return; }
+
+        // --- HLS (.m3u8) logic ---
+        if (url.includes('.m3u8')) {
+            if (Hls.isSupported()) {
+                hlsInstance = new Hls({
+                    enableWorker: true,
+                    xhrSetup: function(xhr, url) {
+                        xhr.setRequestHeader('User-Agent', 'plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6');
+                        if (manualCookie) {
+                            xhr.setRequestHeader('Cookie', manualCookie);
+                        }
+                    }
+                });
+                hlsInstance.loadSource(url);
+                hlsInstance.attachMedia(video);
+                hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+                    hlsInstance.levels.forEach((l, i) => {
+                        let opt = document.createElement('option');
+                        opt.value = i; opt.text = l.height + 'p';
+                        qSelect.appendChild(opt);
+                    });
+                    video.play();
+                    status.innerText = "HLS ACTIVE";
+                });
             }
-        });
-    }
-
-    function parseInput() {
-        const input = document.getElementById('rawInput').value.trim();
-        const parts = input.split('|');
-        let obj = { url: parts[0], cookie: "", ua: "", drm: "" };
-
-        parts.forEach(p => {
-            let lower = p.toLowerCase();
-            if (lower.startsWith("cookie=")) obj.cookie = p.split('=')[1];
-            if (lower.startsWith("user-agent=")) obj.ua = p.split('=')[1];
-            if (lower.startsWith("drmlicense=")) obj.drm = p.split('=')[1];
-        });
-        return obj;
-    }
-
-    async function processLink() {
-        const data = parseInput();
-        if (!data.url) { status.innerText = "ERROR: LINK KHali HAI"; return; }
-
-        status.innerText = "DECODING STREAM...";
-        overlay.style.display = "none";
-
-        // DRM Clearkey Config
-        if (data.drm && data.drm.includes(':')) {
-            const [kid, key] = data.drm.split(':');
-            player.configure({
-                drm: { clearKeys: { [kid.trim()]: key.trim() } }
-            });
-        }
-
-        try {
-            const finalUrl = PROXY + encodeURIComponent(data.url);
-            await player.load(finalUrl);
-            status.innerText = "ONLINE: STREAMING STARTED";
+        } 
+        // --- DASH (.mpd) logic (For JioTV/DRM) ---
+        else if (url.includes('.mpd')) {
+            shaka.polyfill.installAll();
+            shakaPlayer = new shaka.Player(video);
             
-            // Autoplay attempt
-            video.play().catch(() => {
-                overlay.style.display = "flex";
+            // JIO HEADERS & COOKIE PERSISTENCE
+            shakaPlayer.getNetworkingEngine().registerRequestFilter((type, request) => {
+                request.headers["Referer"] = "https://www.jiotv.com/";
+                request.headers["User-Agent"] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
+
+                if (manualCookie) {
+                    request.headers["Cookie"] = manualCookie;
+                    // Persistence Logic: Append token to segment URIs
+                    if (type === shaka.net.NetworkingEngine.RequestType.SEGMENT || type === shaka.net.NetworkingEngine.RequestType.MANIFEST) {
+                        if (!request.uris[0].includes("__hdnea__")) {
+                            const sep = request.uris[0].includes("?") ? "&" : "?";
+                            request.uris[0] += sep + manualCookie;
+                        }
+                    }
+                }
             });
-        } catch (e) {
-            status.innerText = "LOAD FAILED: Error " + e.code;
-            console.error(e);
+
+            if (drmInput.includes(':')) {
+                const parts = drmInput.split(':');
+                shakaPlayer.configure({
+                    drm: { clearKeys: { [parts[0].trim()]: parts[1].trim() } },
+                    streaming: { abr: { enabled: false } } // Forced High Quality Default
+                });
+                status.innerText = "DRM LOADED...";
+            }
+
+            try {
+                await shakaPlayer.load(url);
+                
+                // Sorting quality (High to Low)
+                const tracks = shakaPlayer.getVariantTracks().sort((a, b) => b.height - a.height);
+                const seen = new Set();
+                
+                tracks.forEach(t => {
+                    if (!seen.has(t.height)) {
+                        let opt = document.createElement('option');
+                        opt.value = t.id; opt.text = t.height + 'p';
+                        qSelect.appendChild(opt);
+                        seen.add(t.height);
+                    }
+                });
+
+                // Force Best Quality on load
+                if (tracks.length > 0) {
+                    shakaPlayer.selectVariantTrack(tracks[0], true);
+                    qSelect.value = tracks[0].id;
+                }
+
+                video.play();
+                status.innerText = "DASH ACTIVE";
+            } catch (e) { status.innerText = "ERROR: " + e.code; }
         }
     }
 
-    overlay.onclick = () => {
-        video.play();
-        overlay.style.display = "none";
+    qSelect.onchange = () => {
+        if (hlsInstance) hlsInstance.currentLevel = qSelect.value === "auto" ? -1 : parseInt(qSelect.value);
+        if (shakaPlayer) {
+            if (qSelect.value === "auto") shakaPlayer.configure({ abr: { enabled: true } });
+            else {
+                shakaPlayer.configure({ abr: { enabled: false } });
+                shakaPlayer.selectVariantTrack(shakaPlayer.getVariantTracks().find(t => t.id == qSelect.value), true);
+            }
+        }
     };
-
-    document.addEventListener('shaka-ui-loaded', init);
 </script>
 </body>
 </html>
