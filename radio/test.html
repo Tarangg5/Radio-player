@@ -155,7 +155,7 @@
                 video.play();
                 status.innerText = "DASH ACTIVE";
             } catch (e) { status.innerText = "ERROR: " + e.code; }
-        }
+                }
     }
 
     qSelect.onchange = () => {
@@ -167,6 +167,11 @@
                 shakaPlayer.selectVariantTrack(shakaPlayer.getVariantTracks().find(t => t.id == qSelect.value), true);
             }
         }
+    };
+
+    aSelect.onchange = () => {
+        if (hlsInstance) hlsInstance.audioTrack = parseInt(aSelect.value);
+        if (shakaPlayer) shakaPlayer.selectAudioLanguage(aSelect.value);
     };
 </script>
 </body>
