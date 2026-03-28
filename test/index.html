@@ -165,28 +165,30 @@
             });
         }
 
-                try {
+                        try {
+            // 1. Auto Quality (ABR) ko turant band karein
+            shakaPlayer.configure({
+                abr: { enabled: false },
+                streaming: { lowLatencyMode: true, bufferingGoal: 30 }
+            });
+
             await shakaPlayer.load(ch.src);
             status.innerText = "ONLINE: " + ch.name;
             
-            // --- FIXED QUALITY SELECTION LOGIC (Deduplication) ---
-            qSelect.innerHTML = '<option value="auto">AUTO</option>';
+            // --- QUALITY SELECTION & FORCED HIGH QUALITY ---
+            qSelect.innerHTML = ''; // Direct quality options
             
             const tracks = shakaPlayer.getVariantTracks();
             
-            // Map ka use karke duplicate heights ko remove karenge
+            // Duplicate heights remove karein aur Sort karein (High to Low)
             const seenHeights = new Set();
             const uniqueTracks = tracks.filter(t => {
-                if (seenHeights.has(t.height)) {
-                    return false;
-                }
+                if (seenHeights.has(t.height)) return false;
                 seenHeights.add(t.height);
                 return true;
-            });
+            }).sort((a, b) => b.height - a.height);
 
-            // Sorting: High resolution upar rahegi
-            uniqueTracks.sort((a, b) => b.height - a.height);
-
+            // Dropdown mein options bharein
             uniqueTracks.forEach(t => {
                 let opt = document.createElement('option');
                 opt.value = t.id;
@@ -194,7 +196,16 @@
                 qSelect.appendChild(opt);
             });
 
-            // --- AUDIO SELECTION LOGIC ---
+            // --- FORCED BEST QUALITY LOGIC ---
+            // Sabse pehla track (jo highest hai) select karein
+            if (uniqueTracks.length > 0) {
+                const bestTrack = uniqueTracks[0];
+                shakaPlayer.selectVariantTrack(bestTrack, true);
+                qSelect.value = bestTrack.id; // Dropdown mein bhi set karein
+                status.innerText = "PLAYING IN " + bestTrack.height + "P";
+            }
+
+            // --- AUDIO SELECTION ---
             aSelect.innerHTML = '';
             const langs = shakaPlayer.getAudioLanguages();
             if(langs.length > 0) {
@@ -204,14 +215,13 @@
                     opt.text = (l === 'hi' ? 'HINDI' : l === 'en' ? 'ENGLISH' : l).toUpperCase();
                     aSelect.appendChild(opt);
                 });
-            } else {
-                aSelect.innerHTML = '<option value="default">DEFAULT</option>';
             }
 
             video.play();
         } catch (e) { 
-            status.innerText = "STREAM OFFLINE (ERROR " + e.code + ")"; 
+            status.innerText = "STREAM ERROR: " + e.code; 
         }
+
     }
 
     function changeQuality() {
