@@ -2,82 +2,203 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Star Sports 1 Hindi - Live Player</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SONU NEON TV - Categories Edition</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        body { 
-            background: #121212; 
-            color: white; 
-            font-family: sans-serif; 
-            display: flex; 
-            flex-direction: column;
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0; 
-        }
-        .container { width: 90%; max-width: 900px; text-align: center; }
-        video { width: 100%; border: 2px solid #ed1c24; border-radius: 8px; background: #000; }
-        h2 { margin-bottom: 15px; color: #ed1c24; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
+        
+        body { font-family: 'Orbitron', sans-serif; background: #050505; color: #fff; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
+
+        .container { width: 95%; max-width: 1000px; margin: auto; background: rgba(15, 15, 15, 0.95); padding: 20px; border-radius: 15px; border: 1px solid #333; box-shadow: 0 5px 15px rgba(0,0,0,0.5); text-align: center; }
+
+        h2 { font-size: 1.8em; margin: 10px 0 20px 0; color: #ff0055; text-transform: uppercase; }
+
+        .player-box { width: 100%; max-width: 950px; margin: 0 auto; border-radius: 8px; border: 2px solid #444; background: #000; overflow: hidden; position: relative; }
+        video { width: 100%; aspect-ratio: 16/9; display: block; }
+
+        .controls { width: 100%; display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+        
+        /* Category Buttons */
+        .category-wrapper { display: flex; gap: 8px; overflow-x: auto; padding: 10px 0; scrollbar-width: none; justify-content: center; }
+        .category-wrapper::-webkit-scrollbar { display: none; }
+        .cat-btn { padding: 8px 15px; border-radius: 20px; border: 1px solid #444; background: #111; color: #aaa; cursor: pointer; white-space: nowrap; font-size: 0.7em; transition: 0.3s; }
+        .cat-btn.active { background: #ff0055; color: #fff; border-color: #ff0055; }
+
+        input#searchBar { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ff0055; background: #111; color: #fff; font-family: 'Orbitron'; box-sizing: border-box; outline: none; }
+
+        .selector-group { display: flex; gap: 10px; width: 100%; }
+        .selector-item { flex: 1; text-align: left; }
+        label { font-size: 0.7em; color: #00f2fe; margin-bottom: 5px; display: block; padding-left: 5px; }
+        select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #444; background: #111; color: #fff; font-family: 'Orbitron'; outline: none; cursor: pointer; }
+
+        #status { margin-top: 10px; color: #00e676; font-size: 0.8em; }
+
+        .channel-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 20px; width: 100%; }
+        .channel-card { background: #111; padding: 10px 5px; border-radius: 10px; cursor: pointer; border: 1px solid #222; transition: 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .channel-card:hover { border-color: #00f2fe; }
+        .channel-card.active { border-color: #ff0055; background: rgba(255, 0, 85, 0.05); }
+        .channel-card img { width: 40px; height: 40px; object-fit: contain; margin-bottom: 5px; }
+        .channel-card span { display: block; font-size: 8px; font-weight: bold; width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h2>🔴 Star Sports 1 Hindi (Live)</h2>
-        <video id="video" controls autoplay crossorigin="anonymous"></video>
-        <p style="font-size: 12px; color: #888; margin-top: 10px;">Note: Make sure CORS Extension is ON in your browser.</p>
+<div class="container">
+    <h2>SONU NEON TV</h2>
+    <a href="https://radio-player-virid.vercel.app" title="PLAY RADIO HERE"><p><h1>Click here To PLAY RADIO</h1></p></a>
+    
+    <div id="status">SYSTEM READY</div>
+
+    <div class="player-box">
+        <video id="video" controls autoplay playsinline></video>
     </div>
 
-    <script>
-        const manifestUri = 'https://jiotvpllive.cdn.jio.com/bpk-tv/Star_Sports_1_Hindi_BTS/output/index.mpd';
-        
-        // DRM ClearKey Configuration
-        const keyId = '8ea9b607549252068e260a5f4d7dd321';
-        const key = '350c0aaffedf51cc1502e9543c7c885e';
-        
-        // Cookie Header string
-        const myCookie = "__hdnea__=st=1773629375~exp=1773715775~acl=/*~hmac=ef55190f024fdd08cbd1abb181b06b9166148359dd2f24a0f7036ab745bb3628";
+    <div class="controls">
+        <div class="category-wrapper" id="catWrapper">
+            <button class="cat-btn active" onclick="filterCat('all', this)">ALL</button>
+            <button class="cat-btn" onclick="filterCat('sports', this)">SPORTS</button>
+            <button class="cat-btn" onclick="filterCat('news', this)">NEWS</button>
+            <button class="cat-btn" onclick="filterCat('movies', this)">MOVIES</button>
+            <button class="cat-btn" onclick="filterCat('kids', this)">kids & info</button>
+        </div>
+        <input type="text" id="searchBar" placeholder="Search Channel..." onkeyup="doSearch()">
+        <div class="selector-group">
+            <div class="selector-item">
+                <label>QUALITY</label>
+                <select id="qualitySelect" onchange="changeQuality()"><option value="auto">AUTO</option></select>
+            </div>
+            <div class="selector-item">
+                <label>AUDIO</label>
+                <select id="audioSelect" onchange="changeAudio()"><option value="default">DEFAULT</option></select>
+            </div>
+        </div>
+    </div>
 
-        async function initApp() {
-            shaka.polyfil.installAll();
-            if (shaka.Player.isBrowserSupported()) {
-                initPlayer();
-            } else {
-                alert('Browser not supported!');
+    <div class="channel-list" id="channelList"></div>
+</div>
+<script>
+    const video = document.getElementById('video');
+    const qSelect = document.getElementById('qualitySelect');
+    const aSelect = document.getElementById('audioSelect');
+    const status = document.getElementById('status');
+    
+    // AAPKA M3U WORKER LINK
+    const M3U_API = "https://cool-salad-7156.sonuujamuicamp.workers.dev/";
+    
+    let shakaPlayer = null;
+    let hlsInstance = null;
+    let currentCategory = 'all';
+    let allChannels = []; // Worker se data yahan aayega
+
+    // 1. Worker se M3U Data fetch karke parse karne ka function
+    async function loadM3UData() {
+        status.innerText = "FETCHING CHANNELS...";
+        try {
+            const res = await fetch(M3U_API);
+            const text = await res.text();
+            const lines = text.split('\n');
+            const parsedChannels = [];
+
+            for (let i = 0; i < lines.length; i++) {
+                if (lines[i].startsWith('#EXTINF')) {
+                    const name = lines[i].split(',')[1]?.trim();
+                    const logo = lines[i].match(/tvg-logo="([^"]+)"/)?.[1] || "";
+                    const cat = lines[i].match(/group-title="([^"]+)"/)?.[1]?.toLowerCase() || "others";
+                    
+                    // Key aur Cookie nikalein (M3U format ke hisab se)
+                    const keyLine = lines[i+1]?.includes('license_key') ? lines[i+1] : lines[i+2];
+                    const cookieLine = lines[i+2]?.includes('EXTHTTP') ? lines[i+2] : lines[i+3];
+                    const url = lines[i+4]?.trim() || lines[i+3]?.trim();
+
+                    const key = keyLine?.split('=')[1]?.trim();
+                    const cookieJson = cookieLine?.replace('#EXTHTTP:', '').trim();
+                    let cookie = "";
+                    try { cookie = JSON.parse(cookieJson).Cookie; } catch(e){}
+
+                    parsedChannels.push({ name, logo, cat, src: url, key, cookie });
+                }
             }
+            allChannels = parsedChannels;
+            render(allChannels);
+            if(allChannels.length > 0) play(allChannels[0]);
+        } catch (e) {
+            status.innerText = "WORKER FETCH FAILED!";
         }
+    }
 
-        async function initPlayer() {
-            const video = document.getElementById('video');
-            const player = new shaka.Player(video);
+    async function play(ch) {
+        status.innerText = "LOADING: " + ch.name;
+        if (shakaPlayer) { await shakaPlayer.destroy(); shakaPlayer = null; }
+        if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
 
-            // 1. Networking Filter to inject Cookies
-            player.getNetworkingEngine().registerRequestFilter(function(type, request) {
-                // Har request (manifest aur segments) mein cookie add hogi
-                request.headers['Cookie'] = myCookie;
-            });
+        // DASH Player Setup
+        shaka.polyfill.installAll();
+        shakaPlayer = new shaka.Player(video);
 
-            // 2. DRM Setup (ClearKey)
-            player.configure({
-                drm: {
-                    clearKeys: {
-                        [keyId]: key
+        // --- 2. JIO HEADERS & COOKIE LOGIC ---
+        shakaPlayer.getNetworkingEngine().registerRequestFilter((type, request) => {
+            request.headers["Referer"] = "https://www.jiotv.com/";
+            request.headers["User-Agent"] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
+
+            if (ch.cookie) {
+                request.headers["Cookie"] = ch.cookie;
+                // Token append to segments
+                if (type === shaka.net.NetworkingEngine.RequestType.SEGMENT || type === shaka.net.NetworkingEngine.RequestType.MANIFEST) {
+                    if (!request.uris[0].includes("__hdnea__")) {
+                        const sep = request.uris[0].includes("?") ? "&" : "?";
+                        request.uris[0] += sep + ch.cookie;
                     }
                 }
-            });
-
-            // 3. Load the stream
-            try {
-                await player.load(manifestUri);
-                console.log('Video Loaded Successfully!');
-            } catch (e) {
-                console.error('Error loading video:', e);
-                if(e.code == 1001) alert("CORS Error: Please enable 'Allow CORS' extension.");
             }
+        });
+
+        // DRM Configuration
+        if (ch.key) {
+            const parts = ch.key.split(':');
+            shakaPlayer.configure({ drm: { clearKeys: { [parts[0]]: parts[1] } } });
         }
 
-        document.addEventListener('DOMContentLoaded', initApp);
-    </script>
+        try {
+            await shakaPlayer.load(ch.src);
+            status.innerText = "PLAYING: " + ch.name;
+            video.play();
+        } catch (e) { 
+            status.innerText = "ERROR: STREAM FAILED"; 
+        }
+    }
+
+    // Baaki ke helper functions (Search, Render, Quality) wahi rahenge
+    function render(data) {
+        const container = document.getElementById('channelList');
+        container.innerHTML = '';
+        data.forEach(ch => {
+            const card = document.createElement('div');
+            card.className = 'channel-card';
+            card.innerHTML = `<img src="${ch.logo}" onerror="this.src='https://via.placeholder.com/40'"><span>${ch.name}</span>`;
+            card.onclick = () => play(ch);
+            container.appendChild(card);
+        });
+    }
+
+    function doSearch() {
+        const q = document.getElementById('searchBar').value.toLowerCase();
+        let filtered = allChannels;
+        if (currentCategory !== 'all') {
+            filtered = filtered.filter(c => c.cat.includes(currentCategory));
+        }
+        filtered = filtered.filter(c => c.name.toLowerCase().includes(q));
+        render(filtered);
+    }
+
+    // Start App
+    loadM3UData();
+                        
+
+
+    
+</script>
+
 </body>
 </html>
