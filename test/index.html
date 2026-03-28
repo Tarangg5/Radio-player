@@ -21,10 +21,33 @@
         .controls { width: 100%; display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
         
         /* Category Buttons */
-        .category-wrapper { display: flex; gap: 8px; overflow-x: auto; padding: 10px 0; scrollbar-width: none; justify-content: center; }
-        .category-wrapper::-webkit-scrollbar { display: none; }
-        .cat-btn { padding: 8px 15px; border-radius: 20px; border: 1px solid #444; background: #111; color: #aaa; cursor: pointer; white-space: nowrap; font-size: 0.7em; transition: 0.3s; }
-        .cat-btn.active { background: #ff0055; color: #fff; border-color: #ff0055; }
+        .category-wrapper { 
+    display: flex; 
+    gap: 10px; 
+    overflow-x: auto; 
+    padding: 15px 5px; 
+    width: 100%;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE */
+    justify-content: flex-start; /* Mobile friendly */
+}
+.category-wrapper::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
+.cat-btn { 
+    padding: 10px 20px; 
+    border-radius: 25px; 
+    border: 1px solid #333; 
+    background: #111; 
+    color: #fff; 
+    cursor: pointer; 
+    white-space: nowrap; 
+    font-size: 10px; 
+    transition: 0.4s;
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 1px;
+}
+.cat-btn:hover { border-color: #ff0055; box-shadow: 0 0 10px #ff0055; }
+.cat-btn.active { background: #ff0055; color: #fff; border-color: #ff0055; box-shadow: 0 0 15px #ff0055; }
 
         input#searchBar { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ff0055; background: #111; color: #fff; font-family: 'Orbitron'; box-sizing: border-box; outline: none; }
 
@@ -57,12 +80,18 @@
 
     <div class="controls">
         <div class="category-wrapper" id="catWrapper">
-            <button class="cat-btn active" onclick="filterCat('all', this)">ALL</button>
-            <button class="cat-btn" onclick="filterCat('sports', this)">SPORTS</button>
-            <button class="cat-btn" onclick="filterCat('news', this)">NEWS</button>
-            <button class="cat-btn" onclick="filterCat('movies', this)">MOVIES</button>
-            <button class="cat-btn" onclick="filterCat('kids', this)">kids & info</button>
-        </div>
+    <button class="cat-btn active" onclick="filterCat('all', this)">ALL</button>
+    <button class="cat-btn" onclick="filterCat('entertainment', this)">ENTERTAINMENT</button>
+    <button class="cat-btn" onclick="filterCat('sports', this)">SPORTS</button>
+    <button class="cat-btn" onclick="filterCat('movies', this)">MOVIES</button>
+    <button class="cat-btn" onclick="filterCat('kids', this)">KIDS & INFO</button>
+    <button class="cat-btn" onclick="filterCat('news', this)">NEWS</button>
+    <button class="cat-btn" onclick="filterCat('music', this)">MUSIC</button>
+    <button class="cat-btn" onclick="filterCat('lifestyle', this)">LIFESTYLE</button>
+    <button class="cat-btn" onclick="filterCat('marathi', this)">MARATHI</button>
+    <button class="cat-btn" onclick="filterCat('hindi', this)">HINDI</button>
+</div>
+
         <input type="text" id="searchBar" placeholder="Search Channel..." onkeyup="doSearch()">
         <div class="selector-group">
             <div class="selector-item">
