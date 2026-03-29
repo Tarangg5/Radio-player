@@ -1,4 +1,4 @@
-#EXTM3U
+
 
 #EXTINF:-1 tvg-id="Star_Sports_HD1" tvg-name="Star Sports 1 HD" tvg-logo="https://jiotv.catchup.cdn.jio.com/dare_images/images/Star_Sports_HD1.png" group-title="IPL CUP",Star Sports 1 HD
 #EXTHTTP:{"Cookie":"__hdnea__=st=1774798656~exp=1774885056~acl=/*~hmac=2a952fbc7ce2146704342b5df72c5b31213b6540b0edfaf89cb1cf12c9d4b2b3"}
