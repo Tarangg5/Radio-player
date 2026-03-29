@@ -1,0 +1,5 @@
+#EXTINF:-1 tvg-id="143" tvg-name="Star Sports 1 Hindi HD" tvg-logo="https://jiotv.com/images/Star_Sports_HD1_Hindi.png" group-title="Sports",Star Sports 1 Hindi HD
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=400131994b445d8c8817202248760fda:2d56cb6f07a75b9aff165d534ae2bfc4
+#EXTHTTP:{"Cookie":"__hdnea__=st=1774798656~exp=1774885056~acl=/*~hmac=2a952fbc7ce2146704342b5df72c5b31213b6540b0edfaf89cb1cf12c9d4b2b3"}
+https://jiotvmblive.cdn.jio.com//bpk-tv/Star_Sports_HD1_Hindi_BTS/output/index.mpd
