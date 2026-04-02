@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SONU NEON TV - Universal Edition</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
+        
+        body { font-family: 'Orbitron', sans-serif; background: #050505; color: #fff; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
+        .container { width: 95%; max-width: 1000px; margin: auto; background: rgba(15, 15, 15, 0.95); padding: 20px; border-radius: 15px; border: 1px solid #333; box-shadow: 0 5px 15px rgba(0,0,0,0.5); text-align: center; }
+        h2 { font-size: 1.8em; margin: 10px 0 20px 0; color: #ff0055; text-transform: uppercase; }
+        .player-box { width: 100%; max-width: 950px; margin: 0 auto; border-radius: 8px; border: 2px solid #444; background: #000; overflow: hidden; position: relative; }
+        video { width: 100%; aspect-ratio: 16/9; display: block; }
+        .controls { width: 100%; display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+        
+        .category-wrapper { display: flex; gap: 10px; overflow-x: auto; padding: 15px 5px; width: 100%; scrollbar-width: none; justify-content: flex-start; }
+        .category-wrapper::-webkit-scrollbar { display: none; }
+
+        .cat-btn { padding: 10px 20px; border-radius: 25px; border: 1px solid #333; background: #111; color: #fff; cursor: pointer; white-space: nowrap; font-size: 10px; transition: 0.4s; font-family: 'Orbitron', sans-serif; letter-spacing: 1px; }
+        .cat-btn:hover { border-color: #ff0055; box-shadow: 0 0 10px #ff0055; }
+        .cat-btn.active { background: #ff0055; color: #fff; border-color: #ff0055; box-shadow: 0 0 15px #ff0055; }
+
+        input#searchBar { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ff0055; background: #111; color: #fff; font-family: 'Orbitron'; box-sizing: border-box; outline: none; }
+        .selector-group { display: flex; gap: 10px; width: 100%; }
+        .selector-item { flex: 1; text-align: left; }
+        label { font-size: 0.7em; color: #00f2fe; margin-bottom: 5px; display: block; padding-left: 5px; }
+        select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #444; background: #111; color: #fff; font-family: 'Orbitron'; outline: none; cursor: pointer; }
+        #status { margin-top: 10px; color: #00e676; font-size: 0.8em; }
+
+        .channel-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 20px; width: 100%; }
+        .channel-card { background: #111; padding: 10px 5px; border-radius: 10px; cursor: pointer; border: 1px solid #222; transition: 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .channel-card:hover { border-color: #00f2fe; }
+        .channel-card.active { border-color: #ff0055; background: rgba(255, 0, 85, 0.05); }
+        .channel-card img { width: 40px; height: 40px; object-fit: contain; margin-bottom: 5px; }
+        .channel-card span { display: block; font-size: 8px; font-weight: bold; width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>SONU NEON TV</h2>
+    <div id="status">SYSTEM READY</div>
+
+    <div class="player-box">
+        <video id="video" controls autoplay playsinline></video>
+    </div>
+
+    <div class="controls">
+        <div class="category-wrapper" id="catWrapper">
+            <button class="cat-btn active" onclick="filterCat('all', this)">ALL</button>
+            <button class="cat-btn" onclick="filterCat('ipl', this)">IPL</button>
+            <button class="cat-btn" onclick="filterCat('sports', this)">SPORTS</button>
+            <button class="cat-btn" onclick="filterCat('entertainment', this)">ENTERTAINMENT</button>
+            <button class="cat-btn" onclick="filterCat('movies', this)">MOVIES</button>
+            <button class="cat-btn" onclick="filterCat('news', this)">NEWS</button>
+        </div>
+
+        <input type="text" id="searchBar" placeholder="Search Channel..." onkeyup="doSearch()">
+        
+        <div class="selector-group">
+            <div class="selector-item">
+                <label>QUALITY</label>
+                <select id="qualitySelect" onchange="changeQuality()"><option value="auto">AUTO</option></select>
+            </div>
+            <div class="selector-item">
+                <label>AUDIO</label>
+                <select id="audioSelect" onchange="changeAudio()"><option value="default">DEFAULT</option></select>
+            </div>
+        </div>
+    </div>
+
+    <div class="channel-list" id="channelList"></div>
+</div>
+
+<script>
+    const video = document.getElementById('video');
+    const qSelect = document.getElementById('qualitySelect');
+    const aSelect = document.getElementById('audioSelect');
+    const status = document.getElementById('status');
+    
+    const M3U_API = "/sports.json"; // Replace with your actual file path
+    
+    let shakaPlayer = null;
+    let currentCategory = 'all';
+    let allChannels = []; 
+
+    async function loadM3UData() {
+        status.innerText = "FETCHING CHANNELS...";
+        try {
+            const res = await fetch(M3U_API);
+            const text = await res.text();
+            const lines = text.split('\n');
+            const parsedChannels = [];
+
+            for (let i = 0; i < lines.length; i++) {
+                if (lines[i].startsWith('#EXTINF')) {
+                    const name = lines[i].split(',')[1]?.trim() || "Unknown";
+                    const logo = lines[i].match(/tvg-logo="([^"]+)"/)?.[1] || "";
+                    const cat = lines[i].match(/group-title="([^"]+)"/)?.[1]?.toLowerCase() || "others";
+                    
+                    let url = "", key = "", cookie = "", userAgent = "";
+
+                    // Look ahead for URL and Headers
+                    for (let j = 1; j <= 5; j++) {
+                        let nextLine = lines[i + j]?.trim();
+                        if (!nextLine) continue;
+
+                        if (nextLine.includes('license_key=')) {
+                            key = nextLine.split('=')[1]?.trim();
+                        } else if (nextLine.startsWith('#EXTHTTP:')) {
+                            try {
+                                const headers = JSON.parse(nextLine.replace('#EXTHTTP:', ''));
+                                if (headers.Cookie) cookie = headers.Cookie;
+                                if (headers["User-Agent"]) userAgent = headers["User-Agent"];
+                            } catch(e) {}
+                        } else if (nextLine.startsWith('http')) {
+                            url = nextLine;
+                            break; 
+                        }
+                    }
+
+                    if (url) {
+                        parsedChannels.push({ name, logo, cat, src: url, key, cookie, userAgent });
+                    }
+                }
+            }
+            allChannels = parsedChannels;
+            render(allChannels);
+            if (allChannels.length > 0) play(allChannels[0]);
+        } catch (e) {
+            status.innerText = "LOAD ERROR";
+        }
+    }
+
+    async function play(ch) {
+        status.innerText = "LOADING: " + ch.name;
+        if (shakaPlayer) await shakaPlayer.destroy();
+
+        shaka.polyfill.installAll();
+        shakaPlayer = new shaka.Player(video);
+
+        shakaPlayer.getNetworkingEngine().registerRequestFilter((type, request) => {
+            // Dynamic Header Logic
+            request.headers["Referer"] = "https://www.jiotv.com/";
+            request.headers["User-Agent"] = ch.userAgent || "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
+            
+            if (ch.cookie) {
+                request.headers["Cookie"] = ch.cookie;
+            }
+        });
+
+        if (ch.key) {
+            const parts = ch.key.split(':');
+            shakaPlayer.configure({ 
+                drm: { clearKeys: { [parts[0].trim()]: parts[1].trim() } }
+            });
+        }
+
+        try {
+            await shakaPlayer.load(ch.src);
+            status.innerText = "ONLINE: " + ch.name;
+            
+            // Quality Update
+            qSelect.innerHTML = '<option value="auto">AUTO</option>';
+            const tracks = shakaPlayer.getVariantTracks().sort((a, b) => b.height - a.height);
+            const seen = new Set();
+            tracks.forEach(t => {
+                if (!seen.has(t.height)) {
+                    let opt = document.createElement('option');
+                    opt.value = t.id;
+                    opt.text = t.height + 'P';
+                    qSelect.appendChild(opt);
+                    seen.add(t.height);
+                }
+            });
+
+            // Audio Update
+            aSelect.innerHTML = '';
+            shakaPlayer.getAudioLanguages().forEach(l => {
+                let opt = document.createElement('option');
+                opt.value = l;
+                opt.text = l.toUpperCase();
+                aSelect.appendChild(opt);
+            });
+
+            video.play();
+        } catch (e) { 
+            status.innerText = "STREAM ERROR"; 
+        }
+    }
+
+    function changeQuality() {
+        const val = qSelect.value;
+        if (val === "auto") {
+            shakaPlayer.configure({ abr: { enabled: true } });
+        } else {
+            shakaPlayer.configure({ abr: { enabled: false } });
+            const track = shakaPlayer.getVariantTracks().find(t => t.id == val);
+            shakaPlayer.selectVariantTrack(track, true);
+        }
+    }
+
+    function changeAudio() { shakaPlayer.selectAudioLanguage(aSelect.value); }
+
+    function render(data) {
+        const container = document.getElementById('channelList');
+        container.innerHTML = '';
+        data.forEach(ch => {
+            const card = document.createElement('div');
+            card.className = 'channel-card';
+            card.innerHTML = `<img src="${ch.logo}" onerror="this.src='https://via.placeholder.com/40'"><span>${ch.name}</span>`;
+            card.onclick = () => play(ch);
+            container.appendChild(card);
+        });
+    }
+
+    function filterCat(cat, btn) {
+        currentCategory = cat;
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        doSearch();
+    }
+
+    function doSearch() {
+        const q = document.getElementById('searchBar').value.toLowerCase();
+        let filtered = allChannels.filter(c => (currentCategory === 'all' || c.cat.includes(currentCategory)) && c.name.toLowerCase().includes(q));
+        render(filtered);
+    }
+
+    document.addEventListener('DOMContentLoaded', loadM3UData);
+</script>
+</body>
+</html>
