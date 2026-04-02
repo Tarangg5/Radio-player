@@ -13,7 +13,7 @@
         .container { width: 95%; max-width: 1000px; margin: auto; background: rgba(15, 15, 15, 0.95); padding: 20px; border-radius: 15px; border: 1px solid #333; box-shadow: 0 5px 15px rgba(0,0,0,0.5); text-align: center; }
         h2 { font-size: 1.8em; margin: 10px 0 20px 0; color: #ff0055; text-transform: uppercase; }
         .player-box { width: 100%; max-width: 950px; margin: 0 auto; border-radius: 8px; border: 2px solid #444; background: #000; overflow: hidden; position: relative; }
-        video { width: 100%; aspect-ratio: 16/9; display: block; }
+        video { width: 100%; aspect-ratio: 16/9; display: block; outline: none; }
         .controls { width: 100%; display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
         
         .category-wrapper { display: flex; gap: 10px; overflow-x: auto; padding: 15px 5px; width: 100%; scrollbar-width: none; justify-content: flex-start; }
@@ -28,30 +28,29 @@
         .selector-item { flex: 1; text-align: left; }
         label { font-size: 0.7em; color: #00f2fe; margin-bottom: 5px; display: block; padding-left: 5px; }
         select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #444; background: #111; color: #fff; font-family: 'Orbitron'; outline: none; cursor: pointer; }
-        #status { margin-top: 10px; color: #00e676; font-size: 0.8em; }
+        #status { margin-top: 10px; color: #00e676; font-size: 0.8em; font-weight: bold; }
 
         .channel-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 20px; width: 100%; }
-        .channel-card { background: #111; padding: 10px 5px; border-radius: 10px; cursor: pointer; border: 1px solid #222; transition: 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .channel-card:hover { border-color: #00f2fe; }
-        .channel-card.active { border-color: #ff0055; background: rgba(255, 0, 85, 0.05); }
-        .channel-card img { width: 40px; height: 40px; object-fit: contain; margin-bottom: 5px; }
-        .channel-card span { display: block; font-size: 8px; font-weight: bold; width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .channel-card { background: #111; padding: 10px 5px; border-radius: 10px; cursor: pointer; border: 1px solid #222; transition: 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80px; }
+        .channel-card:hover { border-color: #00f2fe; transform: translateY(-2px); }
+        .channel-card.active { border-color: #ff0055; background: rgba(255, 0, 85, 0.1); }
+        .channel-card img { width: 45px; height: 45px; object-fit: contain; margin-bottom: 8px; }
+        .channel-card span { display: block; font-size: 9px; font-weight: bold; width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2>SONU NEON TV</h2>
-    <div id="status">SYSTEM READY</div>
+    <div id="status">INITIALIZING...</div>
 
     <div class="player-box">
-        <video id="video" controls autoplay playsinline></video>
+        <video id="video" controls autoplay playsinline poster="https://via.placeholder.com/1920x1080/000/ff0055?text=SONU+NEON+TV"></video>
     </div>
 
     <div class="controls">
         <div class="category-wrapper" id="catWrapper">
             <button class="cat-btn active" onclick="filterCat('all', this)">ALL</button>
-            <button class="cat-btn" onclick="filterCat('ipl', this)">IPL</button>
             <button class="cat-btn" onclick="filterCat('sports', this)">SPORTS</button>
             <button class="cat-btn" onclick="filterCat('entertainment', this)">ENTERTAINMENT</button>
             <button class="cat-btn" onclick="filterCat('movies', this)">MOVIES</button>
@@ -81,30 +80,35 @@
     const aSelect = document.getElementById('audioSelect');
     const status = document.getElementById('status');
     
-    const M3U_API = "/sports.json"; // Replace with your actual file path
+    // Yahan apni M3U file ka sahi path dalein (Jaise sports.m3u ya sports.txt)
+    const M3U_API = "/sports.json"; 
     
     let shakaPlayer = null;
     let currentCategory = 'all';
     let allChannels = []; 
 
     async function loadM3UData() {
-        status.innerText = "FETCHING CHANNELS...";
+        status.innerText = "FETCHING DATA...";
+        console.log("Loading file:", M3U_API);
+
         try {
             const res = await fetch(M3U_API);
+            if (!res.ok) throw new Error("File not found! Path check karein.");
+            
             const text = await res.text();
             const lines = text.split('\n');
             const parsedChannels = [];
 
             for (let i = 0; i < lines.length; i++) {
-                if (lines[i].startsWith('#EXTINF')) {
-                    const name = lines[i].split(',')[1]?.trim() || "Unknown";
+                if (lines[i].trim().startsWith('#EXTINF')) {
+                    const name = lines[i].split(',')[1]?.trim() || "Channel " + (parsedChannels.length + 1);
                     const logo = lines[i].match(/tvg-logo="([^"]+)"/)?.[1] || "";
                     const cat = lines[i].match(/group-title="([^"]+)"/)?.[1]?.toLowerCase() || "others";
                     
                     let url = "", key = "", cookie = "", userAgent = "";
 
-                    // Look ahead for URL and Headers
-                    for (let j = 1; j <= 5; j++) {
+                    // URL aur Headers ke liye agle 6 lines check karein
+                    for (let j = 1; j <= 6; j++) {
                         let nextLine = lines[i + j]?.trim();
                         if (!nextLine) continue;
 
@@ -112,10 +116,10 @@
                             key = nextLine.split('=')[1]?.trim();
                         } else if (nextLine.startsWith('#EXTHTTP:')) {
                             try {
-                                const headers = JSON.parse(nextLine.replace('#EXTHTTP:', ''));
+                                const headers = JSON.parse(nextLine.replace('#EXTHTTP:', '').trim());
                                 if (headers.Cookie) cookie = headers.Cookie;
                                 if (headers["User-Agent"]) userAgent = headers["User-Agent"];
-                            } catch(e) {}
+                            } catch(e) { console.error("Header Parse Error", e); }
                         } else if (nextLine.startsWith('http')) {
                             url = nextLine;
                             break; 
@@ -127,24 +131,41 @@
                     }
                 }
             }
+            
+            if (parsedChannels.length === 0) {
+                status.innerText = "NO CHANNELS FOUND IN FILE!";
+                return;
+            }
+
             allChannels = parsedChannels;
             render(allChannels);
-            if (allChannels.length > 0) play(allChannels[0]);
+            status.innerText = "SYSTEM READY";
+            console.log("Channels Loaded:", allChannels.length);
+            
+            // Auto play first channel
+            play(allChannels[0]);
+            
         } catch (e) {
-            status.innerText = "LOAD ERROR";
+            console.error("Fetch Error:", e);
+            status.innerText = "LOAD ERROR: " + e.message;
         }
     }
 
     async function play(ch) {
-        status.innerText = "LOADING: " + ch.name;
-        if (shakaPlayer) await shakaPlayer.destroy();
+        status.innerText = "CONNECTING: " + ch.name;
+        
+        if (shakaPlayer) {
+            await shakaPlayer.destroy();
+            shakaPlayer = null;
+        }
 
         shaka.polyfill.installAll();
         shakaPlayer = new shaka.Player(video);
 
+        // Header Filtering (Jio & Hotstar)
         shakaPlayer.getNetworkingEngine().registerRequestFilter((type, request) => {
-            // Dynamic Header Logic
             request.headers["Referer"] = "https://www.jiotv.com/";
+            // Agar file me User-Agent hai (Hotstar), toh wo use hoga, nahi toh default Jio wala
             request.headers["User-Agent"] = ch.userAgent || "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
             
             if (ch.cookie) {
@@ -152,6 +173,7 @@
             }
         });
 
+        // DRM Setup
         if (ch.key) {
             const parts = ch.key.split(':');
             shakaPlayer.configure({ 
@@ -162,33 +184,41 @@
         try {
             await shakaPlayer.load(ch.src);
             status.innerText = "ONLINE: " + ch.name;
-            
-            // Quality Update
-            qSelect.innerHTML = '<option value="auto">AUTO</option>';
-            const tracks = shakaPlayer.getVariantTracks().sort((a, b) => b.height - a.height);
-            const seen = new Set();
-            tracks.forEach(t => {
-                if (!seen.has(t.height)) {
-                    let opt = document.createElement('option');
-                    opt.value = t.id;
-                    opt.text = t.height + 'P';
-                    qSelect.appendChild(opt);
-                    seen.add(t.height);
-                }
-            });
+            updateTracks();
+            video.play();
+        } catch (e) { 
+            console.error("Playback Error:", e);
+            status.innerText = "STREAM ERROR (Code: " + e.code + ")"; 
+        }
+    }
 
-            // Audio Update
-            aSelect.innerHTML = '';
-            shakaPlayer.getAudioLanguages().forEach(l => {
+    function updateTracks() {
+        // Quality Update
+        qSelect.innerHTML = '<option value="auto">AUTO</option>';
+        const tracks = shakaPlayer.getVariantTracks().sort((a, b) => b.height - a.height);
+        const seenHeights = new Set();
+        tracks.forEach(t => {
+            if (!seenHeights.has(t.height)) {
+                let opt = document.createElement('option');
+                opt.value = t.id;
+                opt.text = t.height + 'P';
+                qSelect.appendChild(opt);
+                seenHeights.add(t.height);
+            }
+        });
+
+        // Audio Update
+        aSelect.innerHTML = '';
+        const langs = shakaPlayer.getAudioLanguages();
+        if(langs.length > 0) {
+            langs.forEach(l => {
                 let opt = document.createElement('option');
                 opt.value = l;
                 opt.text = l.toUpperCase();
                 aSelect.appendChild(opt);
             });
-
-            video.play();
-        } catch (e) { 
-            status.innerText = "STREAM ERROR"; 
+        } else {
+            aSelect.innerHTML = '<option value="default">DEFAULT</option>';
         }
     }
 
@@ -203,7 +233,9 @@
         }
     }
 
-    function changeAudio() { shakaPlayer.selectAudioLanguage(aSelect.value); }
+    function changeAudio() { 
+        if (shakaPlayer) shakaPlayer.selectAudioLanguage(aSelect.value); 
+    }
 
     function render(data) {
         const container = document.getElementById('channelList');
@@ -211,8 +243,12 @@
         data.forEach(ch => {
             const card = document.createElement('div');
             card.className = 'channel-card';
-            card.innerHTML = `<img src="${ch.logo}" onerror="this.src='https://via.placeholder.com/40'"><span>${ch.name}</span>`;
-            card.onclick = () => play(ch);
+            card.innerHTML = `<img src="${ch.logo}" onerror="this.src='https://via.placeholder.com/45?text=TV'"><span>${ch.name}</span>`;
+            card.onclick = () => {
+                document.querySelectorAll('.channel-card').forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                play(ch);
+            };
             container.appendChild(card);
         });
     }
@@ -226,7 +262,11 @@
 
     function doSearch() {
         const q = document.getElementById('searchBar').value.toLowerCase();
-        let filtered = allChannels.filter(c => (currentCategory === 'all' || c.cat.includes(currentCategory)) && c.name.toLowerCase().includes(q));
+        let filtered = allChannels.filter(c => {
+            const matchCat = currentCategory === 'all' || c.cat.includes(currentCategory);
+            const matchName = c.name.toLowerCase().includes(q);
+            return matchCat && matchName;
+        });
         render(filtered);
     }
 
