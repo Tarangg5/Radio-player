@@ -182,7 +182,10 @@
         }
 
         try {
-            await shakaPlayer.load(ch.src);
+            // Test karne ke liye proxy add karein
+const proxyUrl = "https://cors-anywhere.herokuapp.com/"; 
+await shakaPlayer.load(proxyUrl + ch.src);
+
             status.innerText = "ONLINE: " + ch.name;
             updateTracks();
             video.play();
