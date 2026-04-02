@@ -1,4 +1,13 @@
 #EXTM3U
-#EXTINF:-1 tvg-logo="https://www.hotstar.com/favicon.ico" group-title="SPORTS", Hotstar Live
-#EXTHTTP:{"Cookie":"hdntl=exp=1775217949~acl=%2f*~id=333acb32ca319b17f3c378bca17921da~data=hdntl~hmac=8f97998436fe841e1d5c1f92c312ab71c133223405cbcd0145ed48bd57f46e81", "User-Agent":"Hotstar;in.startv.hotstar/25.03.19.2.11274 (Android/15)"}
-https://jcevents.hotstar.com/bpk-tv/e03bbf7688f4b14faa3782e78851c3d9_CTV/Fallback/index2.m3u8
+
+#EXTINF:-1 tvg-logo="https://jiotv.com/images/logos/Star_Sports_1_Hindi_HD.png" group-title="SPORTS", Star Sports 1 Hindi HD
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=400131994b445d8c8817202248760fda:2d56cb6f07a75b9aff165d534ae2bfc4
+#EXTHTTP:{"Cookie":"__hdnea__=st=1775131200~exp=1775152800~acl=/*~hmac=2dae0b4f0f0644367ed24ab627e46c0037f02e5e5dedea781eae13781e453bec"}
+https://jiotvpllive.cdn.jio.com/bpk-tv/Star_Sports_HD1_Hindi_BTS/output/index.mpd
+
+#EXTINF:-1 tvg-logo="https://jiotv.com/images/logos/Star_Sports_1_HD.png" group-title="SPORTS", Star Sports 1 HD
+#KODIPROP:inputstream.adaptive.license_type=clearkey
+#KODIPROP:inputstream.adaptive.license_key=965dc2ddb1d85138ad787999a7f30ca5:859695076e67fe961836b564db6d689c
+#EXTHTTP:{"Cookie":"__hdnea__=st=1775131200~exp=1775152800~acl=/*~hmac=2dae0b4f0f0644367ed24ab627e46c0037f02e5e5dedea781eae13781e453bec"}
+https://jiotvpllive.cdn.jio.com/bpk-tv/Star_Sports_HD1_BTS/output/index.mpd
