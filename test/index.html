@@ -123,6 +123,7 @@
 
     // 1. M3U Data fetch aur parse karne ka logic
     async function loadM3UData() {
+        async function loadM3UData() {
         status.innerText = "SYSTEM INITIATING: FETCHING CHANNELS...";
         try {
             const res = await fetch(M3U_API);
@@ -130,35 +131,43 @@
             const lines = text.split('\n');
             const parsedChannels = [];
 
+            let currentCh = null;
+
             for (let i = 0; i < lines.length; i++) {
-                if (lines[i].startsWith('#EXTINF')) {
-                    const name = lines[i].split(',')[1]?.trim();
-                    const logo = lines[i].match(/tvg-logo="([^"]+)"/)?.[1] || "";
-                    const cat = lines[i].match(/group-title="([^"]+)"/)?.[1]?.toLowerCase() || "others";
-                    
-                    // M3U Structure: #EXTINF -> #KODIPROP -> #EXTHTTP -> URL
-                    const keyLine = lines[i+1]?.includes('license_key') ? lines[i+1] : lines[i+2];
-                    const cookieLine = lines[i+2]?.includes('EXTHTTP') ? lines[i+2] : lines[i+3];
-                    const url = lines[i+4]?.trim() || lines[i+3]?.trim();
-
-                    const key = keyLine?.split('=')[1]?.trim();
-                    const cookieJson = cookieLine?.replace('#EXTHTTP:', '').trim();
-                    let cookie = "";
-                    try { cookie = JSON.parse(cookieJson).Cookie; } catch(e){}
-
-                    if(url && url.startsWith('http')) {
-                        parsedChannels.push({ name, logo, cat, src: url, key, cookie });
-                    }
+                let line = lines[i].trim();
+                
+                if (line.startsWith('#EXTINF')) {
+                    if (currentCh) parsedChannels.push(currentCh); // Purana save karein
+                    currentCh = {
+                        name: line.split(',')[1]?.trim() || "Unknown",
+                        logo: line.match(/tvg-logo="([^"]+)"/)?.[1] || "",
+                        cat: line.match(/group-title="([^"]+)"/)?.[1]?.toLowerCase() || "others",
+                        src: "", key: "", cookie: ""
+                    };
+                } else if (line.includes('license_key=')) {
+                    currentCh.key = line.split('=')[1]?.trim();
+                } else if (line.startsWith('#EXTHTTP:')) {
+                    try {
+                        let json = JSON.parse(line.replace('#EXTHTTP:', '').trim());
+                        // Check both 'cookie' and 'Cookie'
+                        currentCh.cookie = json.cookie || json.Cookie || "";
+                    } catch(e) {}
+                } else if (line.startsWith('http')) {
+                    currentCh.src = line.trim();
                 }
             }
-            allChannels = parsedChannels;
+            if (currentCh) parsedChannels.push(currentCh); // Last channel add karein
+
+            allChannels = parsedChannels.filter(c => c.src !== ""); // Khali links hata dein
             render(allChannels);
             if(allChannels.length > 0) play(allChannels[0]);
+            
         } catch (e) {
-            status.innerText = "SYSTEM ERROR: WORKER OFFLINE";
+            status.innerText = "SYSTEM ERROR: FETCH FAILED";
             console.error(e);
         }
     }
+
 
     async function play(ch) {
         status.innerText = "DECODING: " + ch.name;
