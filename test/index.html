@@ -150,24 +150,20 @@
         if (shakaPlayer) { await shakaPlayer.destroy(); shakaPlayer = null; }
 
         shaka.polyfill.installAll();
-        shakaPlayer = new shaka.Player(video);
+            shakaPlayer = new shaka.Player(video);
+            
+            // JIO HEADERS & COOKIE PERSISTENCE
+            shakaPlayer.getNetworkingEngine().registerRequestFilter((type, request) => {
+                request.headers["Referer"] = "https://www.jiotv.com/";
+                request.headers["User-Agent"] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
 
-        // --- JIO HEADERS INJECTION LOGIC ---
-        shakaPlayer.getNetworkingEngine().registerRequestFilter((type, request) => {
-            // Jio Authentication Headers
-            request.headers["Referer"] = "https://www.jiotv.com/";
-            request.headers["User-Agent"] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
-
-            if (ch.cookie) {
-                // Main Header Cookie injection
-                request.headers["Cookie"] = ch.cookie;
-                
-                // Fallback Token Append logic for Manifest and Segments
-                let tokenValue = ch.cookie.includes("=") ? ch.cookie.split('=')[1] : ch.cookie;
-                request.uris.forEach((uri, index) => {
-                    const sep = uri.includes("?") ? "&" : "?";
-                    if (!uri.includes("__hdnea__")) {
-                        request.uris[index] = uri + sep + "__hdnea__=" + encodeURIComponent(tokenValue);
+                if (manualCookie) {
+                    request.headers["Cookie"] = manualCookie;
+                    // Persistence Logic: Append token to segment URIs
+                    if (type === shaka.net.NetworkingEngine.RequestType.SEGMENT || type === shaka.net.NetworkingEngine.RequestType.MANIFEST) {
+                        if (!request.uris[0].includes("__hdnea__")) {
+                            const sep = request.uris[0].includes("?") ? "&" : "?";
+                            request.uris[0] += sep + manualCookie;
                     }
                 });
             }
