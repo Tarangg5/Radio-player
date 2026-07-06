@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SONU NEON TV - Categories Edition</title>
-    <!-- Shaka Player CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.5/shaka-player.compiled.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
@@ -86,14 +85,12 @@
     const aSelect = document.getElementById('audioSelect');
     const status = document.getElementById('status');
     
-    // Aapka Worker API Link
     const M3U_API = "https://websource.sonuujamuicamp.workers.dev/?url=https://premiumplugjiotvplusplaylist.shieb6655.workers.dev/";
     
     let shakaPlayer = null;
     let currentCategory = 'all';
     let allChannels = []; 
 
-    // M3U Playlist Parsing Logic
     async function loadM3UData() {
         status.innerText = "SYSTEM INITIATING: FETCHING CHANNELS...";
         try {
@@ -143,33 +140,32 @@
         }
     }
 
-    // Main Playback Logic with Original Jio Headers
     async function play(ch) {
         status.innerText = "DECODING: " + ch.name;
         
         if (shakaPlayer) { await shakaPlayer.destroy(); shakaPlayer = null; }
 
         shaka.polyfill.installAll();
-            shakaPlayer = new shaka.Player(video);
-            
-            // JIO HEADERS & COOKIE PERSISTENCE
-            shakaPlayer.getNetworkingEngine().registerRequestFilter((type, request) => {
-                request.headers["Referer"] = "https://www.jiotv.com/";
-                request.headers["User-Agent"] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
+        shakaPlayer = new shaka.Player(video);
 
-                if (manualCookie) {
-                    request.headers["Cookie"] = manualCookie;
-                    // Persistence Logic: Append token to segment URIs
-                    if (type === shaka.net.NetworkingEngine.RequestType.SEGMENT || type === shaka.net.NetworkingEngine.RequestType.MANIFEST) {
-                        if (!request.uris[0].includes("__hdnea__")) {
-                            const sep = request.uris[0].includes("?") ? "&" : "?";
-                            request.uris[0] += sep + manualCookie;
+        // --- AAPKA WORKING LOGIC INTEGRATED HERE ---
+        shakaPlayer.getNetworkingEngine().registerRequestFilter((type, request) => {
+            request.headers["Referer"] = "https://www.jiotv.com/";
+            request.headers["User-Agent"] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
+
+            if (ch.cookie) {
+                request.headers["Cookie"] = ch.cookie;
+                // Persistence Logic: Append token to segment URIs exact match to your code
+                if (type === shaka.net.NetworkingEngine.RequestType.SEGMENT || type === shaka.net.NetworkingEngine.RequestType.MANIFEST) {
+                    if (!request.uris[0].includes("__hdnea__")) {
+                        const sep = request.uris[0].includes("?") ? "&" : "?";
+                        request.uris[0] += sep + ch.cookie;
                     }
-                });
+                }
             }
         });
 
-        // DRM (ClearKey) Configuration
+        // DRM (ClearKey) Config
         if (ch.key) {
             const parts = ch.key.split(':');
             if (parts.length === 2) {
@@ -184,7 +180,7 @@
             await shakaPlayer.load(ch.src);
             status.innerText = "ONLINE: " + ch.name;
             
-            // Quality Selection Update
+            // Quality Selector
             qSelect.innerHTML = '<option value="auto">AUTO</option>';
             const tracks = shakaPlayer.getVariantTracks();
             const seenHeights = new Set();
@@ -201,7 +197,7 @@
                 qSelect.appendChild(opt);
             });
 
-            // Audio Track Selection Update
+            // Audio Selector
             aSelect.innerHTML = '';
             const langs = shakaPlayer.getAudioLanguages();
             if(langs.length > 0) {
@@ -218,7 +214,7 @@
             video.play();
         } catch (e) { 
             status.innerText = "STREAM OFFLINE (ERROR " + e.code + ")"; 
-            console.error("Shaka Player Playback Error:", e);
+            console.error("Shaka Playback Error:", e);
         }
     }
 
@@ -239,7 +235,6 @@
         if (shakaPlayer) shakaPlayer.selectAudioLanguage(aSelect.value);
     }
 
-    // UI Render Channels
     function render(data) {
         const container = document.getElementById('channelList');
         container.innerHTML = '';
