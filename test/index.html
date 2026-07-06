@@ -10,54 +10,30 @@
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
         
         body { font-family: 'Orbitron', sans-serif; background: #050505; color: #fff; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
-
         .container { width: 95%; max-width: 1000px; margin: auto; background: rgba(15, 15, 15, 0.95); padding: 20px; border-radius: 15px; border: 1px solid #333; box-shadow: 0 5px 15px rgba(0,0,0,0.5); text-align: center; }
-
         h2 { font-size: 1.8em; margin: 10px 0 20px 0; color: #ff0055; text-transform: uppercase; }
-
         .player-box { width: 100%; max-width: 950px; margin: 0 auto; border-radius: 8px; border: 2px solid #444; background: #000; overflow: hidden; position: relative; }
         video { width: 100%; aspect-ratio: 16/9; display: block; }
-
         .controls { width: 100%; display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
         
-        /* Category Buttons */
         .category-wrapper { 
-    display: flex; 
-    gap: 10px; 
-    overflow-x: auto; 
-    padding: 15px 5px; 
-    width: 100%;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE */
-    justify-content: flex-start; /* Mobile friendly */
-}
-.category-wrapper::-webkit-scrollbar { display: none; } /* Chrome/Safari */
-
-.cat-btn { 
-    padding: 10px 20px; 
-    border-radius: 25px; 
-    border: 1px solid #333; 
-    background: #111; 
-    color: #fff; 
-    cursor: pointer; 
-    white-space: nowrap; 
-    font-size: 10px; 
-    transition: 0.4s;
-    font-family: 'Orbitron', sans-serif;
-    letter-spacing: 1px;
-}
-.cat-btn:hover { border-color: #ff0055; box-shadow: 0 0 10px #ff0055; }
-.cat-btn.active { background: #ff0055; color: #fff; border-color: #ff0055; box-shadow: 0 0 15px #ff0055; }
-
+            display: flex; gap: 10px; overflow-x: auto; padding: 15px 5px; width: 100%;
+            scrollbar-width: none; -ms-overflow-style: none; justify-content: flex-start; 
+        }
+        .category-wrapper::-webkit-scrollbar { display: none; }
+        .cat-btn { 
+            padding: 10px 20px; border-radius: 25px; border: 1px solid #333; background: #111; 
+            color: #fff; cursor: pointer; white-space: nowrap; font-size: 10px; transition: 0.4s;
+            font-family: 'Orbitron', sans-serif; letter-spacing: 1px;
+        }
+        .cat-btn:hover { border-color: #ff0055; box-shadow: 0 0 10px #ff0055; }
+        .cat-btn.active { background: #ff0055; color: #fff; border-color: #ff0055; box-shadow: 0 0 15px #ff0055; }
         input#searchBar { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #ff0055; background: #111; color: #fff; font-family: 'Orbitron'; box-sizing: border-box; outline: none; }
-
         .selector-group { display: flex; gap: 10px; width: 100%; }
         .selector-item { flex: 1; text-align: left; }
         label { font-size: 0.7em; color: #00f2fe; margin-bottom: 5px; display: block; padding-left: 5px; }
         select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #444; background: #111; color: #fff; font-family: 'Orbitron'; outline: none; cursor: pointer; }
-
         #status { margin-top: 10px; color: #00e676; font-size: 0.8em; }
-
         .channel-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 20px; width: 100%; }
         .channel-card { background: #111; padding: 10px 5px; border-radius: 10px; cursor: pointer; border: 1px solid #222; transition: 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .channel-card:hover { border-color: #00f2fe; }
@@ -70,7 +46,6 @@
 
 <div class="container">
     <h2>SONU NEON TV</h2>
-    <a href="/" title="PLAY RADIO HERE"><p><h1>Click here To PLAY RADIO</h1></p></a>
     
     <div id="status">SYSTEM READY</div>
 
@@ -80,18 +55,14 @@
 
     <div class="controls">
         <div class="category-wrapper" id="catWrapper">
-    <button class="cat-btn active" onclick="filterCat('all', this)">ALL</button>
-            <button class="cat-btn" onclick="filterCat('ipl cup', this)">IPL CUP</button>
-    <button class="cat-btn" onclick="filterCat('entertainment', this)">ENTERTAINMENT</button>
-    <button class="cat-btn" onclick="filterCat('sports', this)">SPORTS</button>
-    <button class="cat-btn" onclick="filterCat('movies', this)">MOVIES</button>
-    <button class="cat-btn" onclick="filterCat('kids', this)">KIDS & INFO</button>
-    <button class="cat-btn" onclick="filterCat('news', this)">NEWS</button>
-    <button class="cat-btn" onclick="filterCat('music', this)">MUSIC</button>
-    <button class="cat-btn" onclick="filterCat('lifestyle', this)">LIFESTYLE</button>
-    <button class="cat-btn" onclick="filterCat('marathi', this)">MARATHI</button>
-    <button class="cat-btn" onclick="filterCat('hindi', this)">HINDI</button>
-</div>
+            <button class="cat-btn active" onclick="filterCat('all', this)">ALL</button>
+            <button class="cat-btn" onclick="filterCat('devotional', this)">DEVOTIONAL</button>
+            <button class="cat-btn" onclick="filterCat('entertainment', this)">ENTERTAINMENT</button>
+            <button class="cat-btn" onclick="filterCat('sports', this)">SPORTS</button>
+            <button class="cat-btn" onclick="filterCat('movies', this)">MOVIES</button>
+            <button class="cat-btn" onclick="filterCat('kids', this)">KIDS</button>
+            <button class="cat-btn" onclick="filterCat('news', this)">NEWS</button>
+        </div>
 
         <input type="text" id="searchBar" placeholder="Search Channel..." onkeyup="doSearch()">
         <div class="selector-group">
@@ -108,22 +79,20 @@
 
     <div class="channel-list" id="channelList"></div>
 </div>
+
 <script>
-                        const video = document.getElementById('video');
+    const video = document.getElementById('video');
     const qSelect = document.getElementById('qualitySelect');
     const aSelect = document.getElementById('audioSelect');
     const status = document.getElementById('status');
     
-    // AAPKA M3U WORKER LINK
     const M3U_API = "https://websource.sonuujamuicamp.workers.dev/?url=https://premiumplugjiotvplusplaylist.shieb6655.workers.dev/";
     
     let shakaPlayer = null;
     let currentCategory = 'all';
     let allChannels = []; 
 
-    // 1. M3U Data fetch aur parse karne ka logic
-    
-        async function loadM3UData() {
+    async function loadM3UData() {
         status.innerText = "SYSTEM INITIATING: FETCHING CHANNELS...";
         try {
             const res = await fetch(M3U_API);
@@ -135,30 +104,34 @@
 
             for (let i = 0; i < lines.length; i++) {
                 let line = lines[i].trim();
+                if (!line) continue;
                 
                 if (line.startsWith('#EXTINF')) {
-                    if (currentCh) parsedChannels.push(currentCh); // Purana save karein
+                    if (currentCh && currentCh.src) parsedChannels.push(currentCh);
+                    
                     currentCh = {
-                        name: line.split(',')[1]?.trim() || "Unknown",
+                        name: line.split(',')[1]?.trim() || "Unknown Channel",
                         logo: line.match(/tvg-logo="([^"]+)"/)?.[1] || "",
                         cat: line.match(/group-title="([^"]+)"/)?.[1]?.toLowerCase() || "others",
                         src: "", key: "", cookie: ""
                     };
                 } else if (line.includes('license_key=')) {
-                    currentCh.key = line.split('=')[1]?.trim();
+                    if (currentCh) currentCh.key = line.split('license_key=')[1]?.trim();
                 } else if (line.startsWith('#EXTHTTP:')) {
-                    try {
-                        let json = JSON.parse(line.replace('#EXTHTTP:', '').trim());
-                        // Check both 'cookie' and 'Cookie'
-                        currentCh.cookie = json.cookie || json.Cookie || "";
-                    } catch(e) {}
+                    if (currentCh) {
+                        try {
+                            let cleanJson = line.replace('#EXTHTTP:', '').trim();
+                            let json = JSON.parse(cleanJson);
+                            currentCh.cookie = json.cookie || json.Cookie || "";
+                        } catch(e) { console.error("JSON Parse Error", e); }
+                    }
                 } else if (line.startsWith('http')) {
-                    currentCh.src = line.trim();
+                    if (currentCh) currentCh.src = line.trim();
                 }
             }
-            if (currentCh) parsedChannels.push(currentCh); // Last channel add karein
+            if (currentCh && currentCh.src) parsedChannels.push(currentCh);
 
-            allChannels = parsedChannels.filter(c => c.src !== ""); // Khali links hata dein
+            allChannels = parsedChannels;
             render(allChannels);
             if(allChannels.length > 0) play(allChannels[0]);
             
@@ -168,63 +141,53 @@
         }
     }
 
-
     async function play(ch) {
         status.innerText = "DECODING: " + ch.name;
         
-        // Purane instances saaf karein
         if (shakaPlayer) { await shakaPlayer.destroy(); shakaPlayer = null; }
 
         shaka.polyfill.installAll();
         shakaPlayer = new shaka.Player(video);
 
-        // --- JIO HEADERS & COOKIE PERSISTENCE LOGIC ---
+        // Bypassing browser blocked headers via URL Parameters
         shakaPlayer.getNetworkingEngine().registerRequestFilter((type, request) => {
-            request.headers["Referer"] = "https://www.jiotv.com/";
-            request.headers["User-Agent"] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
-
             if (ch.cookie) {
-                request.headers["Cookie"] = ch.cookie;
-                // Append token to segments (Persistence)
-                if (type === shaka.net.NetworkingEngine.RequestType.SEGMENT || type === shaka.net.NetworkingEngine.RequestType.MANIFEST) {
-                    if (!request.uris[0].includes("__hdnea__")) {
-                        const sep = request.uris[0].includes("?") ? "&" : "?";
-                        request.uris[0] += sep + ch.cookie;
+                // Extracts the actual token content inside __hdnea__
+                let tokenValue = ch.cookie.replace('__hdnea__=', '').trim();
+                
+                request.uris.forEach((uri, index) => {
+                    const sep = uri.includes("?") ? "&" : "?";
+                    if (!uri.includes("__hdnea__")) {
+                        request.uris[index] = uri + sep + "__hdnea__=" + encodeURIComponent(tokenValue);
                     }
-                }
+                });
             }
         });
 
-        // DRM (ClearKey) Config
+        // ClearKey DRM Configuration
         if (ch.key) {
             const parts = ch.key.split(':');
-            shakaPlayer.configure({ 
-                drm: { clearKeys: { [parts[0].trim()]: parts[1].trim() } },
-                streaming: { lowLatencyMode: true, bufferingGoal: 30 }
-            });
+            if (parts.length === 2) {
+                shakaPlayer.configure({ 
+                    drm: { clearKeys: { [parts[0].trim()]: parts[1].trim() } },
+                    streaming: { lowLatencyMode: true, bufferingGoal: 30 }
+                });
+            }
         }
 
-                try {
+        try {
             await shakaPlayer.load(ch.src);
             status.innerText = "ONLINE: " + ch.name;
             
-            // --- FIXED QUALITY SELECTION LOGIC (Deduplication) ---
+            // Build Quality Selector
             qSelect.innerHTML = '<option value="auto">AUTO</option>';
-            
             const tracks = shakaPlayer.getVariantTracks();
-            
-            // Map ka use karke duplicate heights ko remove karenge
             const seenHeights = new Set();
             const uniqueTracks = tracks.filter(t => {
-                if (seenHeights.has(t.height)) {
-                    return false;
-                }
+                if (seenHeights.has(t.height)) return false;
                 seenHeights.add(t.height);
                 return true;
-            });
-
-            // Sorting: High resolution upar rahegi
-            uniqueTracks.sort((a, b) => b.height - a.height);
+            }).sort((a, b) => b.height - a.height);
 
             uniqueTracks.forEach(t => {
                 let opt = document.createElement('option');
@@ -233,7 +196,7 @@
                 qSelect.appendChild(opt);
             });
 
-            // --- AUDIO SELECTION LOGIC ---
+            // Build Audio Selector
             aSelect.innerHTML = '';
             const langs = shakaPlayer.getAudioLanguages();
             if(langs.length > 0) {
@@ -250,6 +213,7 @@
             video.play();
         } catch (e) { 
             status.innerText = "STREAM OFFLINE (ERROR " + e.code + ")"; 
+            console.error("Shaka Player Error:", e);
         }
     }
 
@@ -261,7 +225,7 @@
             } else {
                 shakaPlayer.configure({ abr: { enabled: false } });
                 const track = shakaPlayer.getVariantTracks().find(t => t.id == val);
-                shakaPlayer.selectVariantTrack(track, true);
+                if (track) shakaPlayer.selectVariantTrack(track, true);
             }
         }
     }
@@ -303,12 +267,7 @@
         render(filtered);
     }
 
-    // Initialize App
     document.addEventListener('DOMContentLoaded', loadM3UData);
-
-
-    
 </script>
-
 </body>
 </html>
